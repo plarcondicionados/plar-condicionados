@@ -64,14 +64,12 @@
   th, td { border: 1px solid #333; padding: 8px; text-align: left; }
   th { background: #222; color: #6fa8dc; }
   .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
-  .sugestao { color: #b08d3e; font-size: 13px; margin-top: -5px; }
   .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
 </style>
 </head>
 <body>
 
 <div class="logo-area">
-  <!-- Substitua a linha abaixo pelo caminho da sua logo, ex: <img src="logo-plar.png.png"> -->
   <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
   <h1>PL AR CONDICIONADOS</h1>
   <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
@@ -83,7 +81,6 @@
   <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
   <input type="date" id="data">
   <input type="time" id="horario">
-  <div class="sugestao" id="sugestaoHorario"></div>
   <button onclick="cadastrar()">Adicionar Atendimento</button>
 </div>
 
@@ -106,173 +103,94 @@
 </div>
 
 <script>
-  let escalas = JSON.parse(localStorage.getItem('escalas_plar')) || [];
-  const INTERVALO_MINUTOS = 30;
+  let escalas = [];
 
-  function salvar() {
-    localStorage.setItem('escalas_plar', JSON.stringify(escalas));
+  async function carregarTabela() {
+    const resposta = await fetch("/atendimentos");
+    escalas = await resposta.json();
     renderizarTabela();
   }
 
-  function somarMinutos(horario, minutos) {
-    const [h, m] = horario.split(':').map(Number);
-    const data = new Date();
-    data.setHours(h, m + minutos, 0, 0);
-    const hh = String(data.getHours()).padStart(2, '0');
-    const mm = String(data.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
+  function renderizarTabela() {
+    const corpo = document.getElementById("corpoTabela");
+    corpo.innerHTML = "";
+    escalas.forEach(item => {
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td>${item.nome}</td>
+        <td>${item.local}</td>
+        <td>${item.data}</td>
+        <td>${item.horario}</td>
+        <td><button class="del-btn" onclick="excluir(${item.id})">Excluir</button></td>
+      `;
+      corpo.appendChild(linha);
+    });
   }
 
-  function atualizarSugestao() {
-    const data = document.getElementById('data').value;
-    const div = document.getElementById('sugestaoHorario');
-    if (!data) { div.innerHTML = ''; return; }
+  async function cadastrar() {
+    const nome = document.getElementById("nome").value.trim();
+    const local = document.getElementById("local").value.trim();
+    const data = document.getElementById("data").value;
+    const horario = document.getElementById("horario").value;
 
-    const doDia = escalas.filter(e => e.data === data).sort((a, b) => a.horario.localeCompare(b.horario));
-    if (doDia.length === 0) {
-      div.innerHTML = 'Nenhum atendimento nesse dia ainda.';
+    if (!nome || !local || !data || !horario) {
+      alert("Preencha todos os campos antes de adicionar.");
       return;
     }
-    const ultimo = doDia[doDia.length - 1];
-    const proximo = somarMinutos(ultimo.horario, INTERVALO_MINUTOS);
-    div.innerHTML = `Último atendimento nesse dia: ${ultimo.horario} (
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>PLar Condicionados - Escala de Funcionários</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 750px;
-    margin: 30px auto;
-    background: #0d0d0d;
-    color: #eee;
-  }
-  .logo-area {
-    text-align: center;
-    padding: 20px;
-    background: #000;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #b08d3e;
-  }
-  .logo-area img {
-    max-width: 180px;
-  }
-  .logo-area h1 {
-    color: #b08d3e;
-    margin: 10px 0 0 0;
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-  .logo-area p {
-    color: #6fa8dc;
-    margin: 5px 0 0 0;
-    font-size: 13px;
-    letter-spacing: 3px;
-  }
-  h2 { color: #6fa8dc; }
-  .card {
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #333;
-  }
-  input, select, button {
-    padding: 8px;
-    margin: 5px 0;
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 5px;
-    border: 1px solid #444;
-    background: #222;
-    color: #eee;
-  }
-  button {
-    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
-    color: #000;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  button:hover { opacity: 0.85; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-  th { background: #222; color: #6fa8dc; }
-  .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
-  .sugestao { color: #b08d3e; font-size: 13px; margin-top: -5px; }
-  .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
-</style>
-</head>
-<body>
+    await fetch("/atendimentos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, local, data, horario })
+    });
 
-<div class="logo-area">
-  <!-- Substitua a linha abaixo pelo caminho da sua logo, ex: <img src="logo-plar.png.png"> -->
-  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
-  <h1>PL AR CONDICIONADOS</h1>
-  <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
-</div>
+    document.getElementById("nome").value = "";
+    document.getElementById("local").value = "";
+    document.getElementById("data").value = "";
+    document.getElementById("horario").value = "";
 
-<div class="card">
-  <h2>Cadastrar Atendimento</h2>
-  <input type="text" id="nome" placeholder="Nome do funcionário">
-  <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
-  <input type="date" id="data">
-  <input type="time" id="horario">
-  <div class="sugestao" id="sugestaoHorario"></div>
-  <button onclick="cadastrar()">Adicionar Atendimento</button>
-</div>
-
-<div class="card">
-  <h2>Escala Completa</h2>
-  <table id="tabela">
-    <thead>
-      <tr><th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th><th></th></tr>
-    </thead>
-    <tbody id="corpoTabela"></tbody>
-  </table>
-  <button class="export-btn" onclick="exportarTxt()">Exportar Escala em TXT</button>
-</div>
-
-<div class="card">
-  <h2>Consultar Meu Horário (Funcionário)</h2>
-  <input type="text" id="buscaNome" placeholder="Digite seu nome">
-  <button onclick="buscar()">Buscar</button>
-  <div id="resultadoBusca" style="margin-top:10px;"></div>
-</div>
-
-<script>
-  let escalas = JSON.parse(localStorage.getItem('escalas_plar')) || [];
-  const INTERVALO_MINUTOS = 30;
-
-  function salvar() {
-    localStorage.setItem('escalas_plar', JSON.stringify(escalas));
-    renderizarTabela();
+    carregarTabela();
   }
 
-  function somarMinutos(horario, minutos) {
-    const [h, m] = horario.split(':').map(Number);
-    const data = new Date();
-    data.setHours(h, m + minutos, 0, 0);
-    const hh = String(data.getHours()).padStart(2, '0');
-    const mm = String(data.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
+  async function excluir(id) {
+    await fetch(`/atendimentos/${id}`, { method: "DELETE" });
+    carregarTabela();
   }
 
-  function atualizarSugestao() {
-    const data = document.getElementById('data').value;
-    const div = document.getElementById('sugestaoHorario');
-    if (!data) { div.innerHTML = ''; return; }
-
-    const doDia = escalas.filter(e => e.data === data).sort((a, b) => a.horario.localeCompare(b.horario));
-    if (doDia.length === 0) {
-      div.innerHTML = 'Nenhum atendimento nesse dia ainda.';
+  function buscar() {
+    const nomeBusca = document.getElementById("buscaNome").value.trim().toLowerCase();
+    const div = document.getElementById("resultadoBusca");
+    if (!nomeBusca) {
+      div.innerHTML = "Digite um nome para buscar.";
       return;
     }
-    const ultimo = doDia[doDia.length - 1];
-    const proximo = somarMinutos(ultimo.horario, INTERVALO_MINUTOS);
-    div.innerHTML = `Último atendimento nesse dia: ${ultimo.horario} (
+    const encontrados = escalas.filter(e => e.nome.toLowerCase().includes(nomeBusca));
+    if (encontrados.length === 0) {
+      div.innerHTML = "Nenhum atendimento encontrado para esse nome.";
+      return;
+    }
+    div.innerHTML = encontrados.map(e =>
+      `${e.nome} - ${e.local} - ${e.data} às ${e.horario}`
+    ).join("<br>");
+  }
 
+  function exportarTxt() {
+    if (escalas.length === 0) {
+      alert("Não há atendimentos cadastrados para exportar.");
+      return;
+    }
+    let conteudo = "ESCALA DE ATENDIMENTOS - PLAR CONDICIONADOS\n\n";
+    escalas.forEach(e => {
+      conteudo += `Funcionário: ${e.nome}\nLocal: ${e.local}\nData: ${e.data}\nHorário: ${e.horario}\n\n`;
+    });
+    const blob = new Blob([conteudo], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "escala_plar.txt";
+    link.click();
+  }
+
+  carregarTabela();
+</script>
+</body>
+</html>
