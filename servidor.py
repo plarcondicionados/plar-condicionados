@@ -43,6 +43,14 @@ def adicionar_atendimento():
     conexao.close()
     return jsonify({"mensagem": "salvo"})
 
+@app.route("/atendimentos/<int:id_atendimento>", methods=["DELETE"])
+def excluir_atendimento(id_atendimento):
+    conexao = conectar()
+    conexao.execute("DELETE FROM atendimentos WHERE id = ?", (id_atendimento,))
+    conexao.commit()
+    conexao.close()
+    return jsonify({"mensagem": "excluido"})
+
 @app.route("/")
 def pagina_login():
     return send_from_directory(".", "login.html")
