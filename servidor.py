@@ -43,7 +43,7 @@ def adicionar_atendimento():
     conexao.close()
     return jsonify({"mensagem": "salvo"})
 
-    @app.route("/")
+@app.route("/")
 def pagina_login():
     return send_from_directory(".", "login.html")
 
