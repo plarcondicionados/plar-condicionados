@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>PLar Condicionados - Escala de Funcionários</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 750px;
+    margin: 30px auto;
+    background: #0d0d0d;
+    color: #eee;
+  }
+  .logo-area {
+    text-align: center;
+    padding: 20px;
+    background: #000;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #b08d3e;
+  }
+  .logo-area img {
+    max-width: 180px;
+  }
+  .logo-area h1 {
+    color: #b08d3e;
+    margin: 10px 0 0 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+  .logo-area p {
+    color: #6fa8dc;
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+  h2 { color: #6fa8dc; }
+  .card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+  }
+  input, select, button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background: #222;
+    color: #eee;
+  }
+  button {
+    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+  th { background: #222; color: #6fa8dc; }
+  .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
+  .sugestao { color: #b08d3e; font-size: 13px; margin-top: -5px; }
+  .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
+</style>
+</head>
+<body>
+
+<div class="logo-area">
+  <!-- Substitua a linha abaixo pelo caminho da sua logo, ex: <img src="logo-plar.png.png"> -->
+  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
+  <h1>PL AR CONDICIONADOS</h1>
+  <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
+</div>
+
+<div class="card">
+  <h2>Cadastrar Atendimento</h2>
+  <input type="text" id="nome" placeholder="Nome do funcionário">
+  <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
+  <input type="date" id="data">
+  <input type="time" id="horario">
+  <div class="sugestao" id="sugestaoHorario"></div>
+  <button onclick="cadastrar()">Adicionar Atendimento</button>
+</div>
+
+<div class="card">
+  <h2>Escala Completa</h2>
+  <table id="tabela">
+    <thead>
+      <tr><th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th><th></th></tr>
+    </thead>
+    <tbody id="corpoTabela"></tbody>
+  </table>
+  <button class="export-btn" onclick="exportarTxt()">Exportar Escala em TXT</button>
+</div>
+
+<div class="card">
+  <h2>Consultar Meu Horário (Funcionário)</h2>
+  <input type="text" id="buscaNome" placeholder="Digite seu nome">
+  <button onclick="buscar()">Buscar</button>
+  <div id="resultadoBusca" style="margin-top:10px;"></div>
+</div>
+
+<script>
+  let escalas = JSON.parse(localStorage.getItem('escalas_plar')) || [];
+  const INTERVALO_MINUTOS = 30;
+
+  function salvar() {
+    localStorage.setItem('escalas_plar', JSON.stringify(escalas));
+    renderizarTabela();
+  }
+
+  function somarMinutos(horario, minutos) {
+    const [h, m] = horario.split(':').map(Number);
+    const data = new Date();
+    data.setHours(h, m + minutos, 0, 0);
+    const hh = String(data.getHours()).padStart(2, '0');
+    const mm = String(data.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  function atualizarSugestao() {
+    const data = document.getElementById('data').value;
+    const div = document.getElementById('sugestaoHorario');
+    if (!data) { div.innerHTML = ''; return; }
+
+    const doDia = escalas.filter(e => e.data === data).sort((a, b) => a.horario.localeCompare(b.horario));
+    if (doDia.length === 0) {
+      div.innerHTML = 'Nenhum atendimento nesse dia ainda.';
+      return;
+    }
+    const ultimo = doDia[doDia.length - 1];
+    const proximo = somarMinutos(ultimo.horario, INTERVALO_MINUTOS);
+    div.innerHTML = `Último atendimento nesse dia: ${ultimo.horario} (
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>PLar Condicionados - Escala de Funcionários</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 750px;
+    margin: 30px auto;
+    background: #0d0d0d;
+    color: #eee;
+  }
+  .logo-area {
+    text-align: center;
+    padding: 20px;
+    background: #000;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #b08d3e;
+  }
+  .logo-area img {
+    max-width: 180px;
+  }
+  .logo-area h1 {
+    color: #b08d3e;
+    margin: 10px 0 0 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+  .logo-area p {
+    color: #6fa8dc;
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+  h2 { color: #6fa8dc; }
+  .card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+  }
+  input, select, button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background: #222;
+    color: #eee;
+  }
+  button {
+    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+  th { background: #222; color: #6fa8dc; }
+  .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
+  .sugestao { color: #b08d3e; font-size: 13px; margin-top: -5px; }
+  .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
+</style>
+</head>
+<body>
+
+<div class="logo-area">
+  <!-- Substitua a linha abaixo pelo caminho da sua logo, ex: <img src="logo-plar.png.png"> -->
+  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
+  <h1>PL AR CONDICIONADOS</h1>
+  <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
+</div>
+
+<div class="card">
+  <h2>Cadastrar Atendimento</h2>
+  <input type="text" id="nome" placeholder="Nome do funcionário">
+  <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
+  <input type="date" id="data">
+  <input type="time" id="horario">
+  <div class="sugestao" id="sugestaoHorario"></div>
+  <button onclick="cadastrar()">Adicionar Atendimento</button>
+</div>
+
+<div class="card">
+  <h2>Escala Completa</h2>
+  <table id="tabela">
+    <thead>
+      <tr><th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th><th></th></tr>
+    </thead>
+    <tbody id="corpoTabela"></tbody>
+  </table>
+  <button class="export-btn" onclick="exportarTxt()">Exportar Escala em TXT</button>
+</div>
+
+<div class="card">
+  <h2>Consultar Meu Horário (Funcionário)</h2>
+  <input type="text" id="buscaNome" placeholder="Digite seu nome">
+  <button onclick="buscar()">Buscar</button>
+  <div id="resultadoBusca" style="margin-top:10px;"></div>
+</div>
+
+<script>
+  let escalas = JSON.parse(localStorage.getItem('escalas_plar')) || [];
+  const INTERVALO_MINUTOS = 30;
+
+  function salvar() {
+    localStorage.setItem('escalas_plar', JSON.stringify(escalas));
+    renderizarTabela();
+  }
+
+  function somarMinutos(horario, minutos) {
+    const [h, m] = horario.split(':').map(Number);
+    const data = new Date();
+    data.setHours(h, m + minutos, 0, 0);
+    const hh = String(data.getHours()).padStart(2, '0');
+    const mm = String(data.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  function atualizarSugestao() {
+    const data = document.getElementById('data').value;
+    const div = document.getElementById('sugestaoHorario');
+    if (!data) { div.innerHTML = ''; return; }
+
+    const doDia = escalas.filter(e => e.data === data).sort((a, b) => a.horario.localeCompare(b.horario));
+    if (doDia.length === 0) {
+      div.innerHTML = 'Nenhum atendimento nesse dia ainda.';
+      return;
+    }
+    const ultimo = doDia[doDia.length - 1];
+    const proximo = somarMinutos(ultimo.horario, INTERVALO_MINUTOS);
+    div.innerHTML = `Último atendimento nesse dia: ${ultimo.horario} (
+

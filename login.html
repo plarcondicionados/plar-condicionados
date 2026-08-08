@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>PLar Condicionados - Acesso Restrito</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #1a1a1a, #000);
+    color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .login-box {
+    background: #111;
+    padding: 60px 55px;
+    border-radius: 20px;
+    border: 1px solid #b08d3e;
+    width: 440px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(176, 141, 62, 0.2);
+  }
+  .login-box img {
+    max-width: 220px;
+    margin-bottom: 26px;
+  }
+  .login-box h1 {
+    color: #b08d3e;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: 2px;
+  }
+  .login-box p {
+    color: #6fa8dc;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 36px 0;
+    letter-spacing: 3px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 16px 18px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #1c1c1c;
+    color: #eee;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .login-box input:focus {
+    border-color: #b08d3e;
+  }
+  .login-box button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
+    color: #000;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .login-box button:hover { opacity: 0.85; }
+  .erro {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 16px;
+    min-height: 18px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
+  <h1>PL AR CONDICIONADOS</h1>
+  <p>ÁREA RESTRITA</p>
+  <input type="text" id="usuario" placeholder="Usuário">
+  <input type="password" id="senha" placeholder="Senha">
+  <button onclick="verificarLogin()">Entrar</button>
+  <div class="erro" id="mensagemErro"></div>
+</div>
+
+<script>
+  const USUARIO_CORRETO = "PLAR";
+  const SENHA_CORRETA = "Edilson123";
+
+  function verificarLogin() {
+    const usuario = document.getElementById('usuario').value;
+    const senha = document.getElementById('senha').value;
+
+    if (usuario === USUARIO_CORRETO && senha === SENHA_CORRETA) {
+      sessionStorage.setItem('logado_plar', 'sim');
+      window.location.href = "teste2.html";
+    } else {
+      document.getElementById('mensagemErro').innerText = "Usuário ou senha incorretos.";
+    }
+  }
+
+  document.getElementById('senha').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') verificarLogin();
+  });
+</script>
+
+</body>
+</html>
