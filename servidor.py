@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 
 app = Flask(__name__)
@@ -42,6 +42,18 @@ def adicionar_atendimento():
     conexao.commit()
     conexao.close()
     return jsonify({"mensagem": "salvo"})
+
+    @app.route("/")
+def pagina_login():
+    return send_from_directory(".", "login.html")
+
+@app.route("/teste2.html")
+def pagina_escala():
+    return send_from_directory(".", "teste2.html")
+
+@app.route("/<path:nome_arquivo>")
+def servir_arquivo(nome_arquivo):
+    return send_from_directory(".", nome_arquivo)
 
 if __name__ == "__main__":
     app.run(debug=True)
