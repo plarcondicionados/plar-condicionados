@@ -64,7 +64,9 @@
   th, td { border: 1px solid #333; padding: 8px; text-align: left; }
   th { background: #222; color: #6fa8dc; }
   .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
+  .save-btn { background: #5cb85c; color: #fff; width: auto; padding: 4px 10px; }
   .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
+  .percentual-input { width: 70px; display: inline-block; }
 </style>
 </head>
 <body>
@@ -73,6 +75,20 @@
   <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
   <h1>PL AR CONDICIONADOS</h1>
   <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
+</div>
+
+<div class="card">
+  <h2>Gerenciar Funcionários</h2>
+  <input type="text" id="novoUsuario" placeholder="Usuário do funcionário">
+  <input type="password" id="novaSenha" placeholder="Senha do funcionário">
+  <input type="number" id="novoPercentual" placeholder="Percentual de comissão (ex: 40)">
+  <button onclick="cadastrarFuncionario()">Cadastrar Funcionário</button>
+  <table id="tabelaFuncionarios">
+    <thead>
+      <tr><th>Usuário</th><th>Percentual</th><th></th></tr>
+    </thead>
+    <tbody id="corpoFuncionarios"></tbody>
+  </table>
 </div>
 
 <div class="card">
@@ -104,6 +120,77 @@
 
 <script>
   let escalas = [];
+  let funcionarios = [];
+
+  async function carregarFuncionarios() {
+    const resposta = await fetch("/usuarios");
+    funcionarios = await resposta.json();
+    renderizarFuncionarios();
+  }
+
+  function renderizarFuncionarios() {
+    const corpo = document.getElementById("corpoFuncionarios");
+    corpo.innerHTML = "";
+    funcionarios.forEach(f => {
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td>${f.usuario}</td>
+        <td>
+          <input type="number" class="percentual-input" id="percentual-${f.id}" value="${f.percentual}">
+          %
+        </td>
+        <td>
+          <button class="save-btn" onclick="salvarPercentual(${f.id})">Salvar</button>
+          <button class="del-btn" onclick="excluirFuncionario(${f.id})">Excluir</button>
+        </td>
+      `;
+      corpo.appendChild(linha);
+    });
+  }
+
+  async function cadastrarFuncionario() {
+    const usuario = document.getElementById("novoUsuario").value.trim();
+    const senha = document.getElementById("novaSenha").value.trim();
+    const percentual = parseFloat(document.getElementById("novoPercentual").value);
+
+    if (!usuario || !senha || isNaN(percentual)) {
+      alert("Preencha usuário, senha e percentual antes de cadastrar.");
+      return;
+    }
+
+    const resposta = await fetch("/usuarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario, senha, percentual })
+    });
+    const dados = await resposta.json();
+
+    if (dados.erro) {
+      alert(dados.erro);
+      return;
+    }
+
+    document.getElementById("novoUsuario").value = "";
+    document.getElementById("novaSenha").value = "";
+    document.getElementById("novoPercentual").value = "";
+    carregarFuncionarios();
+  }
+
+  async function salvarPercentual(id) {
+    const percentual = parseFloat(document.getElementById(`percentual-${id}`).value);
+    await fetch(`/usuarios/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ percentual })
+    });
+    alert("Percentual atualizado.");
+  }
+
+  async function excluirFuncionario(id) {
+    if (!confirm("Tem certeza que deseja excluir esse funcionário?")) return;
+    await fetch(`/usuarios/${id}`, { method: "DELETE" });
+    carregarFuncionarios();
+  }
 
   async function carregarTabela() {
     const resposta = await fetch("/atendimentos");
@@ -190,6 +277,7 @@
     link.click();
   }
 
+  carregarFuncionarios();
   carregarTabela();
 </script>
 </body>
