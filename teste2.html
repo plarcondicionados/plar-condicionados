@@ -6,7 +6,7 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    max-width: 750px;
+    max-width: 850px;
     margin: 30px auto;
     background: #0d0d0d;
     color: #eee;
@@ -19,21 +19,9 @@
     margin-bottom: 20px;
     border: 1px solid #b08d3e;
   }
-  .logo-area img {
-    max-width: 180px;
-  }
-  .logo-area h1 {
-    color: #b08d3e;
-    margin: 10px 0 0 0;
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-  .logo-area p {
-    color: #6fa8dc;
-    margin: 5px 0 0 0;
-    font-size: 13px;
-    letter-spacing: 3px;
-  }
+  .logo-area img { max-width: 180px; }
+  .logo-area h1 { color: #b08d3e; margin: 10px 0 0 0; font-size: 22px; letter-spacing: 2px; }
+  .logo-area p { color: #6fa8dc; margin: 5px 0 0 0; font-size: 13px; letter-spacing: 3px; }
   h2 { color: #6fa8dc; }
   .card {
     background: #1a1a1a;
@@ -60,7 +48,7 @@
     cursor: pointer;
   }
   button:hover { opacity: 0.85; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
   th, td { border: 1px solid #333; padding: 8px; text-align: left; }
   th { background: #222; color: #6fa8dc; }
   .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
@@ -83,20 +71,23 @@
   <input type="password" id="novaSenha" placeholder="Senha do funcionário">
   <input type="number" id="novoPercentual" placeholder="Percentual de comissão (ex: 40)">
   <button onclick="cadastrarFuncionario()">Cadastrar Funcionário</button>
-  <table id="tabelaFuncionarios">
-    <thead>
-      <tr><th>Usuário</th><th>Percentual</th><th></th></tr>
-    </thead>
+  <table>
+    <thead><tr><th>Usuário</th><th>Percentual</th><th></th></tr></thead>
     <tbody id="corpoFuncionarios"></tbody>
   </table>
 </div>
 
 <div class="card">
   <h2>Cadastrar Atendimento</h2>
-  <input type="text" id="nome" placeholder="Nome do funcionário">
+  <input type="text" id="nome" placeholder="Nome do funcionário (igual ao usuário cadastrado)">
   <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
   <input type="date" id="data">
   <input type="time" id="horario">
+  <select id="tipoServico">
+    <option value="limpeza">Limpeza</option>
+    <option value="automacao">Automação</option>
+  </select>
+  <input type="number" id="quantidadeAparelhos" placeholder="Quantidade de ar condicionados">
   <button onclick="cadastrar()">Adicionar Atendimento</button>
 </div>
 
@@ -104,18 +95,14 @@
   <h2>Escala Completa</h2>
   <table id="tabela">
     <thead>
-      <tr><th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th><th></th></tr>
+      <tr>
+        <th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th>
+        <th>Serviço</th><th>Aparelhos</th><th>Valor Total</th><th>Comissão</th><th></th>
+      </tr>
     </thead>
     <tbody id="corpoTabela"></tbody>
   </table>
   <button class="export-btn" onclick="exportarTxt()">Exportar Escala em TXT</button>
-</div>
-
-<div class="card">
-  <h2>Consultar Meu Horário (Funcionário)</h2>
-  <input type="text" id="buscaNome" placeholder="Digite seu nome">
-  <button onclick="buscar()">Buscar</button>
-  <div id="resultadoBusca" style="margin-top:10px;"></div>
 </div>
 
 <script>
@@ -135,10 +122,7 @@
       const linha = document.createElement("tr");
       linha.innerHTML = `
         <td>${f.usuario}</td>
-        <td>
-          <input type="number" class="percentual-input" id="percentual-${f.id}" value="${f.percentual}">
-          %
-        </td>
+        <td><input type="number" class="percentual-input" id="percentual-${f.id}" value="${f.percentual}"> %</td>
         <td>
           <button class="save-btn" onclick="salvarPercentual(${f.id})">Salvar</button>
           <button class="del-btn" onclick="excluirFuncionario(${f.id})">Excluir</button>
@@ -152,24 +136,17 @@
     const usuario = document.getElementById("novoUsuario").value.trim();
     const senha = document.getElementById("novaSenha").value.trim();
     const percentual = parseFloat(document.getElementById("novoPercentual").value);
-
     if (!usuario || !senha || isNaN(percentual)) {
-      alert("Preencha usuário, senha e percentual antes de cadastrar.");
+      alert("Preencha usuário, senha e percentual.");
       return;
     }
-
     const resposta = await fetch("/usuarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usuario, senha, percentual })
     });
     const dados = await resposta.json();
-
-    if (dados.erro) {
-      alert(dados.erro);
-      return;
-    }
-
+    if (dados.erro) { alert(dados.erro); return; }
     document.getElementById("novoUsuario").value = "";
     document.getElementById("novaSenha").value = "";
     document.getElementById("novoPercentual").value = "";
@@ -187,7 +164,7 @@
   }
 
   async function excluirFuncionario(id) {
-    if (!confirm("Tem certeza que deseja excluir esse funcionário?")) return;
+    if (!confirm("Excluir esse funcionário?")) return;
     await fetch(`/usuarios/${id}`, { method: "DELETE" });
     carregarFuncionarios();
   }
@@ -208,6 +185,10 @@
         <td>${item.local}</td>
         <td>${item.data}</td>
         <td>${item.horario}</td>
+        <td>${item.tipo_servico || "-"}</td>
+        <td>${item.quantidade_aparelhos || "-"}</td>
+        <td>R$ ${item.valor_total ? item.valor_total.toFixed(2) : "0.00"}</td>
+        <td>R$ ${item.valor_comissao ? item.valor_comissao.toFixed(2) : "0.00"}</td>
         <td><button class="del-btn" onclick="excluir(${item.id})">Excluir</button></td>
       `;
       corpo.appendChild(linha);
@@ -219,8 +200,10 @@
     const local = document.getElementById("local").value.trim();
     const data = document.getElementById("data").value;
     const horario = document.getElementById("horario").value;
+    const tipo_servico = document.getElementById("tipoServico").value;
+    const quantidade_aparelhos = document.getElementById("quantidadeAparelhos").value;
 
-    if (!nome || !local || !data || !horario) {
+    if (!nome || !local || !data || !horario || !quantidade_aparelhos) {
       alert("Preencha todos os campos antes de adicionar.");
       return;
     }
@@ -228,13 +211,14 @@
     await fetch("/atendimentos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, local, data, horario })
+      body: JSON.stringify({ nome, local, data, horario, tipo_servico, quantidade_aparelhos })
     });
 
     document.getElementById("nome").value = "";
     document.getElementById("local").value = "";
     document.getElementById("data").value = "";
     document.getElementById("horario").value = "";
+    document.getElementById("quantidadeAparelhos").value = "";
 
     carregarTabela();
   }
@@ -244,23 +228,6 @@
     carregarTabela();
   }
 
-  function buscar() {
-    const nomeBusca = document.getElementById("buscaNome").value.trim().toLowerCase();
-    const div = document.getElementById("resultadoBusca");
-    if (!nomeBusca) {
-      div.innerHTML = "Digite um nome para buscar.";
-      return;
-    }
-    const encontrados = escalas.filter(e => e.nome.toLowerCase().includes(nomeBusca));
-    if (encontrados.length === 0) {
-      div.innerHTML = "Nenhum atendimento encontrado para esse nome.";
-      return;
-    }
-    div.innerHTML = encontrados.map(e =>
-      `${e.nome} - ${e.local} - ${e.data} às ${e.horario}`
-    ).join("<br>");
-  }
-
   function exportarTxt() {
     if (escalas.length === 0) {
       alert("Não há atendimentos cadastrados para exportar.");
@@ -268,7 +235,7 @@
     }
     let conteudo = "ESCALA DE ATENDIMENTOS - PLAR CONDICIONADOS\n\n";
     escalas.forEach(e => {
-      conteudo += `Funcionário: ${e.nome}\nLocal: ${e.local}\nData: ${e.data}\nHorário: ${e.horario}\n\n`;
+      conteudo += `Funcionário: ${e.nome}\nLocal: ${e.local}\nData: ${e.data}\nHorário: ${e.horario}\nServiço: ${e.tipo_servico}\nAparelhos: ${e.quantidade_aparelhos}\nValor Total: R$ ${e.valor_total}\nComissão: R$ ${e.valor_comissao}\n\n`;
     });
     const blob = new Blob([conteudo], { type: "text/plain" });
     const link = document.createElement("a");
