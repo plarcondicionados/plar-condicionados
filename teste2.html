@@ -219,5 +219,126 @@
         <td>${item.quantidade_aparelhos || "-"}</td>
         <td>R$ ${item.valor_total ? item.valor_total.toFixed(2) : "0.00"}</td>
         <td>R$ ${item.valor_comissao ? item.valor_comissao.toFixed(2) : "0.00"}</td>
-        <td><button class="del-btn
+        <td><button class="del-btn" onclick="excluir(${item.id})">Excluir</button></td>
+      `;
+      corpo.appendChild(linha);
+    });
+  }
 
+  async function cadastrar() {
+    const nome = document.getElementById("nome").value.trim();
+    const local = document.getElementById("local").value.trim();
+    const data = document.getElementById("data").value;
+    const horario = document.getElementById("horario").value;
+    const tipo_servico = document.getElementById("tipoServico").value;
+    const quantidade_aparelhos = document.getElementById("quantidadeAparelhos").value;
+
+    if (!nome || !local || !data || !horario || !quantidade_aparelhos) {
+      alert("Preencha todos os campos antes de adicionar.");
+      return;
+    }
+
+    const resposta = await fetch("/atendimentos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, local, data, horario, tipo_servico, quantidade_aparelhos })
+    });
+    const dados = await resposta.json();
+    if (dados.erro) { alert(dados.erro); return; }
+
+    document.getElementById("nome").value = "";
+    document.getElementById("local").value = "";
+    document.getElementById("data").value = "";
+    document.getElementById("horario").value = "";
+    document.getElementById("quantidadeAparelhos").value = "";
+
+    carregarTabela();
+  }
+
+  async function excluir(id) {
+    await fetch(`/atendimentos/${id}`, { method: "DELETE" });
+    carregarTabela();
+  }
+
+  function exportarTxt() {
+    if (escalas.length === 0) {
+      alert("Não há atendimentos cadastrados para exportar.");
+      return;
+    }
+    let conteudo = "ESCALA DE ATENDIMENTOS - PLAR CONDICIONADOS\n\n";
+    escalas.forEach(e => {
+      conteudo += `Funcionário: ${e.nome}\nLocal: ${e.local}\nData: ${e.data}\nHorário: ${e.horario}\nServiço: ${e.tipo_servico}\nAparelhos: ${e.quantidade_aparelhos}\nValor Total: R$ ${e.valor_total}\nComissão: R$ ${e.valor_comissao}\n\n`;
+    });
+    const blob = new Blob([conteudo], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "escala_plar.txt";
+    link.click();
+  }
+
+  function exibirResultadoBalanco(lista, tituloPeriodo) {
+    const faturamento = lista.reduce((soma, e) => soma + (e.valor_total || 0), 0);
+    const comissoes = lista.reduce((soma, e) => soma + (e.valor_comissao || 0), 0);
+    const lucro = faturamento - comissoes;
+
+    document.getElementById("resultadoBalanco").innerHTML = `
+      <p>Período: <strong>${tituloPeriodo}</strong></p>
+      <p>Atendimentos no período: <strong>${lista.length}</strong></p>
+      <p class="fatura">Faturamento Total: R$ ${faturamento.toFixed(2)}</p>
+      <p class="comissao">Total em Comissões: R$ ${comissoes.toFixed(2)}</p>
+      <p class="lucro">Lucro Líquido: R$ ${lucro.toFixed(2)}</p>
+    `;
+  }
+
+  function calcularBalanco(periodo) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const filtrado = escalas.filter(e => {
+      if (!e.data) return false;
+      const dataItem = new Date(e.data + "T00:00:00");
+
+      if (periodo === "dia") {
+        return dataItem.getTime() === hoje.getTime();
+      }
+      if (periodo === "semana") {
+        const seteDiasAtras = new Date(hoje);
+        seteDiasAtras.setDate(hoje.getDate() - 6);
+        return dataItem >= seteDiasAtras && dataItem <= hoje;
+      }
+      if (periodo === "mes") {
+        return dataItem.getMonth() === hoje.getMonth() && dataItem.getFullYear() === hoje.getFullYear();
+      }
+      return false;
+    });
+
+    const titulos = { dia: "Hoje", semana: "Últimos 7 dias", mes: "Este mês" };
+    exibirResultadoBalanco(filtrado, titulos[periodo]);
+  }
+
+  function calcularBalancoPersonalizado() {
+    const inicio = document.getElementById("dataInicio").value;
+    const fim = document.getElementById("dataFim").value;
+
+    if (!inicio || !fim) {
+      alert("Selecione as duas datas do período.");
+      return;
+    }
+
+    const dataInicio = new Date(inicio + "T00:00:00");
+    const dataFim = new Date(fim + "T00:00:00");
+
+    const filtrado = escalas.filter(e => {
+      if (!e.data) return false;
+      const dataItem = new Date(e.data + "T00:00:00");
+      return dataItem >= dataInicio && dataItem <= dataFim;
+    });
+
+    exibirResultadoBalanco(filtrado, `${inicio} até ${fim}`);
+  }
+
+  carregarFuncionarios();
+  carregarTabela();
+</script>
+</body>
+</html>
