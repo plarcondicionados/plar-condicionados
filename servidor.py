@@ -8,7 +8,7 @@ def conectar():
     conexao.row_factory = sqlite3.Row
     return conexao
 
-def criar_tabela():
+def criar_tabelas():
     conexao = conectar()
     conexao.execute("""
         CREATE TABLE IF NOT EXISTS atendimentos (
@@ -19,10 +19,45 @@ def criar_tabela():
             horario TEXT
         )
     """)
+    conexao.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario TEXT UNIQUE,
+            senha TEXT,
+            tipo TEXT,
+            percentual REAL
+        )
+    """)
+    admin_existe = conexao.execute("SELECT * FROM usuarios WHERE usuario = ?", ("PLAR",)).fetchone()
+    if not admin_existe:
+        conexao.execute(
+            "INSERT INTO usuarios (usuario, senha, tipo, percentual) VALUES (?, ?, ?, ?)",
+            ("PLAR", "Edilson123", "admin", 0)
+        )
     conexao.commit()
     conexao.close()
 
-criar_tabela()
+criar_tabelas()
+
+@app.route("/login", methods=["POST"])
+def login():
+    dados = request.get_json()
+    usuario = dados.get("usuario", "")
+    senha = dados.get("senha", "")
+    conexao = conectar()
+    resultado = conexao.execute(
+        "SELECT * FROM usuarios WHERE usuario = ? AND senha = ?",
+        (usuario, senha)
+    ).fetchone()
+    conexao.close()
+    if resultado:
+        return jsonify({
+            "sucesso": True,
+            "tipo": resultado["tipo"],
+            "id": resultado["id"],
+            "usuario": resultado["usuario"]
+        })
+    return jsonify({"sucesso": False})
 
 @app.route("/atendimentos", methods=["GET"])
 def listar_atendimentos():
