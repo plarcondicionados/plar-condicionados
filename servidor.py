@@ -59,6 +59,51 @@ def login():
         })
     return jsonify({"sucesso": False})
 
+@app.route("/usuarios", methods=["GET"])
+def listar_usuarios():
+    conexao = conectar()
+    resultado = conexao.execute(
+        "SELECT id, usuario, tipo, percentual FROM usuarios WHERE tipo = 'funcionario'"
+    ).fetchall()
+    conexao.close()
+    return jsonify([dict(linha) for linha in resultado])
+
+@app.route("/usuarios", methods=["POST"])
+def criar_usuario():
+    dados = request.get_json()
+    conexao = conectar()
+    try:
+        conexao.execute(
+            "INSERT INTO usuarios (usuario, senha, tipo, percentual) VALUES (?, ?, ?, ?)",
+            (dados["usuario"], dados["senha"], "funcionario", dados["percentual"])
+        )
+        conexao.commit()
+        conexao.close()
+        return jsonify({"mensagem": "criado"})
+    except sqlite3.IntegrityError:
+        conexao.close()
+        return jsonify({"erro": "Já existe um usuário com esse nome."}), 400
+
+@app.route("/usuarios/<int:id_usuario>", methods=["PUT"])
+def editar_usuario(id_usuario):
+    dados = request.get_json()
+    conexao = conectar()
+    conexao.execute(
+        "UPDATE usuarios SET percentual = ? WHERE id = ?",
+        (dados["percentual"], id_usuario)
+    )
+    conexao.commit()
+    conexao.close()
+    return jsonify({"mensagem": "atualizado"})
+
+@app.route("/usuarios/<int:id_usuario>", methods=["DELETE"])
+def excluir_usuario(id_usuario):
+    conexao = conectar()
+    conexao.execute("DELETE FROM usuarios WHERE id = ?", (id_usuario,))
+    conexao.commit()
+    conexao.close()
+    return jsonify({"mensagem": "excluido"})
+
 @app.route("/atendimentos", methods=["GET"])
 def listar_atendimentos():
     conexao = conectar()
