@@ -99,16 +99,27 @@
 </div>
 
 <script>
-  const USUARIO_CORRETO = "PLAR";
-  const SENHA_CORRETA = "Edilson123";
-
-  function verificarLogin() {
+  async function verificarLogin() {
     const usuario = document.getElementById('usuario').value;
     const senha = document.getElementById('senha').value;
 
-    if (usuario === USUARIO_CORRETO && senha === SENHA_CORRETA) {
-      sessionStorage.setItem('logado_plar', 'sim');
-      window.location.href = "teste2.html";
+    const resposta = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario, senha })
+    });
+    const dados = await resposta.json();
+
+    if (dados.sucesso) {
+      sessionStorage.setItem('usuario_plar', dados.usuario);
+      sessionStorage.setItem('id_plar', dados.id);
+      sessionStorage.setItem('tipo_plar', dados.tipo);
+
+      if (dados.tipo === "admin") {
+        window.location.href = "teste2.html";
+      } else {
+        window.location.href = "area-funcionario.html";
+      }
     } else {
       document.getElementById('mensagemErro').innerText = "Usuário ou senha incorretos.";
     }
