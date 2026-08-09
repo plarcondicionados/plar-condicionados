@@ -16,7 +16,11 @@ def criar_tabelas():
             nome TEXT,
             local TEXT,
             data TEXT,
-            horario TEXT
+            horario TEXT,
+            tipo_servico TEXT,
+            quantidade_aparelhos INTEGER,
+            valor_total REAL,
+            valor_comissao REAL
         )
     """)
     conexao.execute("""
@@ -38,6 +42,15 @@ def criar_tabelas():
     conexao.close()
 
 criar_tabelas()
+
+def calcular_valores(tipo_servico, quantidade_aparelhos, percentual):
+    if tipo_servico == "limpeza":
+        valor_total = 200 * quantidade_aparelhos
+    else:
+        extras = max(0, quantidade_aparelhos - 2)
+        valor_total = 950 + (extras * 100)
+    valor_comissao = round(valor_total * (percentual / 100), 2)
+    return valor_total, valor_comissao
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -114,11 +127,26 @@ def listar_atendimentos():
 @app.route("/atendimentos", methods=["POST"])
 def adicionar_atendimento():
     dados = request.get_json()
+    nome = dados["nome"]
+    local = dados["local"]
+    data = dados["data"]
+    horario = dados["horario"]
+    tipo_servico = dados["tipo_servico"]
+    quantidade_aparelhos = int(dados["quantidade_aparelhos"])
+
     conexao = conectar()
-    conexao.execute(
-        "INSERT INTO atendimentos (nome, local, data, horario) VALUES (?, ?, ?, ?)",
-        (dados["nome"], dados["local"], dados["data"], dados["horario"])
-    )
+    funcionario = conexao.execute(
+        "SELECT percentual FROM usuarios WHERE usuario = ?", (nome,)
+    ).fetchone()
+    percentual = funcionario["percentual"] if funcionario else 0
+
+    valor_total, valor_comissao = calcular_valores(tipo_servico, quantidade_aparelhos, percentual)
+
+    conexao.execute("""
+        INSERT INTO atendimentos
+        (nome, local, data, horario, tipo_servico, quantidade_aparelhos, valor_total, valor_comissao)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (nome, local, data, horario, tipo_servico, quantidade_aparelhos, valor_total, valor_comissao))
     conexao.commit()
     conexao.close()
     return jsonify({"mensagem": "salvo"})
