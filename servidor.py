@@ -48,6 +48,7 @@ def criar_tabelas():
         )
     conexao.commit()
     conexao.close()
+
 criar_tabelas()
 
 def calcular_valores(tipo_servico, quantidade_aparelhos, percentual):
@@ -134,12 +135,20 @@ def listar_atendimentos():
 @app.route("/atendimentos", methods=["POST"])
 def adicionar_atendimento():
     dados = request.get_json()
-    nome = dados["nome"]
-    local = dados["local"]
-    data = dados["data"]
-    horario = dados["horario"]
-    tipo_servico = dados["tipo_servico"]
-    quantidade_aparelhos = int(dados["quantidade_aparelhos"])
+    nome = dados.get("nome", "")
+    local = dados.get("local", "")
+    data = dados.get("data", "")
+    horario = dados.get("horario", "")
+    tipo_servico = dados.get("tipo_servico", "")
+    quantidade_aparelhos_bruto = dados.get("quantidade_aparelhos", "")
+
+    if not nome or not local or not data or not horario or not tipo_servico or not quantidade_aparelhos_bruto:
+        return jsonify({"erro": "Preencha todos os campos antes de adicionar."}), 400
+
+    try:
+        quantidade_aparelhos = int(quantidade_aparelhos_bruto)
+    except (ValueError, TypeError):
+        return jsonify({"erro": "Quantidade de aparelhos inválida."}), 400
 
     conexao = conectar()
     funcionario = conexao.execute(
