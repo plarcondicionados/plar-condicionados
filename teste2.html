@@ -112,8 +112,8 @@
     <button onclick="calcularBalanco('mes')">Este mês</button>
   </div>
   <p style="margin-top:15px; color:#999; font-size:13px;">Ou escolha um período personalizado:</p>
-  <input type="date" id="dataInicio">
-  <input type="date" id="dataFim">
+  <input type="date" id="dataInicio" min="2026-01-01" max="2028-12-31">
+  <input type="date" id="dataFim" min="2026-01-01" max="2028-12-31">
   <button onclick="calcularBalancoPersonalizado()">Calcular Período</button>
 
   <div class="resultado-balanco" id="resultadoBalanco">
@@ -235,6 +235,12 @@
 
     if (!nome || !local || !data || !horario || !quantidade_aparelhos) {
       alert("Preencha todos os campos antes de adicionar.");
+      return;
+    }
+
+    const ano = parseInt(data.split("-")[0], 10);
+    if (ano < 2026 || ano > 2028) {
+      alert("Data inválida. O ano deve estar entre 2026 e 2028.");
       return;
     }
 
