@@ -16,11 +16,7 @@ def criar_tabelas():
             nome TEXT,
             local TEXT,
             data TEXT,
-            horario TEXT,
-            tipo_servico TEXT,
-            quantidade_aparelhos INTEGER,
-            valor_total REAL,
-            valor_comissao REAL
+            horario TEXT
         )
     """)
     conexao.execute("""
@@ -32,6 +28,18 @@ def criar_tabelas():
             percentual REAL
         )
     """)
+
+    colunas_existentes = [linha["name"] for linha in conexao.execute("PRAGMA table_info(atendimentos)")]
+    colunas_novas = {
+        "tipo_servico": "TEXT",
+        "quantidade_aparelhos": "INTEGER",
+        "valor_total": "REAL",
+        "valor_comissao": "REAL"
+    }
+    for coluna, tipo in colunas_novas.items():
+        if coluna not in colunas_existentes:
+            conexao.execute(f"ALTER TABLE atendimentos ADD COLUMN {coluna} {tipo}")
+
     admin_existe = conexao.execute("SELECT * FROM usuarios WHERE usuario = ?", ("PLAR",)).fetchone()
     if not admin_existe:
         conexao.execute(
@@ -40,7 +48,6 @@ def criar_tabelas():
         )
     conexao.commit()
     conexao.close()
-
 criar_tabelas()
 
 def calcular_valores(tipo_servico, quantidade_aparelhos, percentual):
