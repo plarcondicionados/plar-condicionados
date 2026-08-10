@@ -8,17 +8,21 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
       --background: #071014;
       --sidebar: #09171d;
-      --surface: rgba(14, 29, 36, .94);
+      --surface: rgba(14, 29, 36, .95);
       --surface-light: #142b34;
-      --border: rgba(255,255,255,.10);
+      --border: rgba(255, 255, 255, .10);
       --text: #f1f8fa;
       --muted: #91a7ae;
       --blue: #1499dc;
@@ -26,7 +30,7 @@
       --gold: #c6a052;
       --green: #38d889;
       --red: #ff6674;
-      --shadow: 0 18px 45px rgba(0,0,0,.25);
+      --shadow: 0 18px 45px rgba(0, 0, 0, .25);
     }
 
     * {
@@ -49,7 +53,7 @@
           rgba(4, 14, 18, .96),
           rgba(5, 29, 38, .92)
         ),
-        url("fundo-plar.png") center/cover fixed no-repeat;
+        url("fundo-plar.png") center / cover fixed no-repeat;
     }
 
     body.modo-compacto td {
@@ -145,8 +149,8 @@
       color: white;
       background: linear-gradient(
         90deg,
-        rgba(20,153,220,.23),
-        rgba(20,153,220,.04)
+        rgba(20, 153, 220, .23),
+        rgba(20, 153, 220, .04)
       );
     }
 
@@ -163,7 +167,7 @@
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
-      background: rgba(255,255,255,.035);
+      background: rgba(255, 255, 255, .035);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
@@ -213,6 +217,11 @@
       border-radius: 10px;
     }
 
+    .icon-button:hover {
+      color: white;
+      border-color: var(--blue);
+    }
+
     .avatar {
       display: grid;
       place-items: center;
@@ -229,7 +238,7 @@
       font-size: 11px;
     }
 
-    /* PÁGINAS */
+    /* ABAS */
 
     .page {
       display: none;
@@ -260,7 +269,7 @@
       margin-bottom: 24px;
     }
 
-    .page-title h1 {
+    .page-title h2 {
       margin-bottom: 6px;
       font-size: 25px;
     }
@@ -297,7 +306,7 @@
       width: 110px;
       height: 110px;
       content: "";
-      background: rgba(20,153,220,.11);
+      background: rgba(20, 153, 220, .11);
       border-radius: 50%;
     }
 
@@ -344,10 +353,6 @@
       box-shadow: var(--shadow);
     }
 
-    .panel + .panel {
-      margin-top: 20px;
-    }
-
     .large-panel {
       max-width: 1150px;
     }
@@ -360,7 +365,7 @@
       margin-bottom: 20px;
     }
 
-    .panel-header h2 {
+    .panel-header h3 {
       font-size: 16px;
     }
 
@@ -388,7 +393,7 @@
       color: white;
       background: linear-gradient(135deg, var(--blue), #126e9c);
       border: 0;
-      box-shadow: 0 7px 20px rgba(20,153,220,.2);
+      box-shadow: 0 7px 20px rgba(20, 153, 220, .2);
     }
 
     .primary-button:hover {
@@ -421,7 +426,7 @@
     input:focus,
     select:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(20,153,220,.12);
+      box-shadow: 0 0 0 3px rgba(20, 153, 220, .12);
     }
 
     .service-form {
@@ -464,8 +469,7 @@
       margin-bottom: 17px;
     }
 
-    .filters input,
-    .filters select {
+    .filters > * {
       flex: 1;
     }
 
@@ -475,7 +479,7 @@
 
     table {
       width: 100%;
-      min-width: 730px;
+      min-width: 760px;
       border-collapse: collapse;
       font-size: 12px;
     }
@@ -493,11 +497,11 @@
     td {
       padding: 14px 10px;
       color: #d9e7ea;
-      border-bottom: 1px solid rgba(255,255,255,.055);
+      border-bottom: 1px solid rgba(255, 255, 255, .055);
     }
 
     tr:hover td {
-      background: rgba(20,153,220,.04);
+      background: rgba(20, 153, 220, .04);
     }
 
     .status {
@@ -506,7 +510,7 @@
       color: var(--green);
       font-size: 10px;
       font-weight: 700;
-      background: rgba(56,216,137,.1);
+      background: rgba(56, 216, 137, .1);
       border-radius: 20px;
     }
 
@@ -515,6 +519,10 @@
       font-size: 11px;
       background: transparent;
       border: 0;
+    }
+
+    .delete:hover {
+      text-decoration: underline;
     }
 
     .empty {
@@ -537,7 +545,7 @@
       justify-content: space-between;
       gap: 12px;
       padding: 12px;
-      background: rgba(255,255,255,.025);
+      background: rgba(255, 255, 255, .025);
       border: 1px solid var(--border);
       border-radius: 11px;
     }
@@ -576,7 +584,18 @@
       font-weight: 700;
     }
 
+    .percentage-input {
+      width: 75px;
+      padding: 7px 8px;
+      text-align: center;
+    }
+
     /* FINANCEIRO */
+
+    .chart-wrapper {
+      position: relative;
+      height: 340px;
+    }
 
     .balance {
       display: grid;
@@ -657,7 +676,7 @@
       justify-content: space-between;
       gap: 20px;
       padding: 18px;
-      background: rgba(255,255,255,.025);
+      background: rgba(255, 255, 255, .025);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
@@ -719,18 +738,13 @@
 
     .export-card {
       padding: 22px;
-      background: rgba(255,255,255,.025);
+      background: rgba(255, 255, 255, .025);
       border: 1px solid var(--border);
       border-radius: 14px;
     }
 
-    .export-card i {
-      margin-bottom: 15px;
-      color: var(--blue-light);
-    }
-
     .export-card h3 {
-      margin-bottom: 7px;
+      margin: 12px 0 7px;
       font-size: 14px;
     }
 
@@ -742,15 +756,24 @@
       line-height: 1.5;
     }
 
-    /* MOBILE */
+    .export-icon {
+      color: var(--blue-light);
+      font-size: 25px;
+    }
 
-    @media (max-width: 1050px) {
+    /* RESPONSIVO */
+
+    @media (max-width: 1100px) {
       .metrics {
         grid-template-columns: repeat(2, 1fr);
       }
 
       .content-grid {
         grid-template-columns: 1fr;
+      }
+
+      .export-options {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -829,6 +852,15 @@
         align-items: flex-start;
         flex-direction: column;
       }
+
+      .employee {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .chart-wrapper {
+        height: 280px;
+      }
     }
   </style>
 </head>
@@ -838,7 +870,12 @@
 
     <aside class="sidebar">
       <div class="brand">
-        <img src="logo-plar.png.png" alt="Logo PLAR Condicionados">
+        <img
+          src="logo-plar.png.png"
+          alt="Logo PLAR Condicionados"
+          onerror="this.onerror=null; this.src='logoplarpng.png'"
+        >
+
         <div>
           <strong>PLAR ERP</strong>
           <small>GESTÃO INTELIGENTE</small>
@@ -849,27 +886,27 @@
 
       <nav class="nav">
         <button class="active" data-page="dashboard">
-          <i data-lucide="layout-dashboard"></i>
+          <span>▦</span>
           <span>Visão geral</span>
         </button>
 
         <button data-page="atendimento">
-          <i data-lucide="calendar-plus"></i>
+          <span>＋</span>
           <span>Novo atendimento</span>
         </button>
 
         <button data-page="escala">
-          <i data-lucide="calendar-days"></i>
+          <span>▣</span>
           <span>Escala de serviços</span>
         </button>
 
         <button data-page="funcionarios">
-          <i data-lucide="users"></i>
+          <span>♙</span>
           <span>Funcionários</span>
         </button>
 
         <button data-page="financeiro">
-          <i data-lucide="wallet-cards"></i>
+          <span>R$</span>
           <span>Financeiro</span>
         </button>
       </nav>
@@ -878,12 +915,12 @@
 
       <nav class="nav">
         <button data-page="configuracoes">
-          <i data-lucide="settings"></i>
+          <span>⚙</span>
           <span>Configurações</span>
         </button>
 
         <button data-page="exportacao">
-          <i data-lucide="download"></i>
+          <span>⇩</span>
           <span>Exportar dados</span>
         </button>
       </nav>
@@ -904,12 +941,18 @@
         </div>
 
         <div class="top-actions">
-          <button class="icon-button" onclick="mostrarNotificacoes()" title="Notificações">
-            <i data-lucide="bell"></i>
+          <button
+            class="icon-button"
+            type="button"
+            onclick="mostrarNotificacoes()"
+            title="Notificações"
+          >
+            🔔
           </button>
 
           <div class="profile">
             <div class="avatar">PL</div>
+
             <div>
               <strong>Administrador</strong><br>
               <small>Acesso administrativo</small>
@@ -918,47 +961,47 @@
         </div>
       </header>
 
-      <!-- VISÃO GERAL -->
+      <!-- DASHBOARD -->
 
       <section class="page active" id="page-dashboard">
         <div class="metrics">
           <article class="metric">
-            <i class="metric-icon" data-lucide="calendar-check"></i>
             <span class="metric-label">Atendimentos registrados</span>
             <strong class="metric-value" id="totalAtendimentos">0</strong>
+
             <div class="metric-footer">
-              <i data-lucide="activity"></i>
-              Operação atualizada
+              ✓ Operação atualizada
             </div>
           </article>
 
           <article class="metric">
-            <i class="metric-icon" data-lucide="users"></i>
             <span class="metric-label">Funcionários ativos</span>
             <strong class="metric-value" id="totalFuncionarios">0</strong>
+
             <div class="metric-footer">
-              <i data-lucide="check-circle"></i>
-              Equipe operacional
+              ✓ Equipe operacional
             </div>
           </article>
 
           <article class="metric">
-            <i class="metric-icon" data-lucide="trending-up"></i>
             <span class="metric-label">Faturamento total</span>
-            <strong class="metric-value" id="faturamentoTotal">R$ 0,00</strong>
+            <strong class="metric-value" id="faturamentoTotal">
+              R$ 0,00
+            </strong>
+
             <div class="metric-footer">
-              <i data-lucide="bar-chart-3"></i>
-              Visão financeira
+              ↑ Visão financeira
             </div>
           </article>
 
           <article class="metric">
-            <i class="metric-icon" data-lucide="badge-dollar-sign"></i>
             <span class="metric-label">Lucro estimado</span>
-            <strong class="metric-value" id="lucroTotal">R$ 0,00</strong>
+            <strong class="metric-value" id="lucroTotal">
+              R$ 0,00
+            </strong>
+
             <div class="metric-footer">
-              <i data-lucide="arrow-up-right"></i>
-              Após comissões
+              ↑ Após comissões
             </div>
           </article>
         </div>
@@ -967,10 +1010,9 @@
           <div class="panel">
             <div class="panel-header">
               <div>
-                <h2>Resumo da operação</h2>
-                <p>Veja rapidamente os principais dados do ERP.</p>
+                <h3>Resumo da operação</h3>
+                <p>Principais dados do sistema.</p>
               </div>
-              <i data-lucide="activity"></i>
             </div>
 
             <div class="balance">
@@ -998,26 +1040,34 @@
           <div class="panel">
             <div class="panel-header">
               <div>
-                <h2>Ações rápidas</h2>
+                <h3>Ações rápidas</h3>
                 <p>Acesse os recursos mais usados.</p>
               </div>
-              <i data-lucide="zap"></i>
             </div>
 
             <div style="display:grid;gap:10px">
-              <button class="primary-button" onclick="abrirPagina('atendimento')">
-                <i data-lucide="plus"></i>
-                Novo atendimento
+              <button
+                class="primary-button"
+                type="button"
+                onclick="abrirPagina('atendimento')"
+              >
+                ＋ Novo atendimento
               </button>
 
-              <button class="secondary-button" onclick="abrirPagina('escala')">
-                <i data-lucide="calendar-days"></i>
-                Ver escala
+              <button
+                class="secondary-button"
+                type="button"
+                onclick="abrirPagina('escala')"
+              >
+                ▣ Ver escala
               </button>
 
-              <button class="secondary-button" onclick="abrirPagina('financeiro')">
-                <i data-lucide="wallet-cards"></i>
-                Ver financeiro
+              <button
+                class="secondary-button"
+                type="button"
+                onclick="abrirPagina('financeiro')"
+              >
+                R$ Ver financeiro
               </button>
             </div>
           </div>
@@ -1029,27 +1079,42 @@
       <section class="page" id="page-atendimento">
         <div class="page-title">
           <div>
-            <h1>Novo atendimento</h1>
-            <p>Agende uma visita técnica ou serviço de manutenção.</p>
+            <h2>Novo atendimento</h2>
+            <p>Agende uma visita técnica ou serviço.</p>
           </div>
-          <i data-lucide="clipboard-plus"></i>
         </div>
 
         <div class="panel large-panel">
-          <form class="service-form" onsubmit="cadastrar(event)">
+          <form class="service-form" id="formAtendimento">
             <div class="field">
               <label for="nome">Funcionário responsável</label>
-              <input id="nome" type="text" placeholder="Nome do funcionário" required>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Nome do funcionário"
+                required
+              >
             </div>
 
             <div class="field">
               <label for="local">Cliente ou local do serviço</label>
-              <input id="local" type="text" placeholder="Ex.: Loja Centro" required>
+              <input
+                id="local"
+                type="text"
+                placeholder="Ex.: Loja Centro"
+                required
+              >
             </div>
 
             <div class="field">
               <label for="data">Data</label>
-              <input id="data" type="date" min="2026-01-01" max="2028-12-31" required>
+              <input
+                id="data"
+                type="date"
+                min="2026-01-01"
+                max="2028-12-31"
+                required
+              >
             </div>
 
             <div class="field">
@@ -1068,18 +1133,32 @@
             </div>
 
             <div class="field">
-              <label for="quantidadeAparelhos">Quantidade de aparelhos</label>
-              <input id="quantidadeAparelhos" type="number" min="1" placeholder="Ex.: 4" required>
+              <label for="quantidadeAparelhos">
+                Quantidade de aparelhos
+              </label>
+
+              <input
+                id="quantidadeAparelhos"
+                type="number"
+                min="1"
+                placeholder="Ex.: 4"
+                required
+              >
             </div>
 
             <div class="form-actions">
-              <button type="reset" class="secondary-button">
+              <button
+                type="reset"
+                class="secondary-button"
+              >
                 Limpar campos
               </button>
 
-              <button type="submit" class="primary-button">
-                <i data-lucide="plus"></i>
-                Adicionar atendimento
+              <button
+                type="submit"
+                class="primary-button"
+              >
+                ＋ Adicionar atendimento
               </button>
             </div>
           </form>
@@ -1091,13 +1170,16 @@
       <section class="page" id="page-escala">
         <div class="page-title">
           <div>
-            <h1>Escala de serviços</h1>
+            <h2>Escala de serviços</h2>
             <p>Visualize e gerencie os atendimentos programados.</p>
           </div>
 
-          <button class="secondary-button" onclick="exportarTxt()">
-            <i data-lucide="download"></i>
-            Exportar escala
+          <button
+            class="secondary-button"
+            type="button"
+            onclick="exportarTxt()"
+          >
+            ⇩ Exportar escala
           </button>
         </div>
 
@@ -1107,10 +1189,9 @@
               type="search"
               id="filtroTabela"
               placeholder="Buscar por funcionário ou local..."
-              oninput="filtrarTabela()"
             >
 
-            <select id="filtroServico" onchange="filtrarTabela()">
+            <select id="filtroServico">
               <option value="">Todos os serviços</option>
               <option value="limpeza">Limpeza</option>
               <option value="automacao">Automação</option>
@@ -1129,6 +1210,7 @@
                   <th>Horário</th>
                   <th>Serviço</th>
                   <th>Aparelhos</th>
+                  <th>Valor</th>
                   <th>Status</th>
                   <th>Ação</th>
                 </tr>
@@ -1145,21 +1227,38 @@
       <section class="page" id="page-funcionarios">
         <div class="page-title">
           <div>
-            <h1>Funcionários</h1>
-            <p>Gerencie sua equipe e as comissões.</p>
+            <h2>Funcionários</h2>
+            <p>Gerencie sua equipe e suas comissões.</p>
           </div>
-          <i data-lucide="users-round"></i>
         </div>
 
         <div class="panel large-panel">
-          <form class="employee-form" onsubmit="cadastrarFuncionario(event)">
-            <input id="novoUsuario" type="text" placeholder="Usuário" required>
-            <input id="novaSenha" type="password" placeholder="Senha" required>
-            <input id="novoPercentual" type="number" min="0" max="100" placeholder="% comissão" required>
+          <form class="employee-form" id="formFuncionario">
+            <input
+              id="novoUsuario"
+              type="text"
+              placeholder="Usuário"
+              required
+            >
+
+            <input
+              id="novaSenha"
+              type="password"
+              placeholder="Senha"
+              required
+            >
+
+            <input
+              id="novoPercentual"
+              type="number"
+              min="0"
+              max="100"
+              placeholder="% comissão"
+              required
+            >
 
             <button class="primary-button" type="submit">
-              <i data-lucide="user-plus"></i>
-              Cadastrar
+              ＋ Cadastrar
             </button>
           </form>
 
@@ -1169,58 +1268,92 @@
         </div>
       </section>
 
-      <!-- FINANCEIRO -->
+      <!-- FINANCEIRO: ESTA É A ÚNICA ABA FINANCEIRA -->
 
       <section class="page" id="page-financeiro">
-        <div class="page-title">
-          <div>
-            <h1>Financeiro</h1>
-            <p>Consulte faturamento, comissões e lucro estimado.</p>
-          </div>
-          <i data-lucide="chart-no-axes-combined"></i>
-        </div>
-
         <div class="metrics">
           <article class="metric">
             <span class="metric-label">Faturamento total</span>
-            <strong class="metric-value" id="financeiroFaturamentoGrande">R$ 0,00</strong>
+            <strong
+              class="metric-value"
+              id="financeiroFaturamentoGrande"
+            >
+              R$ 0,00
+            </strong>
           </article>
 
           <article class="metric">
             <span class="metric-label">Total em comissões</span>
-            <strong class="metric-value" id="financeiroComissoesGrande">R$ 0,00</strong>
+            <strong
+              class="metric-value"
+              id="financeiroComissoesGrande"
+            >
+              R$ 0,00
+            </strong>
           </article>
 
           <article class="metric">
             <span class="metric-label">Lucro estimado</span>
-            <strong class="metric-value" id="financeiroLucroGrande">R$ 0,00</strong>
+            <strong
+              class="metric-value"
+              id="financeiroLucroGrande"
+            >
+              R$ 0,00
+            </strong>
           </article>
 
           <article class="metric">
             <span class="metric-label">Atendimentos</span>
-            <strong class="metric-value" id="financeiroAtendimentos">0</strong>
+            <strong
+              class="metric-value"
+              id="financeiroAtendimentos"
+            >
+              0
+            </strong>
           </article>
         </div>
 
-        <div class="panel large-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Filtrar período financeiro</h2>
-              <p>Consulte os resultados por intervalo de datas.</p>
+        <div class="content-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Desempenho financeiro</h3>
+                <p>Faturamento, comissões e lucro por serviço.</p>
+              </div>
+            </div>
+
+            <div class="chart-wrapper">
+              <canvas id="graficoFinanceiro"></canvas>
             </div>
           </div>
 
-          <div class="filters">
-            <input type="date" id="dataInicio">
-            <input type="date" id="dataFim">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Filtrar período</h3>
+                <p>Consulte os resultados por intervalo.</p>
+              </div>
+            </div>
 
-            <button class="primary-button" onclick="calcularBalancoPersonalizado()">
-              Calcular período
-            </button>
-          </div>
+            <div class="filters" style="display:grid">
+              <input type="date" id="dataInicio">
+              <input type="date" id="dataFim">
 
-          <div class="resultado-balanco" id="resultadoBalanco">
-            Selecione um período para visualizar os resultados.
+              <button
+                class="primary-button"
+                type="button"
+                onclick="calcularBalancoPersonalizado()"
+              >
+                Calcular período
+              </button>
+            </div>
+
+            <div
+              class="resultado-balanco"
+              id="resultadoBalanco"
+            >
+              Selecione um período para visualizar os resultados.
+            </div>
           </div>
         </div>
       </section>
@@ -1230,10 +1363,9 @@
       <section class="page" id="page-configuracoes">
         <div class="page-title">
           <div>
-            <h1>Configurações</h1>
+            <h2>Configurações</h2>
             <p>Personalize o comportamento do sistema.</p>
           </div>
-          <i data-lucide="settings"></i>
         </div>
 
         <div class="panel large-panel">
@@ -1241,11 +1373,15 @@
             <div class="setting-item">
               <div>
                 <strong>Notificações do sistema</strong>
-                <span>Receber alertas sobre novos atendimentos.</span>
+                <span>Receber alertas administrativos.</span>
               </div>
 
               <label class="switch">
-                <input type="checkbox" id="notificacoes" checked>
+                <input
+                  type="checkbox"
+                  id="notificacoes"
+                  checked
+                >
                 <span class="slider"></span>
               </label>
             </div>
@@ -1257,7 +1393,11 @@
               </div>
 
               <label class="switch">
-                <input type="checkbox" id="atualizacaoAutomatica" checked>
+                <input
+                  type="checkbox"
+                  id="atualizacaoAutomatica"
+                  checked
+                >
                 <span class="slider"></span>
               </label>
             </div>
@@ -1265,23 +1405,30 @@
             <div class="setting-item">
               <div>
                 <strong>Modo compacto</strong>
-                <span>Reduzir espaçamentos nas tabelas.</span>
+                <span>Reduzir espaçamento das tabelas.</span>
               </div>
 
               <label class="switch">
-                <input type="checkbox" id="modoCompacto" onchange="alternarModoCompacto()">
+                <input
+                  type="checkbox"
+                  id="modoCompacto"
+                >
                 <span class="slider"></span>
               </label>
             </div>
 
             <div class="setting-item">
               <div>
-                <strong>Confirmação para exclusões</strong>
-                <span>Solicitar confirmação antes de excluir registros.</span>
+                <strong>Confirmar exclusões</strong>
+                <span>Confirmar antes de apagar registros.</span>
               </div>
 
               <label class="switch">
-                <input type="checkbox" id="confirmarExclusao" checked>
+                <input
+                  type="checkbox"
+                  id="confirmarExclusao"
+                  checked
+                >
                 <span class="slider"></span>
               </label>
             </div>
@@ -1294,37 +1441,51 @@
       <section class="page" id="page-exportacao">
         <div class="page-title">
           <div>
-            <h1>Exportar dados</h1>
+            <h2>Exportar dados</h2>
             <p>Baixe os dados operacionais da PLAR.</p>
           </div>
-          <i data-lucide="download"></i>
         </div>
 
         <div class="panel large-panel">
           <div class="export-options">
             <div class="export-card">
-              <i data-lucide="calendar-days"></i>
+              <div class="export-icon">▣</div>
               <h3>Escala de serviços</h3>
               <p>Exporte todos os atendimentos cadastrados.</p>
-              <button class="primary-button" onclick="exportarTxt()">
+
+              <button
+                class="primary-button"
+                type="button"
+                onclick="exportarTxt()"
+              >
                 Exportar TXT
               </button>
             </div>
 
             <div class="export-card">
-              <i data-lucide="users"></i>
+              <div class="export-icon">♙</div>
               <h3>Funcionários</h3>
-              <p>Exporte a lista de funcionários da empresa.</p>
-              <button class="primary-button" onclick="exportarFuncionarios()">
+              <p>Exporte a lista de funcionários e comissões.</p>
+
+              <button
+                class="primary-button"
+                type="button"
+                onclick="exportarFuncionarios()"
+              >
                 Exportar CSV
               </button>
             </div>
 
             <div class="export-card">
-              <i data-lucide="database"></i>
+              <div class="export-icon">◆</div>
               <h3>Backup completo</h3>
-              <p>Baixe um backup dos registros carregados.</p>
-              <button class="primary-button" onclick="exportarBackup()">
+              <p>Baixe um backup dos dados carregados.</p>
+
+              <button
+                class="primary-button"
+                type="button"
+                onclick="exportarBackup()"
+              >
                 Fazer backup
               </button>
             </div>
@@ -1337,6 +1498,7 @@
   <script>
     let escalas = [];
     let funcionarios = [];
+    let graficoFinanceiro = null;
 
     const paginas = {
       dashboard: [
@@ -1345,7 +1507,7 @@
       ],
       atendimento: [
         "Novo atendimento",
-        "Agende uma visita técnica ou serviço de manutenção."
+        "Agende uma visita técnica ou serviço."
       ],
       escala: [
         "Escala de serviços",
@@ -1353,11 +1515,11 @@
       ],
       funcionarios: [
         "Funcionários",
-        "Gerencie sua equipe e as comissões."
+        "Gerencie sua equipe e suas comissões."
       ],
       financeiro: [
         "Financeiro",
-        "Consulte faturamento, comissões e lucro estimado."
+        "Acompanhe faturamento, comissões e lucro."
       ],
       configuracoes: [
         "Configurações",
@@ -1374,6 +1536,26 @@
         style: "currency",
         currency: "BRL"
       });
+    }
+
+    function escaparHTML(valor) {
+      return String(valor ?? "")
+        .replaceAll("&", "&")
+        .replaceAll("<", "<")
+        .replaceAll(">", ">")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatarServico(servico) {
+      const nomes = {
+        limpeza: "Limpeza",
+        automacao: "Automação",
+        manutencao: "Manutenção",
+        instalacao: "Instalação"
+      };
+
+      return nomes[servico] || servico || "Outros";
     }
 
     function abrirPagina(nome) {
@@ -1394,12 +1576,17 @@
         );
       });
 
-      document.getElementById("tituloPagina").textContent = paginas[nome][0];
-      document.getElementById("subtituloPagina").textContent = paginas[nome][1];
+      document.getElementById("tituloPagina").textContent =
+        paginas[nome][0];
+
+      document.getElementById("subtituloPagina").textContent =
+        paginas[nome][1];
 
       localStorage.setItem("paginaAtualPLAR", nome);
 
-      setTimeout(() => lucide.createIcons(), 50);
+      if (nome === "financeiro") {
+        setTimeout(atualizarGraficoFinanceiro, 50);
+      }
     }
 
     document.querySelectorAll("[data-page]").forEach(button => {
@@ -1410,16 +1597,29 @@
 
     async function carregarFuncionarios() {
       try {
-        const resposta = await fetch("/usuarios");
+        const resposta = await fetch("/usuarios", {
+          credentials: "include"
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao carregar funcionários.");
+        }
+
         funcionarios = await resposta.json();
 
         renderizarFuncionarios();
 
-        document.getElementById("totalFuncionarios").textContent = funcionarios.length;
-        document.getElementById("resumoFuncionarios").textContent = funcionarios.length;
-      } catch {
-        document.getElementById("listaFuncionarios").innerHTML =
-          '<div class="empty">Não foi possível carregar os funcionários.</div>';
+        document.getElementById("totalFuncionarios").textContent =
+          funcionarios.length;
+
+        document.getElementById("resumoFuncionarios").textContent =
+          funcionarios.length;
+      } catch (erro) {
+        document.getElementById("listaFuncionarios").innerHTML = `
+          <div class="empty">
+            Não foi possível carregar os funcionários.
+          </div>
+        `;
       }
     }
 
@@ -1427,39 +1627,75 @@
       const lista = document.getElementById("listaFuncionarios");
 
       if (!funcionarios.length) {
-        lista.innerHTML = '<div class="empty">Nenhum funcionário cadastrado.</div>';
+        lista.innerHTML = `
+          <div class="empty">
+            Nenhum funcionário cadastrado.
+          </div>
+        `;
+
         return;
       }
 
-      lista.innerHTML = funcionarios.map(funcionario => `
-        <div class="employee">
-          <div class="employee-info">
-            <div class="employee-avatar">
-              ${(funcionario.usuario || "F").substring(0, 2).toUpperCase()}
+      lista.innerHTML = funcionarios.map(funcionario => {
+        const usuario = escaparHTML(funcionario.usuario);
+        const percentual = Number(funcionario.percentual || 0);
+        const iniciais = usuario.substring(0, 2).toUpperCase();
+
+        return `
+          <div class="employee">
+            <div class="employee-info">
+              <div class="employee-avatar">${iniciais}</div>
+
+              <div>
+                <strong>${usuario}</strong>
+                <small>Funcionário operacional</small>
+              </div>
             </div>
 
-            <div>
-              <strong>${funcionario.usuario}</strong>
-              <small>Funcionário operacional</small>
-            </div>
+            <input
+              class="percentage-input"
+              type="number"
+              min="0"
+              max="100"
+              value="${percentual}"
+              id="percentual-${funcionario.id}"
+              title="Percentual de comissão"
+            >
+
+            <span class="commission">% comissão</span>
+
+            <button
+              class="secondary-button"
+              type="button"
+              onclick="salvarPercentual(${funcionario.id})"
+            >
+              Salvar
+            </button>
+
+            <button
+              class="delete"
+              type="button"
+              onclick="excluirFuncionario(${funcionario.id})"
+            >
+              Excluir
+            </button>
           </div>
-
-          <span class="commission">
-            ${funcionario.percentual || 0}% comissão
-          </span>
-
-          <button class="delete" onclick="excluirFuncionario(${funcionario.id})">
-            Excluir
-          </button>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
 
     async function cadastrarFuncionario(event) {
       event.preventDefault();
 
-      const usuario = document.getElementById("novoUsuario").value.trim();
-      const senha = document.getElementById("novaSenha").value.trim();
+      const usuario = document
+        .getElementById("novoUsuario")
+        .value
+        .trim();
+
+      const senha = document
+        .getElementById("novaSenha")
+        .value;
+
       const percentual = Number(
         document.getElementById("novoPercentual").value || 0
       );
@@ -1469,52 +1705,111 @@
         return;
       }
 
-      const resposta = await fetch("/usuarios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          usuario,
-          senha,
-          percentual
-        })
-      });
+      try {
+        const resposta = await fetch("/usuarios", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            usuario,
+            senha,
+            percentual
+          })
+        });
 
-      const dados = await resposta.json();
+        const dados = await resposta.json();
 
-      if (dados.erro) {
-        alert(dados.erro);
+        if (!resposta.ok || dados.erro) {
+          throw new Error(
+            dados.erro || "Não foi possível cadastrar o funcionário."
+          );
+        }
+
+        event.target.reset();
+        await carregarFuncionarios();
+
+        alert("Funcionário cadastrado com sucesso.");
+      } catch (erro) {
+        alert(erro.message);
+      }
+    }
+
+    async function salvarPercentual(id) {
+      const campo = document.getElementById("percentual-" + id);
+      const percentual = Number(campo.value);
+
+      if (percentual < 0 || percentual > 100) {
+        alert("O percentual deve estar entre 0 e 100.");
         return;
       }
 
-      event.target.reset();
-      await carregarFuncionarios();
-      alert("Funcionário cadastrado com sucesso.");
+      try {
+        const resposta = await fetch("/usuarios/" + id, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ percentual })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || dados.erro) {
+          throw new Error(
+            dados.erro || "Não foi possível atualizar o percentual."
+          );
+        }
+
+        alert("Percentual atualizado.");
+        carregarFuncionarios();
+      } catch (erro) {
+        alert(erro.message);
+      }
     }
 
     async function excluirFuncionario(id) {
-      if (!confirm("Deseja excluir este funcionário?")) return;
+      if (!confirm("Deseja excluir este funcionário?")) {
+        return;
+      }
 
-      await fetch("/usuarios/" + id, {
-        method: "DELETE"
-      });
+      try {
+        const resposta = await fetch("/usuarios/" + id, {
+          method: "DELETE",
+          credentials: "include"
+        });
 
-      carregarFuncionarios();
+        if (!resposta.ok) {
+          throw new Error("Não foi possível excluir o funcionário.");
+        }
+
+        carregarFuncionarios();
+      } catch (erro) {
+        alert(erro.message);
+      }
     }
 
     async function carregarTabela() {
       try {
-        const resposta = await fetch("/atendimentos");
+        const resposta = await fetch("/atendimentos", {
+          credentials: "include"
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao carregar atendimentos.");
+        }
+
         escalas = await resposta.json();
 
         renderizarTabela();
         atualizarIndicadores();
         atualizarFinanceiro();
-      } catch {
+      } catch (erro) {
         document.getElementById("corpoTabela").innerHTML = `
           <tr>
-            <td colspan="8" class="empty">
+            <td colspan="9" class="empty">
               Não foi possível carregar os atendimentos.
             </td>
           </tr>
@@ -1528,30 +1823,48 @@
       if (!lista.length) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="8" class="empty">
+            <td colspan="9" class="empty">
               Nenhum atendimento encontrado.
             </td>
           </tr>
         `;
+
         return;
       }
 
-      corpo.innerHTML = lista.map(item => `
-        <tr>
-          <td><strong>${item.nome || "-"}</strong></td>
-          <td>${item.local || "-"}</td>
-          <td>${item.data || "-"}</td>
-          <td>${item.horario || "-"}</td>
-          <td>${item.tipo_servico || "-"}</td>
-          <td>${item.quantidade_aparelhos || "-"}</td>
-          <td><span class="status">Agendado</span></td>
-          <td>
-            <button class="delete" onclick="excluirAtendimento(${item.id})">
-              Excluir
-            </button>
-          </td>
-        </tr>
-      `).join("");
+      corpo.innerHTML = lista.map(item => {
+        const nome = escaparHTML(item.nome || "-");
+        const local = escaparHTML(item.local || "-");
+        const data = escaparHTML(item.data || "-");
+        const horario = escaparHTML(item.horario || "-");
+        const servico = escaparHTML(
+          formatarServico(item.tipo_servico)
+        );
+
+        return `
+          <tr>
+            <td><strong>${nome}</strong></td>
+            <td>${local}</td>
+            <td>${data}</td>
+            <td>${horario}</td>
+            <td>${servico}</td>
+            <td>${item.quantidade_aparelhos || "-"}</td>
+            <td>${dinheiro(item.valor_total)}</td>
+            <td>
+              <span class="status">Agendado</span>
+            </td>
+            <td>
+              <button
+                class="delete"
+                type="button"
+                onclick="excluirAtendimento(${item.id})"
+              >
+                Excluir
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
     function filtrarTabela() {
@@ -1568,8 +1881,11 @@
           ${item.local || ""}
         `.toLowerCase();
 
-        return texto.includes(busca) &&
-          (!tipo || item.tipo_servico === tipo);
+        const correspondeBusca = texto.includes(busca);
+        const correspondeTipo =
+          !tipo || item.tipo_servico === tipo;
+
+        return correspondeBusca && correspondeTipo;
       });
 
       renderizarTabela(filtrados);
@@ -1588,41 +1904,56 @@
           document.getElementById("quantidadeAparelhos").value
       };
 
-      const resposta = await fetch("/atendimentos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dados)
-      });
+      try {
+        const resposta = await fetch("/atendimentos", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(dados)
+        });
 
-      const retorno = await resposta.json();
+        const retorno = await resposta.json();
 
-      if (retorno.erro) {
-        alert(retorno.erro);
-        return;
+        if (!resposta.ok || retorno.erro) {
+          throw new Error(
+            retorno.erro || "Não foi possível cadastrar o atendimento."
+          );
+        }
+
+        event.target.reset();
+        await carregarTabela();
+
+        alert("Atendimento adicionado com sucesso.");
+        abrirPagina("escala");
+      } catch (erro) {
+        alert(erro.message);
       }
-
-      event.target.reset();
-      await carregarTabela();
-
-      alert("Atendimento adicionado com sucesso.");
-      abrirPagina("escala");
     }
 
     async function excluirAtendimento(id) {
       const confirmar =
-        document.getElementById("confirmarExclusao")?.checked !== false;
+        document.getElementById("confirmarExclusao").checked;
 
       if (confirmar && !confirm("Deseja excluir este atendimento?")) {
         return;
       }
 
-      await fetch("/atendimentos/" + id, {
-        method: "DELETE"
-      });
+      try {
+        const resposta = await fetch("/atendimentos/" + id, {
+          method: "DELETE",
+          credentials: "include"
+        });
 
-      carregarTabela();
+        if (!resposta.ok) {
+          throw new Error("Não foi possível excluir o atendimento.");
+        }
+
+        await carregarTabela();
+      } catch (erro) {
+        alert(erro.message);
+      }
     }
 
     function atualizarIndicadores() {
@@ -1638,8 +1969,11 @@
 
       const lucro = faturamento - comissoes;
 
-      document.getElementById("totalAtendimentos").textContent = escalas.length;
-      document.getElementById("resumoAtendimentos").textContent = escalas.length;
+      document.getElementById("totalAtendimentos").textContent =
+        escalas.length;
+
+      document.getElementById("resumoAtendimentos").textContent =
+        escalas.length;
 
       document.getElementById("faturamentoTotal").textContent =
         dinheiro(faturamento);
@@ -1664,17 +1998,159 @@
 
       const lucro = faturamento - comissoes;
 
-      document.getElementById("financeiroFaturamentoGrande").textContent =
-        dinheiro(faturamento);
+      document.getElementById(
+        "financeiroFaturamentoGrande"
+      ).textContent = dinheiro(faturamento);
 
-      document.getElementById("financeiroComissoesGrande").textContent =
-        dinheiro(comissoes);
+      document.getElementById(
+        "financeiroComissoesGrande"
+      ).textContent = dinheiro(comissoes);
 
-      document.getElementById("financeiroLucroGrande").textContent =
-        dinheiro(lucro);
+      document.getElementById(
+        "financeiroLucroGrande"
+      ).textContent = dinheiro(lucro);
 
-      document.getElementById("financeiroAtendimentos").textContent =
-        escalas.length;
+      document.getElementById(
+        "financeiroAtendimentos"
+      ).textContent = escalas.length;
+
+      atualizarGraficoFinanceiro();
+    }
+
+    function atualizarGraficoFinanceiro() {
+      const canvas = document.getElementById("graficoFinanceiro");
+
+      if (!canvas || typeof Chart === "undefined") {
+        return;
+      }
+
+      const porServico = {};
+
+      escalas.forEach(item => {
+        const servico = formatarServico(item.tipo_servico);
+
+        if (!porServico[servico]) {
+          porServico[servico] = {
+            faturamento: 0,
+            comissoes: 0,
+            lucro: 0
+          };
+        }
+
+        const faturamento = Number(item.valor_total || 0);
+        const comissao = Number(item.valor_comissao || 0);
+        const lucro = faturamento - comissao;
+
+        porServico[servico].faturamento += faturamento;
+        porServico[servico].comissoes += comissao;
+        porServico[servico].lucro += lucro;
+      });
+
+      const servicos = Object.keys(porServico);
+
+      const labels = servicos.length
+        ? servicos
+        : ["Sem dados"];
+
+      const faturamento = servicos.length
+        ? servicos.map(item => porServico[item].faturamento)
+        : [0];
+
+      const comissoes = servicos.length
+        ? servicos.map(item => porServico[item].comissoes)
+        : [0];
+
+      const lucro = servicos.length
+        ? servicos.map(item => porServico[item].lucro)
+        : [0];
+
+      if (graficoFinanceiro) {
+        graficoFinanceiro.destroy();
+      }
+
+      graficoFinanceiro = new Chart(canvas, {
+        type: "bar",
+
+        data: {
+          labels,
+
+          datasets: [
+            {
+              label: "Faturamento",
+              data: faturamento,
+              backgroundColor: "#1499dc",
+              borderRadius: 7
+            },
+            {
+              label: "Comissões",
+              data: comissoes,
+              backgroundColor: "#c6a052",
+              borderRadius: 7
+            },
+            {
+              label: "Lucro",
+              data: lucro,
+              backgroundColor: "#38d889",
+              borderRadius: 7
+            }
+          ]
+        },
+
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+
+          plugins: {
+            legend: {
+              labels: {
+                color: "#91a7ae",
+                font: {
+                  family: "Inter"
+                }
+              }
+            },
+
+            tooltip: {
+              callbacks: {
+                label: context => {
+                  return `${context.dataset.label}: ${dinheiro(context.raw)}`;
+                }
+              }
+            }
+          },
+
+          scales: {
+            x: {
+              ticks: {
+                color: "#91a7ae"
+              },
+
+              grid: {
+                color: "rgba(255,255,255,.06)"
+              }
+            },
+
+            y: {
+              beginAtZero: true,
+
+              ticks: {
+                color: "#91a7ae",
+
+                callback: value => dinheiro(value)
+              },
+
+              grid: {
+                color: "rgba(255,255,255,.06)"
+              }
+            }
+          }
+        }
+      });
     }
 
     function calcularBalancoPersonalizado() {
@@ -1687,7 +2163,7 @@
       }
 
       if (inicio > fim) {
-        alert("A data inicial não pode ser maior que a data final.");
+        alert("A data inicial não pode ser maior que a final.");
         return;
       }
 
@@ -1708,11 +2184,17 @@
       const lucro = faturamento - comissoes;
 
       document.getElementById("resultadoBalanco").innerHTML = `
-        <p>Período: <strong>${inicio} até ${fim}</strong></p>
+        <p>Período: <strong>${escaparHTML(inicio)} até ${escaparHTML(fim)}</strong></p>
         <p>Atendimentos: <strong>${filtrados.length}</strong></p>
-        <p class="faturamento">Faturamento: ${dinheiro(faturamento)}</p>
-        <p class="comissao">Comissões: ${dinheiro(comissoes)}</p>
-        <p class="lucro">Lucro líquido: ${dinheiro(lucro)}</p>
+        <p class="faturamento">
+          Faturamento: ${dinheiro(faturamento)}
+        </p>
+        <p class="comissao">
+          Comissões: ${dinheiro(comissoes)}
+        </p>
+        <p class="lucro">
+          Lucro líquido: ${dinheiro(lucro)}
+        </p>
       `;
     }
 
@@ -1722,11 +2204,13 @@
       });
 
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(arquivo);
+      const url = URL.createObjectURL(arquivo);
+
+      link.href = url;
       link.download = nome;
       link.click();
 
-      URL.revokeObjectURL(link.href);
+      URL.revokeObjectURL(url);
     }
 
     function exportarTxt() {
@@ -1743,7 +2227,7 @@ Funcionário: ${item.nome || "-"}
 Local: ${item.local || "-"}
 Data: ${item.data || "-"}
 Horário: ${item.horario || "-"}
-Serviço: ${item.tipo_servico || "-"}
+Serviço: ${formatarServico(item.tipo_servico)}
 Aparelhos: ${item.quantidade_aparelhos || "-"}
 Valor total: ${dinheiro(item.valor_total)}
 Comissão: ${dinheiro(item.valor_comissao)}
@@ -1751,7 +2235,11 @@ Comissão: ${dinheiro(item.valor_comissao)}
 `;
       });
 
-      baixarArquivo(texto, "escala-plar.txt", "text/plain");
+      baixarArquivo(
+        texto,
+        "escala-plar.txt",
+        "text/plain"
+      );
     }
 
     function exportarFuncionarios() {
@@ -1766,7 +2254,11 @@ Comissão: ${dinheiro(item.valor_comissao)}
         csv += `${funcionario.usuario};${funcionario.percentual || 0}%\n`;
       });
 
-      baixarArquivo(csv, "funcionarios-plar.csv", "text/csv");
+      baixarArquivo(
+        csv,
+        "funcionarios-plar.csv",
+        "text/csv"
+      );
     }
 
     function exportarBackup() {
@@ -1783,22 +2275,11 @@ Comissão: ${dinheiro(item.valor_comissao)}
       );
     }
 
-    function alternarModoCompacto() {
-      const ativado = document.getElementById("modoCompacto").checked;
-
-      document.body.classList.toggle("modo-compacto", ativado);
-
-      localStorage.setItem(
-        "modoCompactoPLAR",
-        ativado ? "ativo" : "inativo"
-      );
-    }
-
     function mostrarNotificacoes() {
-      const ativadas =
-        document.getElementById("notificacoes")?.checked !== false;
+      const notificacoesAtivas =
+        document.getElementById("notificacoes").checked;
 
-      if (!ativadas) {
+      if (!notificacoesAtivas) {
         alert("As notificações estão desativadas.");
         return;
       }
@@ -1813,7 +2294,34 @@ Comissão: ${dinheiro(item.valor_comissao)}
       document.getElementById("modoCompacto").checked = true;
     }
 
-    lucide.createIcons();
+    document
+      .getElementById("modoCompacto")
+      .addEventListener("change", event => {
+        const ativado = event.target.checked;
+
+        document.body.classList.toggle("modo-compacto", ativado);
+
+        localStorage.setItem(
+          "modoCompactoPLAR",
+          ativado ? "ativo" : "inativo"
+        );
+      });
+
+    document
+      .getElementById("filtroTabela")
+      .addEventListener("input", filtrarTabela);
+
+    document
+      .getElementById("filtroServico")
+      .addEventListener("change", filtrarTabela);
+
+    document
+      .getElementById("formAtendimento")
+      .addEventListener("submit", cadastrar);
+
+    document
+      .getElementById("formFuncionario")
+      .addEventListener("submit", cadastrarFuncionario);
 
     carregarFuncionarios();
     carregarTabela();
