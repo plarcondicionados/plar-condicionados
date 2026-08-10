@@ -1,380 +1,1162 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>PLar Condicionados - Escala de Funcionários</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 850px;
-    margin: 30px auto;
-    color: #eee;
-    position: relative;
-    min-height: 100vh;
-  }
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("fundo-plar.jpg");
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.35) blur(1px);
-    z-index: -2;
-    animation: zoomFundo 25s ease-in-out infinite alternate;
-  }
-  body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(13,13,13,0.85));
-    z-index: -1;
-  }
-  @keyframes zoomFundo {
-    from { transform: scale(1); }
-    to { transform: scale(1.1); }
-  }
-  .logo-area {
-    text-align: center;
-    padding: 20px;
-    background: #000;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #b08d3e;
-  }
-  .logo-area img { max-width: 180px; }
-  .logo-area h1 { color: #b08d3e; margin: 10px 0 0 0; font-size: 22px; letter-spacing: 2px; }
-  .logo-area p { color: #6fa8dc; margin: 5px 0 0 0; font-size: 13px; letter-spacing: 3px; }
-  h2 { color: #6fa8dc; }
-  .card {
-    background: rgba(26, 26, 26, 0.85);
-    backdrop-filter: blur(4px);
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #333;
-  }
-  input, select, button {
-    padding: 8px;
-    margin: 5px 0;
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 5px;
-    border: 1px solid #444;
-    background: #222;
-    color: #eee;
-  }
-  button {
-    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
-    color: #000;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  button:hover { opacity: 0.85; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-  th { background: #222; color: #6fa8dc; }
-  .del-btn { background: #d9534f; color: #fff; width: auto; padding: 4px 10px; }
-  .save-btn { background: #5cb85c; color: #fff; width: auto; padding: 4px 10px; }
-  .export-btn { background: #333; color: #6fa8dc; border: 1px solid #6fa8dc; }
-  .percentual-input { width: 70px; display: inline-block; }
-  .filtros-balanco { display: flex; gap: 10px; }
-  .filtros-balanco button { width: auto; flex: 1; }
-  .resultado-balanco {
-    margin-top: 15px;
-    background: #111;
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid #333;
-  }
-  .resultado-balanco p { margin: 6px 0; font-size: 15px; }
-  .resultado-balanco .lucro { color: #5cb85c; font-weight: bold; }
-  .resultado-balanco .fatura { color: #6fa8dc; font-weight: bold; }
-  .resultado-balanco .comissao { color: #b08d3e; font-weight: bold; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLAR ERP | Gestão de Serviços</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg: #071014;
+      --sidebar: #0a151a;
+      --surface: #0e1c22;
+      --surface-2: #13252c;
+      --border: rgba(255,255,255,.09);
+      --text: #eef7fa;
+      --muted: #8da3aa;
+      --blue: #1599dc;
+      --blue-light: #4cc7ff;
+      --gold: #c8a24b;
+      --green: #32d583;
+      --red: #ff6574;
+      --shadow: 0 18px 50px rgba(0,0,0,.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 80% 0%, rgba(21,153,220,.12), transparent 30%),
+        linear-gradient(135deg, #071014, #091a20 55%, #061014);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* MENU LATERAL */
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+      padding: 22px 16px;
+      background: rgba(10,21,26,.96);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 4px 10px 28px;
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .brand strong {
+      font-size: 17px;
+      letter-spacing: .5px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--blue-light);
+      font-size: 9px;
+      letter-spacing: 1.8px;
+      margin-top: 4px;
+    }
+
+    .menu-title {
+      color: #5f7880;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      padding: 16px 12px 8px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 5px;
+    }
+
+    .nav button {
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: .2s;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      color: white;
+      background: linear-gradient(90deg, rgba(21,153,220,.2), rgba(21,153,220,.04));
+    }
+
+    .nav button.active {
+      box-shadow: inset 3px 0 var(--blue);
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 20px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* CONTEÚDO */
+    .main {
+      width: calc(100% - 250px);
+      margin-left: 250px;
+      padding: 28px 34px 50px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .topbar h1 {
+      font-size: 27px;
+      letter-spacing: -.7px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--blue), #125b83);
+    }
+
+    .profile small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* MÉTRICAS */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .metric {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      min-height: 135px;
+      background: linear-gradient(145deg, rgba(19,37,44,.95), rgba(11,26,32,.95));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(21,153,220,.1);
+      right: -35px;
+      bottom: -40px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric-value {
+      display: block;
+      margin-top: 13px;
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .metric-footer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      color: var(--green);
+      font-size: 11px;
+    }
+
+    .metric-icon {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      color: var(--blue-light);
+    }
+
+    /* GRID PRINCIPAL */
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(290px, .8fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 21px;
+      background: rgba(14,28,34,.88);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel + .panel {
+      margin-top: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+      font-size: 16px;
+    }
+
+    .panel-header p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 15px;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--blue), #126e9c);
+      box-shadow: 0 7px 20px rgba(21,153,220,.2);
+    }
+
+    .primary-button:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+
+    .secondary-button {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 13px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 12px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 17px;
+    }
+
+    .filters input,
+    .filters select {
+      min-width: 0;
+      flex: 1;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #0a171c;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(21,153,220,.12);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      color: #729099;
+      font-size: 10px;
+      letter-spacing: .7px;
+      text-align: left;
+      text-transform: uppercase;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.055);
+      color: #d9e7ea;
+    }
+
+    tr:hover td {
+      background: rgba(21,153,220,.04);
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 5px 8px;
+      border-radius: 20px;
+      color: var(--green);
+      background: rgba(50,213,131,.1);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .delete {
+      color: var(--red);
+      background: transparent;
+      border: 0;
+      font-size: 11px;
+    }
+
+    .employee-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 120px auto;
+      gap: 9px;
+      margin-bottom: 18px;
+    }
+
+    .employee-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .employee {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .employee-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .employee-avatar {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: white;
+      background: linear-gradient(135deg, var(--gold), #765c21);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .employee strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .employee small {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .commission {
+      color: var(--blue-light);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .balance {
+      display: grid;
+      gap: 12px;
+    }
+
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .balance-row strong {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .balance-row.profit strong {
+      color: var(--green);
+      font-size: 19px;
+    }
+
+    .progress {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #071116;
+    }
+
+    .progress span {
+      display: block;
+      width: 72%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), var(--blue-light));
+    }
+
+    .service-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-top: 4px;
+    }
+
+    .empty {
+      padding: 28px 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* RESPONSIVO */
+    @media (max-width: 1050px) {
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+        padding: 5px 0 22px;
+      }
+
+      .brand img {
+        width: 43px;
+        height: 43px;
+      }
+
+      .brand div,
+      .menu-title,
+      .nav button span,
+      .sidebar-footer {
+        display: none;
+      }
+
+      .nav button {
+        justify-content: center;
+        padding: 13px 8px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+        margin-left: 70px;
+        padding: 22px 15px 35px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .topbar h1 {
+        font-size: 21px;
+      }
+
+      .profile {
+        display: none;
+      }
+
+      .metrics {
+        gap: 10px;
+      }
+
+      .metric {
+        padding: 14px;
+        min-height: 115px;
+      }
+
+      .metric-value {
+        font-size: 21px;
+      }
+
+      .employee-form,
+      .service-form {
+        grid-template-columns: 1fr;
+      }
+
+      .field.full {
+        grid-column: auto;
+      }
+
+      .form-actions {
+        grid-column: auto;
+        display: grid;
+      }
+
+      .filters {
+        display: grid;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 720px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <div class="app">
 
-<div class="logo-area">
-  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
-  <h1>PL AR CONDICIONADOS</h1>
-  <p>CONFORTO · EFICIÊNCIA · TECNOLOGIA</p>
-</div>
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="logoplarpng.png" alt="Logo PLAR Condicionados">
+        <div>
+          <strong>PLAR ERP</strong>
+          <small>GESTÃO INTELIGENTE</small>
+        </div>
+      </div>
 
-<div class="card">
-  <h2>Gerenciar Funcionários</h2>
-  <input type="text" id="novoUsuario" placeholder="Usuário do funcionário">
-  <input type="password" id="novaSenha" placeholder="Senha do funcionário">
-  <input type="number" id="novoPercentual" placeholder="Percentual de comissão (ex: 40)">
-  <button onclick="cadastrarFuncionario()">Cadastrar Funcionário</button>
-  <table>
-    <thead><tr><th>Usuário</th><th>Percentual</th><th></th></tr></thead>
-    <tbody id="corpoFuncionarios"></tbody>
-  </table>
-</div>
+      <div class="menu-title">Menu principal</div>
 
-<div class="card">
-  <h2>Cadastrar Atendimento</h2>
-  <input type="text" id="nome" placeholder="Nome do funcionário (igual ao usuário cadastrado)">
-  <input type="text" id="local" placeholder="Local do serviço (endereço/cliente)">
-  <input type="date" id="data" min="2026-01-01" max="2028-12-31">
-  <input type="time" id="horario">
-  <select id="tipoServico">
-    <option value="limpeza">Limpeza</option>
-    <option value="automacao">Automação</option>
-  </select>
-  <input type="number" id="quantidadeAparelhos" placeholder="Quantidade de ar condicionados">
-  <button onclick="cadastrar()">Adicionar Atendimento</button>
-</div>
+      <nav class="nav">
+        <button class="active">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Visão geral</span>
+        </button>
 
-<div class="card">
-  <h2>Balanço Financeiro</h2>
-  <div class="filtros-balanco">
-    <button onclick="calcularBalanco('dia')">Hoje</button>
-    <button onclick="calcularBalanco('semana')">Últimos 7 dias</button>
-    <button onclick="calcularBalanco('mes')">Este mês</button>
+        <button onclick="mostrarFormulario()">
+          <i data-lucide="calendar-plus"></i>
+          <span>Novo atendimento</span>
+        </button>
+
+        <button onclick="document.getElementById('escala').scrollIntoView({behavior:'smooth'})">
+          <i data-lucide="calendar-days"></i>
+          <span>Escala de serviços</span>
+        </button>
+
+        <button onclick="document.getElementById('equipe').scrollIntoView({behavior:'smooth'})">
+          <i data-lucide="users"></i>
+          <span>Funcionários</span>
+        </button>
+
+        <button onclick="document.getElementById('financeiro').scrollIntoView({behavior:'smooth'})">
+          <i data-lucide="wallet-cards"></i>
+          <span>Financeiro</span>
+        </button>
+      </nav>
+
+      <div class="menu-title">Sistema</div>
+
+      <nav class="nav">
+        <button>
+          <i data-lucide="settings"></i>
+          <span>Configurações</span>
+        </button>
+
+        <button onclick="exportarTxt()">
+          <i data-lucide="download"></i>
+          <span>Exportar dados</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <strong>PLAR Condicionados</strong><br>
+        Sistema operacional de serviços e manutenção.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Visão geral</h1>
+          <p>Acompanhe a operação da PLAR em um só lugar.</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="icon-button" title="Notificações">
+            <i data-lucide="bell"></i>
+          </button>
+
+          <div class="profile">
+            <div class="avatar">PL</div>
+            <div>
+              <strong>Administrador</strong><br>
+              <small>Acesso administrativo</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="metrics">
+        <article class="metric">
+          <i class="metric-icon" data-lucide="calendar-check"></i>
+          <span class="metric-label">Atendimentos registrados</span>
+          <strong class="metric-value" id="totalAtendimentos">0</strong>
+          <div class="metric-footer">
+            <i data-lucide="activity"></i>
+            Operação atualizada
+          </div>
+        </article>
+
+        <article class="metric">
+          <i class="metric-icon" data-lucide="users"></i>
+          <span class="metric-label">Funcionários ativos</span>
+          <strong class="metric-value" id="totalFuncionarios">0</strong>
+          <div class="metric-footer">
+            <i data-lucide="check-circle"></i>
+            Equipe operacional
+          </div>
+        </article>
+
+        <article class="metric">
+          <i class="metric-icon" data-lucide="trending-up"></i>
+          <span class="metric-label">Faturamento total</span>
+          <strong class="metric-value" id="faturamentoTotal">R$ 0,00</strong>
+          <div class="metric-footer">
+            <i data-lucide="bar-chart-3"></i>
+            Visão financeira
+          </div>
+        </article>
+
+        <article class="metric">
+          <i class="metric-icon" data-lucide="badge-dollar-sign"></i>
+          <span class="metric-label">Lucro estimado</span>
+          <strong class="metric-value" id="lucroTotal">R$ 0,00</strong>
+          <div class="metric-footer">
+            <i data-lucide="arrow-up-right"></i>
+            Após comissões
+          </div>
+        </article>
+      </section>
+
+      <div class="content-grid">
+
+        <section>
+          <div class="panel" id="novo-atendimento">
+            <div class="panel-header">
+              <div>
+                <h2>Novo atendimento</h2>
+                <p>Agende uma visita técnica ou serviço de manutenção.</p>
+              </div>
+              <i data-lucide="clipboard-plus"></i>
+            </div>
+
+            <form class="service-form" onsubmit="cadastrar(event)">
+              <div class="field">
+                <label for="nome">Funcionário responsável</label>
+                <input id="nome" type="text" placeholder="Nome do funcionário" required>
+              </div>
+
+              <div class="field">
+                <label for="local">Cliente ou local do serviço</label>
+                <input id="local" type="text" placeholder="Ex.: Loja Centro" required>
+              </div>
+
+              <div class="field">
+                <label for="data">Data</label>
+                <input id="data" type="date" min="2026-01-01" max="2028-12-31" required>
+              </div>
+
+              <div class="field">
+                <label for="horario">Horário</label>
+                <input id="horario" type="time" required>
+              </div>
+
+              <div class="field">
+                <label for="tipoServico">Tipo de serviço</label>
+                <select id="tipoServico">
+                  <option value="limpeza">Limpeza</option>
+                  <option value="automacao">Automação</option>
+                  <option value="manutencao">Manutenção</option>
+                  <option value="instalacao">Instalação</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="quantidadeAparelhos">Quantidade de aparelhos</label>
+                <input id="quantidadeAparelhos" type="number" min="1" placeholder="Ex.: 4" required>
+              </div>
+
+              <div class="form-actions">
+                <button type="reset" class="secondary-button">Limpar campos</button>
+                <button type="submit" class="primary-button">
+                  <i data-lucide="plus"></i>
+                  Adicionar atendimento
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel" id="escala">
+            <div class="panel-header">
+              <div>
+                <h2>Escala de serviços</h2>
+                <p>Visualize e gerencie os atendimentos programados.</p>
+              </div>
+
+              <button class="secondary-button" onclick="exportarTxt()">
+                <i data-lucide="download"></i>
+                Exportar
+              </button>
+            </div>
+
+            <div class="filters">
+              <input type="search" id="filtroTabela" placeholder="Buscar por funcionário ou local..." oninput="filtrarTabela()">
+              <select id="filtroServico" onchange="filtrarTabela()">
+                <option value="">Todos os serviços</option>
+                <option value="limpeza">Limpeza</option>
+                <option value="automacao">Automação</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="instalacao">Instalação</option>
+              </select>
+            </div>
+
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Funcionário</th>
+                    <th>Local</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Serviço</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <aside>
+          <div class="panel" id="financeiro">
+            <div class="panel-header">
+              <div>
+                <h2>Resumo financeiro</h2>
+                <p>Indicadores gerais da operação.</p>
+              </div>
+              <i data-lucide="pie-chart"></i>
+            </div>
+
+            <div class="balance">
+              <div class="balance-row">
+                <span>Faturamento</span>
+                <strong id="financeiroFaturamento">R$ 0,00</strong>
+              </div>
+
+              <div class="balance-row">
+                <span>Comissões</span>
+                <strong id="financeiroComissoes">R$ 0,00</strong>
+              </div>
+
+              <div class="balance-row profit">
+                <span>Lucro estimado</span>
+                <strong id="financeiroLucro">R$ 0,00</strong>
+              </div>
+
+              <div class="progress">
+                <span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="equipe">
+            <div class="panel-header">
+              <div>
+                <h2>Equipe</h2>
+                <p>Funcionários e percentuais de comissão.</p>
+              </div>
+              <i data-lucide="users-round"></i>
+            </div>
+
+            <form class="employee-form" onsubmit="cadastrarFuncionario(event)">
+              <input id="novoUsuario" type="text" placeholder="Usuário" required>
+              <input id="novaSenha" type="password" placeholder="Senha" required>
+              <input id="novoPercentual" type="number" min="0" max="100" placeholder="%">
+              <button class="primary-button" type="submit" title="Cadastrar funcionário">
+                <i data-lucide="user-plus"></i>
+              </button>
+            </form>
+
+            <div class="employee-list" id="listaFuncionarios">
+              <div class="empty">Carregando equipe...</div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
   </div>
-  <p style="margin-top:15px; color:#999; font-size:13px;">Ou escolha um período personalizado:</p>
-  <input type="date" id="dataInicio" min="2026-01-01" max="2028-12-31">
-  <input type="date" id="dataFim" min="2026-01-01" max="2028-12-31">
-  <button onclick="calcularBalancoPersonalizado()">Calcular Período</button>
 
-  <div class="resultado-balanco" id="resultadoBalanco">
-    <p>Selecione um período acima para ver o balanço.</p>
-  </div>
-</div>
+  <script>
+    let escalas = [];
+    let funcionarios = [];
 
-<div class="card">
-  <h2>Escala Completa</h2>
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th>Funcionário</th><th>Local</th><th>Data</th><th>Horário</th>
-        <th>Serviço</th><th>Aparelhos</th><th>Valor Total</th><th>Comissão</th><th></th>
-      </tr>
-    </thead>
-    <tbody id="corpoTabela"></tbody>
-  </table>
-  <button class="export-btn" onclick="exportarTxt()">Exportar Escala em TXT</button>
-</div>
+    const dinheiro = valor =>
+      Number(valor || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
 
-<script>
-  let escalas = [];
-  let funcionarios = [];
-
-  async function carregarFuncionarios() {
-    const resposta = await fetch("/usuarios");
-    funcionarios = await resposta.json();
-    renderizarFuncionarios();
-  }
-
-  function renderizarFuncionarios() {
-    const corpo = document.getElementById("corpoFuncionarios");
-    corpo.innerHTML = "";
-    funcionarios.forEach(f => {
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td>${f.usuario}</td>
-        <td><input type="number" class="percentual-input" id="percentual-${f.id}" value="${f.percentual}"> %</td>
-        <td>
-          <button class="save-btn" onclick="salvarPercentual(${f.id})">Salvar</button>
-          <button class="del-btn" onclick="excluirFuncionario(${f.id})">Excluir</button>
-        </td>
-      `;
-      corpo.appendChild(linha);
-    });
-  }
-
-  async function cadastrarFuncionario() {
-    const usuario = document.getElementById("novoUsuario").value.trim();
-    const senha = document.getElementById("novaSenha").value.trim();
-    const percentual = parseFloat(document.getElementById("novoPercentual").value);
-    if (!usuario || !senha || isNaN(percentual)) {
-      alert("Preencha usuário, senha e percentual.");
-      return;
+    function mostrarFormulario() {
+      document.getElementById("novo-atendimento")
+        .scrollIntoView({ behavior: "smooth" });
     }
-    const resposta = await fetch("/usuarios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario, senha, percentual })
-    });
-    const dados = await resposta.json();
-    if (dados.erro) { alert(dados.erro); return; }
-    document.getElementById("novoUsuario").value = "";
-    document.getElementById("novaSenha").value = "";
-    document.getElementById("novoPercentual").value = "";
+
+    async function carregarFuncionarios() {
+      try {
+        const resposta = await fetch("/usuarios");
+        funcionarios = await resposta.json();
+        renderizarFuncionarios();
+        document.getElementById("totalFuncionarios").textContent = funcionarios.length;
+      } catch {
+        document.getElementById("listaFuncionarios").innerHTML =
+          '<div class="empty">Não foi possível carregar a equipe.</div>';
+      }
+    }
+
+    function renderizarFuncionarios() {
+      const lista = document.getElementById("listaFuncionarios");
+
+      if (!funcionarios.length) {
+        lista.innerHTML = '<div class="empty">Nenhum funcionário cadastrado.</div>';
+        return;
+      }
+
+      lista.innerHTML = funcionarios.map(f => `
+        <div class="employee">
+          <div class="employee-info">
+            <div class="employee-avatar">
+              ${(f.usuario || "F").substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <strong>${f.usuario}</strong>
+              <small>Funcionário operacional</small>
+            </div>
+          </div>
+
+          <span class="commission">${f.percentual || 0}% comissão</span>
+
+          <button class="delete" onclick="excluirFuncionario(${f.id})">
+            Excluir
+          </button>
+        </div>
+      `).join("");
+    }
+
+    async function cadastrarFuncionario(event) {
+      event.preventDefault();
+
+      const usuario = document.getElementById("novoUsuario").value.trim();
+      const senha = document.getElementById("novaSenha").value.trim();
+      const percentual = Number(document.getElementById("novoPercentual").value || 0);
+
+      const resposta = await fetch("/usuarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, senha, percentual })
+      });
+
+      const dados = await resposta.json();
+
+      if (dados.erro) {
+        alert(dados.erro);
+        return;
+      }
+
+      event.target.reset();
+      carregarFuncionarios();
+    }
+
+    async function excluirFuncionario(id) {
+      if (!confirm("Deseja excluir este funcionário?")) return;
+
+      await fetch(`/usuarios/${id}`, { method: "DELETE" });
+      carregarFuncionarios();
+    }
+
+    async function carregarTabela() {
+      try {
+        const resposta = await fetch("/atendimentos");
+        escalas = await resposta.json();
+        renderizarTabela();
+        atualizarIndicadores();
+      } catch {
+        document.getElementById("corpoTabela").innerHTML =
+          '<tr><td colspan="7" class="empty">Não foi possível carregar os atendimentos.</td></tr>';
+      }
+    }
+
+    function renderizarTabela(lista = escalas) {
+      const corpo = document.getElementById("corpoTabela");
+
+      if (!lista.length) {
+        corpo.innerHTML =
+          '<tr><td colspan="7" class="empty">Nenhum atendimento encontrado.</td></tr>';
+        return;
+      }
+
+      corpo.innerHTML = lista.map(item => `
+        <tr>
+          <td><strong>${item.nome || "-"}</strong></td>
+          <td>${item.local || "-"}</td>
+          <td>${item.data || "-"}</td>
+          <td>${item.horario || "-"}</td>
+          <td>${item.tipo_servico || "-"}</td>
+          <td><span class="status">Agendado</span></td>
+          <td>
+            <button class="delete" onclick="excluir(${item.id})">
+              Excluir
+            </button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function filtrarTabela() {
+      const busca = document.getElementById("filtroTabela").value.toLowerCase();
+      const servico = document.getElementById("filtroServico").value;
+
+      const filtrados = escalas.filter(item => {
+        const texto = `${item.nome} ${item.local}`.toLowerCase();
+        const correspondeBusca = texto.includes(busca);
+        const correspondeServico = !servico || item.tipo_servico === servico;
+
+        return correspondeBusca && correspondeServico;
+      });
+
+      renderizarTabela(filtrados);
+    }
+
+    async function cadastrar(event) {
+      event.preventDefault();
+
+      const dados = {
+        nome: document.getElementById("nome").value.trim(),
+        local: document.getElementById("local").value.trim(),
+        data: document.getElementById("data").value,
+        horario: document.getElementById("horario").value,
+        tipo_servico: document.getElementById("tipoServico").value,
+        quantidade_aparelhos:
+          document.getElementById("quantidadeAparelhos").value
+      };
+
+      const resposta = await fetch("/atendimentos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      });
+
+      const retorno = await resposta.json();
+
+      if (retorno.erro) {
+        alert(retorno.erro);
+        return;
+      }
+
+      event.target.reset();
+      await carregarTabela();
+      alert("Atendimento adicionado com sucesso.");
+    }
+
+    async function excluir(id) {
+      if (!confirm("Deseja excluir este atendimento?")) return;
+
+      await fetch(`/atendimentos/${id}`, { method: "DELETE" });
+      carregarTabela();
+    }
+
+    function atualizarIndicadores() {
+      const faturamento = escalas.reduce(
+        (total, item) => total + Number(item.valor_total || 0), 0
+      );
+
+      const comissoes = escalas.reduce(
+        (total, item) => total + Number(item.valor_comissao || 0), 0
+      );
+
+      const lucro = faturamento - comissoes;
+
+      document.getElementById("totalAtendimentos").textContent = escalas.length;
+      document.getElementById("faturamentoTotal").textContent = dinheiro(faturamento);
+      document.getElementById("lucroTotal").textContent = dinheiro(lucro);
+
+      document.getElementById("financeiroFaturamento").textContent = dinheiro(faturamento);
+      document.getElementById("financeiroComissoes").textContent = dinheiro(comissoes);
+      document.getElementById("financeiroLucro").textContent = dinheiro(lucro);
+    }
+
+    function exportarTxt() {
+      if (!escalas.length) {
+        alert("Não há atendimentos para exportar.");
+        return;
+      }
+
+      let texto = "PLAR ERP - ESCALA DE SERVIÇOS\n\n";
+
+      escalas.forEach(item => {
+        texto +=
+`Funcionário: ${item.nome}
+Local: ${item.local}
+Data: ${item.data}
+Horário: ${item.horario}
+Serviço: ${item.tipo_servico}
+Aparelhos: ${item.quantidade_aparelhos}
+Valor total: ${dinheiro(item.valor_total)}
+Comissão: ${dinheiro(item.valor_comissao)}
+
+`;
+      });
+
+      const arquivo = new Blob([texto], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+
+      link.href = URL.createObjectURL(arquivo);
+      link.download = "escala-plar.txt";
+      link.click();
+
+      URL.revokeObjectURL(link.href);
+    }
+
+    lucide.createIcons();
     carregarFuncionarios();
-  }
-
-  async function salvarPercentual(id) {
-    const percentual = parseFloat(document.getElementById(`percentual-${id}`).value);
-    await fetch(`/usuarios/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ percentual })
-    });
-    alert("Percentual atualizado.");
-  }
-
-  async function excluirFuncionario(id) {
-    if (!confirm("Excluir esse funcionário?")) return;
-    await fetch(`/usuarios/${id}`, { method: "DELETE" });
-    carregarFuncionarios();
-  }
-
-  async function carregarTabela() {
-    const resposta = await fetch("/atendimentos");
-    escalas = await resposta.json();
-    renderizarTabela();
-  }
-
-  function renderizarTabela() {
-    const corpo = document.getElementById("corpoTabela");
-    corpo.innerHTML = "";
-    escalas.forEach(item => {
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td>${item.nome}</td>
-        <td>${item.local}</td>
-        <td>${item.data}</td>
-        <td>${item.horario}</td>
-        <td>${item.tipo_servico || "-"}</td>
-        <td>${item.quantidade_aparelhos || "-"}</td>
-        <td>R$ ${item.valor_total ? item.valor_total.toFixed(2) : "0.00"}</td>
-        <td>R$ ${item.valor_comissao ? item.valor_comissao.toFixed(2) : "0.00"}</td>
-        <td><button class="del-btn" onclick="excluir(${item.id})">Excluir</button></td>
-      `;
-      corpo.appendChild(linha);
-    });
-  }
-
-  async function cadastrar() {
-    const nome = document.getElementById("nome").value.trim();
-    const local = document.getElementById("local").value.trim();
-    const data = document.getElementById("data").value;
-    const horario = document.getElementById("horario").value;
-    const tipo_servico = document.getElementById("tipoServico").value;
-    const quantidade_aparelhos = document.getElementById("quantidadeAparelhos").value;
-
-    if (!nome || !local || !data || !horario || !quantidade_aparelhos) {
-      alert("Preencha todos os campos antes de adicionar.");
-      return;
-    }
-
-    const ano = parseInt(data.split("-")[0], 10);
-    if (ano < 2026 || ano > 2028) {
-      alert("Data inválida. O ano deve estar entre 2026 e 2028.");
-      return;
-    }
-
-    const resposta = await fetch("/atendimentos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, local, data, horario, tipo_servico, quantidade_aparelhos })
-    });
-    const dados = await resposta.json();
-    if (dados.erro) { alert(dados.erro); return; }
-
-    document.getElementById("nome").value = "";
-    document.getElementById("local").value = "";
-    document.getElementById("data").value = "";
-    document.getElementById("horario").value = "";
-    document.getElementById("quantidadeAparelhos").value = "";
-
     carregarTabela();
-  }
-
-  async function excluir(id) {
-    await fetch(`/atendimentos/${id}`, { method: "DELETE" });
-    carregarTabela();
-  }
-
-  function exportarTxt() {
-    if (escalas.length === 0) {
-      alert("Não há atendimentos cadastrados para exportar.");
-      return;
-    }
-    let conteudo = "ESCALA DE ATENDIMENTOS - PLAR CONDICIONADOS\n\n";
-    escalas.forEach(e => {
-      conteudo += `Funcionário: ${e.nome}\nLocal: ${e.local}\nData: ${e.data}\nHorário: ${e.horario}\nServiço: ${e.tipo_servico}\nAparelhos: ${e.quantidade_aparelhos}\nValor Total: R$ ${e.valor_total}\nComissão: R$ ${e.valor_comissao}\n\n`;
-    });
-    const blob = new Blob([conteudo], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "escala_plar.txt";
-    link.click();
-  }
-
-  function exibirResultadoBalanco(lista, tituloPeriodo) {
-    const faturamento = lista.reduce((soma, e) => soma + (e.valor_total || 0), 0);
-    const comissoes = lista.reduce((soma, e) => soma + (e.valor_comissao || 0), 0);
-    const lucro = faturamento - comissoes;
-
-    document.getElementById("resultadoBalanco").innerHTML = `
-      <p>Período: <strong>${tituloPeriodo}</strong></p>
-      <p>Atendimentos no período: <strong>${lista.length}</strong></p>
-      <p class="fatura">Faturamento Total: R$ ${faturamento.toFixed(2)}</p>
-      <p class="comissao">Total em Comissões: R$ ${comissoes.toFixed(2)}</p>
-      <p class="lucro">Lucro Líquido: R$ ${lucro.toFixed(2)}</p>
-    `;
-  }
-
-  function calcularBalanco(periodo) {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const filtrado = escalas.filter(e => {
-      if (!e.data) return false;
-      const dataItem = new Date(e.data + "T00:00:00");
-
-      if (periodo === "dia") {
-        return dataItem.getTime() === hoje.getTime();
-      }
-      if (periodo === "semana") {
-        const seteDiasAtras = new Date(hoje);
-        seteDiasAtras.setDate(hoje.getDate() - 6);
-        return dataItem >= seteDiasAtras && dataItem <= hoje;
-      }
-      if (periodo === "mes") {
-        return dataItem.getMonth() === hoje.getMonth() && dataItem.getFullYear() === hoje.getFullYear();
-      }
-      return false;
-    });
-
-    const titulos = { dia: "Hoje", semana: "Últimos 7 dias", mes: "Este mês" };
-    exibirResultadoBalanco(filtrado, titulos[periodo]);
-  }
-
-  function calcularBalancoPersonalizado() {
-    const inicio = document.getElementById("dataInicio").value;
-    const fim = document.getElementById("dataFim").value;
-
-    if (!inicio || !fim) {
-      alert("Selecione as duas datas do período.");
-      return;
-    }
-
-    const dataInicio = new Date(inicio + "T00:00:00");
-    const dataFim = new Date(fim + "T00:00:00");
-
-    const filtrado = escalas.filter(e => {
-      if (!e.data) return false;
-      const dataItem = new Date(e.data + "T00:00:00");
-      return dataItem >= dataInicio && dataItem <= dataFim;
-    });
-
-    exibirResultadoBalanco(filtrado, `${inicio} até ${fim}`);
-  }
-
-  carregarFuncionarios();
-  carregarTabela();
-</script>
+  </script>
 </body>
 </html>
