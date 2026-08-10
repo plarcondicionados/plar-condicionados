@@ -28,20 +28,15 @@ BANCO_DADOS = BASE_DIR / "escala.db"
 
 app = Flask(__name__)
 
-# Em produção, defina uma variável de ambiente:
-# PLAR_SECRET_KEY=uma-chave-grande-e-secreta
 app.secret_key = os.environ.get(
     "PLAR_SECRET_KEY",
-    "ALTERE-ESTA-CHAVE-SECRETA-DA-PLAR"
+    "ALTERE-ESTA-CHAVE-SECRETA"
 )
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-
-    # Em produção com HTTPS, altere para True.
     SESSION_COOKIE_SECURE=False,
-
     PERMANENT_SESSION_LIFETIME=60 * 60 * 8
 )
 
@@ -103,13 +98,23 @@ def criar_tabelas():
                 f"ALTER TABLE atendimentos ADD COLUMN {coluna} {tipo}"
             )
 
-    # Cria o administrador inicial somente se ele não existir.
-    admin_existe = conexao.execute(
-        "SELECT id FROM usuarios WHERE usuario = ?",
+    conexao.execute("""
+        UPDATE atendimentos
+        SET status_resposta = 'pendente'
+        WHERE status_resposta IS NULL
+        OR status_resposta = ''
+    """)
+
+    admin = conexao.execute(
+        """
+        SELECT id, senha
+        FROM usuarios
+        WHERE usuario = ?
+        """,
         ("PLAR",)
     ).fetchone()
 
-    if not admin_existe:
+    if not admin:
         senha_hash = generate_password_hash("Edilson123")
 
         conexao.execute(
@@ -123,8 +128,26 @@ def criar_tabelas():
 
         print("Administrador inicial criado.")
         print("Usuário: PLAR")
-        print("Senha inicial: Edilson123")
-        print("Altere essa senha depois do primeiro acesso.")
+        print("Senha: Edilson123")
+    else:
+        tipo_admin = conexao.execute(
+            """
+            SELECT tipo
+            FROM usuarios
+            WHERE usuario = ?
+            """,
+            ("PLAR",)
+        ).fetchone()
+
+        if tipo_admin and tipo_admin["tipo"] != "admin":
+            conexao.execute(
+                """
+                UPDATE usuarios
+                SET tipo = 'admin'
+                WHERE usuario = ?
+                """,
+                ("PLAR",)
+            )
 
     conexao.execute("""
         CREATE INDEX IF NOT EXISTS idx_atendimentos_funcionario
@@ -215,14 +238,31 @@ def exigir_admin(funcao):
 
 def senha_valida(senha_salva, senha_digitada):
     """
-    Aceita temporariamente senhas antigas em texto puro para permitir
-    migração automática. Depois do login, a senha é convertida para hash.
+    Aceita senhas antigas em texto puro apenas para permitir
+    a migração automática para hash no primeiro login.
     """
 
-    try:
-        return check_password_hash(senha_salva, senha_digitada)
-    except (ValueError, TypeError):
-        return senha_salva == senha_digitada
+    if not senha_salva:
+        return False
+
+    senha_salva = str(senha_salva)
+
+    e_hash = (
+        senha_salva.startswith("pbkdf2:")
+        or senha_salva.startswith("scrypt:")
+        or senha_salva.startswith("argon2:")
+    )
+
+    if e_hash:
+        try:
+            return check_password_hash(
+                senha_salva,
+                senha_digitada
+            )
+        except (ValueError, TypeError):
+            return False
+
+    return senha_salva == senha_digitada
 
 
 def horario_valido(horario):
@@ -234,17 +274,15 @@ def horario_valido(horario):
     except (ValueError, TypeError):
         return False
 
-    minutos_desde_meia_noite = (
+    minutos = (
         horario_objeto.hour * 60
-    ) + horario_objeto.minute
+        + horario_objeto.minute
+    )
 
     inicio = 8 * 60
     fim = 17 * 60 + 30
 
-    if minutos_desde_meia_noite < inicio:
-        return False
-
-    if minutos_desde_meia_noite > fim:
+    if minutos < inicio or minutos > fim:
         return False
 
     if horario_objeto.minute not in (0, 30):
@@ -266,12 +304,18 @@ def calcular_valores(
     quantidade_aparelhos,
     percentual
 ):
-    tipo_servico = (tipo_servico or "").lower()
+    tipo_servico = str(
+        tipo_servico or ""
+    ).lower()
 
     if tipo_servico == "limpeza":
         valor_total = 200 * quantidade_aparelhos
     else:
-        extras = max(0, quantidade_aparelhos - 2)
+        extras = max(
+            0,
+            quantidade_aparelhos - 2
+        )
+
         valor_total = 950 + (extras * 100)
 
     valor_comissao = round(
@@ -280,10 +324,6 @@ def calcular_valores(
     )
 
     return valor_total, valor_comissao
-
-
-def linha_para_dict(linha):
-    return dict(linha) if linha else None
 
 
 # ============================================================
@@ -327,7 +367,10 @@ def login():
             "erro": "Usuário ou senha inválidos."
         }), 401
 
-    if not senha_valida(usuario["senha"], senha_digitada):
+    if not senha_valida(
+        usuario["senha"],
+        senha_digitada
+    ):
         conexao.close()
 
         return jsonify({
@@ -335,9 +378,18 @@ def login():
             "erro": "Usuário ou senha inválidos."
         }), 401
 
-    # Se a senha antiga estava em texto puro, transforma em hash.
-    if not usuario["senha"].startswith(("pbkdf2:", "scrypt:")):
-        nova_senha_hash = generate_password_hash(senha_digitada)
+    senha_salva = str(usuario["senha"])
+
+    senha_em_hash = (
+        senha_salva.startswith("pbkdf2:")
+        or senha_salva.startswith("scrypt:")
+        or senha_salva.startswith("argon2:")
+    )
+
+    if not senha_em_hash:
+        nova_senha_hash = generate_password_hash(
+            senha_digitada
+        )
 
         conexao.execute(
             """
@@ -345,7 +397,10 @@ def login():
             SET senha = ?
             WHERE id = ?
             """,
-            (nova_senha_hash, usuario["id"])
+            (
+                nova_senha_hash,
+                usuario["id"]
+            )
         )
 
         conexao.commit()
@@ -382,18 +437,27 @@ def logout():
 
 @app.route("/")
 def pagina_login():
-    return send_from_directory(str(BASE_DIR), "login.html")
+    return send_from_directory(
+        str(BASE_DIR),
+        "login.html"
+    )
 
 
 @app.route("/login.html")
 def pagina_login_html():
-    return send_from_directory(str(BASE_DIR), "login.html")
+    return send_from_directory(
+        str(BASE_DIR),
+        "login.html"
+    )
 
 
 @app.route("/teste2.html")
 @exigir_admin
 def pagina_admin():
-    return send_from_directory(str(BASE_DIR), "teste2.html")
+    return send_from_directory(
+        str(BASE_DIR),
+        "teste2.html"
+    )
 
 
 @app.route("/area-funcionario.html")
@@ -405,7 +469,6 @@ def pagina_funcionario():
     )
 
 
-# Arquivos públicos necessários para as telas.
 @app.route("/fundo-plar.png")
 def imagem_fundo():
     return send_from_directory(
@@ -442,8 +505,7 @@ def meu_perfil():
     return jsonify({
         "id": usuario["id"],
         "usuario": usuario["usuario"],
-        "tipo": usuario["tipo"],
-        "percentual": usuario["percentual"]
+        "tipo": usuario["tipo"]
     })
 
 
@@ -570,7 +632,10 @@ def editar_usuario(id_usuario):
         WHERE id = ?
         AND tipo = 'funcionario'
         """,
-        (percentual, id_usuario)
+        (
+            percentual,
+            id_usuario
+        )
     )
 
     conexao.commit()
@@ -603,7 +668,6 @@ def excluir_usuario(id_usuario):
             "erro": "Funcionário não encontrado."
         }), 404
 
-    # Mantém os atendimentos no banco, mas desvincula o funcionário.
     conexao.execute(
         """
         UPDATE atendimentos
@@ -687,7 +751,9 @@ def adicionar_atendimento():
 
     if not nome or not local or not data or not horario:
         return jsonify({
-            "erro": "Preencha funcionário, local, data e horário."
+            "erro": (
+                "Preencha funcionário, local, data e horário."
+            )
         }), 400
 
     if not tipo_servico:
@@ -709,7 +775,9 @@ def adicionar_atendimento():
         }), 400
 
     try:
-        quantidade_aparelhos = int(quantidade_bruta)
+        quantidade_aparelhos = int(
+            quantidade_bruta
+        )
     except (ValueError, TypeError):
         return jsonify({
             "erro": "Quantidade de aparelhos inválida."
@@ -717,7 +785,9 @@ def adicionar_atendimento():
 
     if quantidade_aparelhos <= 0:
         return jsonify({
-            "erro": "A quantidade deve ser maior que zero."
+            "erro": (
+                "A quantidade deve ser maior que zero."
+            )
         }), 400
 
     conexao = conectar()
@@ -749,7 +819,7 @@ def adicionar_atendimento():
         WHERE funcionario_id = ?
         AND data = ?
         AND horario = ?
-        AND status_resposta != 'recusado'
+        AND COALESCE(status_resposta, 'pendente') != 'recusado'
         """,
         (
             funcionario["id"],
@@ -815,7 +885,10 @@ def adicionar_atendimento():
     }), 201
 
 
-@app.route("/atendimentos/<int:id_atendimento>", methods=["DELETE"])
+@app.route(
+    "/atendimentos/<int:id_atendimento>",
+    methods=["DELETE"]
+)
 @exigir_admin
 def excluir_atendimento(id_atendimento):
     conexao = conectar()
@@ -852,6 +925,63 @@ def excluir_atendimento(id_atendimento):
     })
 
 
+@app.route(
+    "/atendimentos/<int:id_atendimento>/concluir",
+    methods=["PUT"]
+)
+@exigir_admin
+def concluir_atendimento(id_atendimento):
+    conexao = conectar()
+
+    atendimento = conexao.execute(
+        """
+        SELECT id, status_resposta
+        FROM atendimentos
+        WHERE id = ?
+        """,
+        (id_atendimento,)
+    ).fetchone()
+
+    if not atendimento:
+        conexao.close()
+
+        return jsonify({
+            "erro": "Atendimento não encontrado."
+        }), 404
+
+    status_atual = (
+        atendimento["status_resposta"]
+        or "pendente"
+    )
+
+    if status_atual != "aceito":
+        conexao.close()
+
+        return jsonify({
+            "erro": (
+                "Somente atendimentos aceitos "
+                "podem ser concluídos."
+            )
+        }), 400
+
+    conexao.execute(
+        """
+        UPDATE atendimentos
+        SET status_resposta = 'concluido'
+        WHERE id = ?
+        """,
+        (id_atendimento,)
+    )
+
+    conexao.commit()
+    conexao.close()
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Atendimento concluído."
+    })
+
+
 # ============================================================
 # ÁREA DO FUNCIONÁRIO
 # ============================================================
@@ -861,7 +991,10 @@ def excluir_atendimento(id_atendimento):
 def meus_agendamentos():
     usuario = usuario_da_sessao()
 
-    data = request.args.get("data", "").strip()
+    data = request.args.get(
+        "data",
+        ""
+    ).strip()
 
     conexao = conectar()
 
@@ -880,7 +1013,9 @@ def meus_agendamentos():
         WHERE funcionario_id = ?
     """
 
-    parametros = [usuario["id"]]
+    parametros = [
+        usuario["id"]
+    ]
 
     if data:
         if not data_valida(data):
@@ -923,7 +1058,10 @@ def responder_agendamento(id_atendimento):
         dados.get("resposta", "")
     ).strip().lower()
 
-    if resposta not in ("aceito", "recusado"):
+    if resposta not in (
+        "aceito",
+        "recusado"
+    ):
         return jsonify({
             "erro": "Resposta inválida."
         }), 400
@@ -950,13 +1088,19 @@ def responder_agendamento(id_atendimento):
             "erro": "Atendimento não encontrado."
         }), 404
 
-    status_atual = atendimento["status_resposta"] or "pendente"
+    status_atual = (
+        atendimento["status_resposta"]
+        or "pendente"
+    )
 
     if status_atual != "pendente":
         conexao.close()
 
         return jsonify({
-            "erro": "Este atendimento já recebeu uma resposta."
+            "erro": (
+                "Este atendimento já recebeu "
+                "uma resposta."
+            )
         }), 400
 
     conexao.execute(
@@ -983,7 +1127,7 @@ def responder_agendamento(id_atendimento):
 
 
 # ============================================================
-# SAÚDE DA APLICAÇÃO
+# STATUS DO SERVIDOR
 # ============================================================
 
 @app.route("/status", methods=["GET"])
