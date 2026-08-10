@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>PLAR ERP | Gestão de Serviços</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,19 +14,19 @@
 
   <style>
     :root {
-      --bg: #071014;
-      --sidebar: #0a151a;
-      --surface: #0e1c22;
-      --surface-2: #13252c;
-      --border: rgba(255,255,255,.09);
-      --text: #eef7fa;
-      --muted: #8da3aa;
-      --blue: #1599dc;
-      --blue-light: #4cc7ff;
-      --gold: #c8a24b;
-      --green: #32d583;
-      --red: #ff6574;
-      --shadow: 0 18px 50px rgba(0,0,0,.25);
+      --background: #071014;
+      --sidebar: #09171d;
+      --surface: rgba(14, 29, 36, .94);
+      --surface-light: #142b34;
+      --border: rgba(255,255,255,.10);
+      --text: #f1f8fa;
+      --muted: #91a7ae;
+      --blue: #1499dc;
+      --blue-light: #56caff;
+      --gold: #c6a052;
+      --green: #38d889;
+      --red: #ff6674;
+      --shadow: 0 18px 45px rgba(0,0,0,.25);
     }
 
     * {
@@ -34,13 +35,26 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       min-height: 100vh;
-      font-family: Inter, Arial, sans-serif;
       color: var(--text);
+      font-family: Inter, Arial, sans-serif;
       background:
-        radial-gradient(circle at 80% 0%, rgba(21,153,220,.12), transparent 30%),
-        linear-gradient(135deg, #071014, #091a20 55%, #061014);
+        linear-gradient(
+          135deg,
+          rgba(4, 14, 18, .96),
+          rgba(5, 29, 38, .92)
+        ),
+        url("fundo-plar.png") center/cover fixed no-repeat;
+    }
+
+    body.modo-compacto td {
+      padding-top: 8px;
+      padding-bottom: 8px;
     }
 
     button,
@@ -59,24 +73,22 @@
     }
 
     /* MENU LATERAL */
+
     .sidebar {
-      width: 250px;
-      min-height: 100vh;
-      padding: 22px 16px;
-      background: rgba(10,21,26,.96);
-      border-right: 1px solid var(--border);
       position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      z-index: 10;
+      inset: 0 auto 0 0;
+      z-index: 20;
+      width: 250px;
+      padding: 22px 16px;
+      background: rgba(7, 19, 25, .97);
+      border-right: 1px solid var(--border);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 11px;
-      padding: 4px 10px 28px;
+      padding: 3px 8px 28px;
     }
 
     .brand img {
@@ -87,25 +99,26 @@
     }
 
     .brand strong {
+      display: block;
       font-size: 17px;
       letter-spacing: .5px;
     }
 
     .brand small {
       display: block;
+      margin-top: 4px;
       color: var(--blue-light);
       font-size: 9px;
-      letter-spacing: 1.8px;
-      margin-top: 4px;
+      letter-spacing: 1.5px;
     }
 
     .menu-title {
-      color: #5f7880;
+      padding: 16px 12px 8px;
+      color: #627c84;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 1.4px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      padding: 16px 12px 8px;
     }
 
     .nav {
@@ -114,22 +127,27 @@
     }
 
     .nav button {
-      border: 0;
-      color: var(--muted);
-      background: transparent;
-      border-radius: 10px;
-      padding: 12px;
       display: flex;
       align-items: center;
       gap: 12px;
+      width: 100%;
+      padding: 12px;
+      color: var(--muted);
       text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
       transition: .2s;
     }
 
     .nav button:hover,
     .nav button.active {
       color: white;
-      background: linear-gradient(90deg, rgba(21,153,220,.2), rgba(21,153,220,.04));
+      background: linear-gradient(
+        90deg,
+        rgba(20,153,220,.23),
+        rgba(20,153,220,.04)
+      );
     }
 
     .nav button.active {
@@ -138,19 +156,20 @@
 
     .sidebar-footer {
       position: absolute;
-      left: 16px;
       right: 16px;
       bottom: 20px;
+      left: 16px;
       padding: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(255,255,255,.03);
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
 
-    /* CONTEÚDO */
+    /* ÁREA PRINCIPAL */
+
     .main {
       width: calc(100% - 250px);
       margin-left: 250px;
@@ -159,8 +178,9 @@
 
     .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 20px;
       margin-bottom: 30px;
     }
 
@@ -170,42 +190,38 @@
     }
 
     .topbar p {
+      margin-top: 6px;
       color: var(--muted);
       font-size: 13px;
-      margin-top: 6px;
     }
 
-    .top-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .icon-button {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-
+    .top-actions,
     .profile {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding-left: 8px;
+      gap: 11px;
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
     }
 
     .avatar {
-      width: 38px;
-      height: 38px;
       display: grid;
       place-items: center;
-      border-radius: 50%;
+      width: 38px;
+      height: 38px;
       color: white;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--blue), #125b83);
+      background: linear-gradient(135deg, var(--blue), #125778);
+      border-radius: 50%;
     }
 
     .profile small {
@@ -213,7 +229,49 @@
       font-size: 11px;
     }
 
-    /* MÉTRICAS */
+    /* PÁGINAS */
+
+    .page {
+      display: none;
+      animation: aparecer .25s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .page-title h1 {
+      margin-bottom: 6px;
+      font-size: 25px;
+    }
+
+    .page-title p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* CARDS */
+
     .metrics {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -223,24 +281,31 @@
 
     .metric {
       position: relative;
-      overflow: hidden;
+      min-height: 130px;
       padding: 20px;
-      min-height: 135px;
-      background: linear-gradient(145deg, rgba(19,37,44,.95), rgba(11,26,32,.95));
+      overflow: hidden;
+      background: linear-gradient(145deg, #142d36, #0b1c23);
       border: 1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
     }
 
     .metric::after {
-      content: "";
       position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: rgba(21,153,220,.1);
       right: -35px;
       bottom: -40px;
+      width: 110px;
+      height: 110px;
+      content: "";
+      background: rgba(20,153,220,.11);
+      border-radius: 50%;
+    }
+
+    .metric-icon {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      color: var(--blue-light);
     }
 
     .metric-label {
@@ -251,7 +316,7 @@
     .metric-value {
       display: block;
       margin-top: 13px;
-      font-size: 27px;
+      font-size: 25px;
       font-weight: 800;
     }
 
@@ -264,24 +329,16 @@
       font-size: 11px;
     }
 
-    .metric-icon {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      color: var(--blue-light);
-    }
-
-    /* GRID PRINCIPAL */
     .content-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(290px, .8fr);
+      grid-template-columns: minmax(0, 1.5fr) minmax(290px, .8fr);
       gap: 20px;
       align-items: start;
     }
 
     .panel {
       padding: 21px;
-      background: rgba(14,28,34,.88);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
@@ -291,10 +348,14 @@
       margin-top: 20px;
     }
 
+    .large-panel {
+      max-width: 1150px;
+    }
+
     .panel-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 15px;
       margin-bottom: 20px;
     }
@@ -304,23 +365,30 @@
     }
 
     .panel-header p {
+      margin-top: 5px;
       color: var(--muted);
       font-size: 12px;
-      margin-top: 5px;
+    }
+
+    /* BOTÕES E FORMULÁRIOS */
+
+    .primary-button,
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 15px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .primary-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 0;
-      border-radius: 9px;
-      padding: 11px 15px;
       color: white;
-      font-size: 12px;
-      font-weight: 700;
       background: linear-gradient(135deg, var(--blue), #126e9c);
-      box-shadow: 0 7px 20px rgba(21,153,220,.2);
+      border: 0;
+      box-shadow: 0 7px 20px rgba(20,153,220,.2);
     }
 
     .primary-button:hover {
@@ -329,13 +397,66 @@
     }
 
     .secondary-button {
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 10px 13px;
       color: var(--muted);
       background: transparent;
-      font-size: 12px;
+      border: 1px solid var(--border);
     }
+
+    .secondary-button:hover {
+      color: white;
+      border-color: var(--blue);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #09171d;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(20,153,220,.12);
+    }
+
+    .service-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 13px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .form-actions {
+      display: flex;
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-top: 4px;
+    }
+
+    .employee-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 130px auto;
+      gap: 9px;
+      margin-bottom: 18px;
+    }
+
+    /* TABELAS */
 
     .filters {
       display: flex;
@@ -345,76 +466,65 @@
 
     .filters input,
     .filters select {
-      min-width: 0;
       flex: 1;
     }
 
-    input,
-    select {
-      width: 100%;
-      padding: 11px 12px;
-      color: var(--text);
-      background: #0a171c;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(21,153,220,.12);
+    .table-container {
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
+      min-width: 730px;
       border-collapse: collapse;
       font-size: 12px;
     }
 
     th {
-      color: #729099;
+      padding: 12px 10px;
+      color: #76939b;
       font-size: 10px;
       letter-spacing: .7px;
       text-align: left;
       text-transform: uppercase;
-      padding: 12px 10px;
       border-bottom: 1px solid var(--border);
     }
 
     td {
       padding: 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.055);
       color: #d9e7ea;
+      border-bottom: 1px solid rgba(255,255,255,.055);
     }
 
     tr:hover td {
-      background: rgba(21,153,220,.04);
+      background: rgba(20,153,220,.04);
     }
 
     .status {
       display: inline-flex;
       padding: 5px 8px;
-      border-radius: 20px;
       color: var(--green);
-      background: rgba(50,213,131,.1);
       font-size: 10px;
       font-weight: 700;
+      background: rgba(56,216,137,.1);
+      border-radius: 20px;
     }
 
     .delete {
       color: var(--red);
+      font-size: 11px;
       background: transparent;
       border: 0;
-      font-size: 11px;
     }
 
-    .employee-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr 120px auto;
-      gap: 9px;
-      margin-bottom: 18px;
+    .empty {
+      padding: 28px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
     }
+
+    /* FUNCIONÁRIOS */
 
     .employee-list {
       display: grid;
@@ -423,13 +533,13 @@
 
     .employee {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
       padding: 12px;
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
       border-radius: 11px;
-      background: rgba(255,255,255,.025);
     }
 
     .employee-info {
@@ -439,15 +549,15 @@
     }
 
     .employee-avatar {
-      width: 32px;
-      height: 32px;
       display: grid;
       place-items: center;
-      border-radius: 9px;
+      width: 34px;
+      height: 34px;
       color: white;
-      background: linear-gradient(135deg, var(--gold), #765c21);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
+      background: linear-gradient(135deg, var(--gold), #765c21);
+      border-radius: 9px;
     }
 
     .employee strong {
@@ -466,9 +576,11 @@
       font-weight: 700;
     }
 
+    /* FINANCEIRO */
+
     .balance {
       display: grid;
-      gap: 12px;
+      gap: 15px;
     }
 
     .balance-row {
@@ -480,7 +592,6 @@
 
     .balance-row strong {
       color: var(--text);
-      font-size: 14px;
     }
 
     .balance-row.profit strong {
@@ -491,55 +602,148 @@
     .progress {
       height: 7px;
       overflow: hidden;
-      border-radius: 8px;
-      background: #071116;
+      background: #061116;
+      border-radius: 10px;
     }
 
     .progress span {
       display: block;
       width: 72%;
       height: 100%;
-      border-radius: inherit;
       background: linear-gradient(90deg, var(--blue), var(--blue-light));
+      border-radius: inherit;
     }
 
-    .service-form {
+    .resultado-balanco {
+      padding: 17px;
+      color: var(--muted);
+      background: #09171d;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .resultado-balanco p {
+      margin: 7px 0;
+    }
+
+    .resultado-balanco .faturamento {
+      color: var(--blue-light);
+      font-weight: 700;
+    }
+
+    .resultado-balanco .comissao {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .resultado-balanco .lucro {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* CONFIGURAÇÕES E EXPORTAÇÃO */
+
+    .settings-grid,
+    .export-options {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 16px;
     }
 
-    .field {
-      display: grid;
-      gap: 6px;
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
 
-    .field label {
+    .setting-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .setting-item span {
       color: var(--muted);
       font-size: 11px;
-      font-weight: 600;
     }
 
-    .field.full {
-      grid-column: 1 / -1;
+    .switch {
+      position: relative;
+      flex-shrink: 0;
+      width: 44px;
+      height: 24px;
     }
 
-    .form-actions {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: flex-end;
-      gap: 9px;
-      margin-top: 4px;
+    .switch input {
+      display: none;
     }
 
-    .empty {
-      padding: 28px 10px;
+    .slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: #263940;
+      border-radius: 20px;
+      transition: .2s;
+    }
+
+    .slider::before {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      content: "";
+      background: white;
+      border-radius: 50%;
+      transition: .2s;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--blue);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    .export-options {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .export-card {
+      padding: 22px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .export-card i {
+      margin-bottom: 15px;
+      color: var(--blue-light);
+    }
+
+    .export-card h3 {
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    .export-card p {
+      min-height: 40px;
+      margin-bottom: 17px;
       color: var(--muted);
-      text-align: center;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1.5;
     }
 
-    /* RESPONSIVO */
+    /* MOBILE */
+
     @media (max-width: 1050px) {
       .metrics {
         grid-template-columns: repeat(2, 1fr);
@@ -584,10 +788,6 @@
         padding: 22px 15px 35px;
       }
 
-      .topbar {
-        align-items: flex-start;
-      }
-
       .topbar h1 {
         font-size: 21px;
       }
@@ -601,38 +801,33 @@
       }
 
       .metric {
+        min-height: 112px;
         padding: 14px;
-        min-height: 115px;
       }
 
       .metric-value {
-        font-size: 21px;
+        font-size: 20px;
       }
 
+      .service-form,
       .employee-form,
-      .service-form {
+      .settings-grid,
+      .export-options {
         grid-template-columns: 1fr;
       }
 
-      .field.full {
-        grid-column: auto;
-      }
-
       .form-actions {
-        grid-column: auto;
         display: grid;
+        grid-column: auto;
       }
 
       .filters {
         display: grid;
       }
 
-      .table-container {
-        overflow-x: auto;
-      }
-
-      table {
-        min-width: 720px;
+      .page-title {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -643,7 +838,7 @@
 
     <aside class="sidebar">
       <div class="brand">
-        <img src="logoplarpng.png" alt="Logo PLAR Condicionados">
+        <img src="logo-plar.png.png" alt="Logo PLAR Condicionados">
         <div>
           <strong>PLAR ERP</strong>
           <small>GESTÃO INTELIGENTE</small>
@@ -653,27 +848,27 @@
       <div class="menu-title">Menu principal</div>
 
       <nav class="nav">
-        <button class="active">
+        <button class="active" data-page="dashboard">
           <i data-lucide="layout-dashboard"></i>
           <span>Visão geral</span>
         </button>
 
-        <button onclick="mostrarFormulario()">
+        <button data-page="atendimento">
           <i data-lucide="calendar-plus"></i>
           <span>Novo atendimento</span>
         </button>
 
-        <button onclick="document.getElementById('escala').scrollIntoView({behavior:'smooth'})">
+        <button data-page="escala">
           <i data-lucide="calendar-days"></i>
           <span>Escala de serviços</span>
         </button>
 
-        <button onclick="document.getElementById('equipe').scrollIntoView({behavior:'smooth'})">
+        <button data-page="funcionarios">
           <i data-lucide="users"></i>
           <span>Funcionários</span>
         </button>
 
-        <button onclick="document.getElementById('financeiro').scrollIntoView({behavior:'smooth'})">
+        <button data-page="financeiro">
           <i data-lucide="wallet-cards"></i>
           <span>Financeiro</span>
         </button>
@@ -682,12 +877,12 @@
       <div class="menu-title">Sistema</div>
 
       <nav class="nav">
-        <button>
+        <button data-page="configuracoes">
           <i data-lucide="settings"></i>
           <span>Configurações</span>
         </button>
 
-        <button onclick="exportarTxt()">
+        <button data-page="exportacao">
           <i data-lucide="download"></i>
           <span>Exportar dados</span>
         </button>
@@ -695,19 +890,21 @@
 
       <div class="sidebar-footer">
         <strong>PLAR Condicionados</strong><br>
-        Sistema operacional de serviços e manutenção.
+        Gestão operacional de serviços e manutenção.
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <div>
-          <h1>Visão geral</h1>
-          <p>Acompanhe a operação da PLAR em um só lugar.</p>
+          <h1 id="tituloPagina">Visão geral</h1>
+          <p id="subtituloPagina">
+            Acompanhe a operação da PLAR em um só lugar.
+          </p>
         </div>
 
         <div class="top-actions">
-          <button class="icon-button" title="Notificações">
+          <button class="icon-button" onclick="mostrarNotificacoes()" title="Notificações">
             <i data-lucide="bell"></i>
           </button>
 
@@ -721,173 +918,75 @@
         </div>
       </header>
 
-      <section class="metrics">
-        <article class="metric">
-          <i class="metric-icon" data-lucide="calendar-check"></i>
-          <span class="metric-label">Atendimentos registrados</span>
-          <strong class="metric-value" id="totalAtendimentos">0</strong>
-          <div class="metric-footer">
-            <i data-lucide="activity"></i>
-            Operação atualizada
-          </div>
-        </article>
+      <!-- VISÃO GERAL -->
 
-        <article class="metric">
-          <i class="metric-icon" data-lucide="users"></i>
-          <span class="metric-label">Funcionários ativos</span>
-          <strong class="metric-value" id="totalFuncionarios">0</strong>
-          <div class="metric-footer">
-            <i data-lucide="check-circle"></i>
-            Equipe operacional
-          </div>
-        </article>
+      <section class="page active" id="page-dashboard">
+        <div class="metrics">
+          <article class="metric">
+            <i class="metric-icon" data-lucide="calendar-check"></i>
+            <span class="metric-label">Atendimentos registrados</span>
+            <strong class="metric-value" id="totalAtendimentos">0</strong>
+            <div class="metric-footer">
+              <i data-lucide="activity"></i>
+              Operação atualizada
+            </div>
+          </article>
 
-        <article class="metric">
-          <i class="metric-icon" data-lucide="trending-up"></i>
-          <span class="metric-label">Faturamento total</span>
-          <strong class="metric-value" id="faturamentoTotal">R$ 0,00</strong>
-          <div class="metric-footer">
-            <i data-lucide="bar-chart-3"></i>
-            Visão financeira
-          </div>
-        </article>
+          <article class="metric">
+            <i class="metric-icon" data-lucide="users"></i>
+            <span class="metric-label">Funcionários ativos</span>
+            <strong class="metric-value" id="totalFuncionarios">0</strong>
+            <div class="metric-footer">
+              <i data-lucide="check-circle"></i>
+              Equipe operacional
+            </div>
+          </article>
 
-        <article class="metric">
-          <i class="metric-icon" data-lucide="badge-dollar-sign"></i>
-          <span class="metric-label">Lucro estimado</span>
-          <strong class="metric-value" id="lucroTotal">R$ 0,00</strong>
-          <div class="metric-footer">
-            <i data-lucide="arrow-up-right"></i>
-            Após comissões
-          </div>
-        </article>
-      </section>
+          <article class="metric">
+            <i class="metric-icon" data-lucide="trending-up"></i>
+            <span class="metric-label">Faturamento total</span>
+            <strong class="metric-value" id="faturamentoTotal">R$ 0,00</strong>
+            <div class="metric-footer">
+              <i data-lucide="bar-chart-3"></i>
+              Visão financeira
+            </div>
+          </article>
 
-      <div class="content-grid">
+          <article class="metric">
+            <i class="metric-icon" data-lucide="badge-dollar-sign"></i>
+            <span class="metric-label">Lucro estimado</span>
+            <strong class="metric-value" id="lucroTotal">R$ 0,00</strong>
+            <div class="metric-footer">
+              <i data-lucide="arrow-up-right"></i>
+              Após comissões
+            </div>
+          </article>
+        </div>
 
-        <section>
-          <div class="panel" id="novo-atendimento">
+        <div class="content-grid">
+          <div class="panel">
             <div class="panel-header">
               <div>
-                <h2>Novo atendimento</h2>
-                <p>Agende uma visita técnica ou serviço de manutenção.</p>
+                <h2>Resumo da operação</h2>
+                <p>Veja rapidamente os principais dados do ERP.</p>
               </div>
-              <i data-lucide="clipboard-plus"></i>
-            </div>
-
-            <form class="service-form" onsubmit="cadastrar(event)">
-              <div class="field">
-                <label for="nome">Funcionário responsável</label>
-                <input id="nome" type="text" placeholder="Nome do funcionário" required>
-              </div>
-
-              <div class="field">
-                <label for="local">Cliente ou local do serviço</label>
-                <input id="local" type="text" placeholder="Ex.: Loja Centro" required>
-              </div>
-
-              <div class="field">
-                <label for="data">Data</label>
-                <input id="data" type="date" min="2026-01-01" max="2028-12-31" required>
-              </div>
-
-              <div class="field">
-                <label for="horario">Horário</label>
-                <input id="horario" type="time" required>
-              </div>
-
-              <div class="field">
-                <label for="tipoServico">Tipo de serviço</label>
-                <select id="tipoServico">
-                  <option value="limpeza">Limpeza</option>
-                  <option value="automacao">Automação</option>
-                  <option value="manutencao">Manutenção</option>
-                  <option value="instalacao">Instalação</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="quantidadeAparelhos">Quantidade de aparelhos</label>
-                <input id="quantidadeAparelhos" type="number" min="1" placeholder="Ex.: 4" required>
-              </div>
-
-              <div class="form-actions">
-                <button type="reset" class="secondary-button">Limpar campos</button>
-                <button type="submit" class="primary-button">
-                  <i data-lucide="plus"></i>
-                  Adicionar atendimento
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div class="panel" id="escala">
-            <div class="panel-header">
-              <div>
-                <h2>Escala de serviços</h2>
-                <p>Visualize e gerencie os atendimentos programados.</p>
-              </div>
-
-              <button class="secondary-button" onclick="exportarTxt()">
-                <i data-lucide="download"></i>
-                Exportar
-              </button>
-            </div>
-
-            <div class="filters">
-              <input type="search" id="filtroTabela" placeholder="Buscar por funcionário ou local..." oninput="filtrarTabela()">
-              <select id="filtroServico" onchange="filtrarTabela()">
-                <option value="">Todos os serviços</option>
-                <option value="limpeza">Limpeza</option>
-                <option value="automacao">Automação</option>
-                <option value="manutencao">Manutenção</option>
-                <option value="instalacao">Instalação</option>
-              </select>
-            </div>
-
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Funcionário</th>
-                    <th>Local</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Serviço</th>
-                    <th>Status</th>
-                    <th>Ação</th>
-                  </tr>
-                </thead>
-                <tbody id="corpoTabela"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <aside>
-          <div class="panel" id="financeiro">
-            <div class="panel-header">
-              <div>
-                <h2>Resumo financeiro</h2>
-                <p>Indicadores gerais da operação.</p>
-              </div>
-              <i data-lucide="pie-chart"></i>
+              <i data-lucide="activity"></i>
             </div>
 
             <div class="balance">
               <div class="balance-row">
-                <span>Faturamento</span>
-                <strong id="financeiroFaturamento">R$ 0,00</strong>
+                <span>Total de atendimentos</span>
+                <strong id="resumoAtendimentos">0</strong>
               </div>
 
               <div class="balance-row">
-                <span>Comissões</span>
-                <strong id="financeiroComissoes">R$ 0,00</strong>
+                <span>Funcionários cadastrados</span>
+                <strong id="resumoFuncionarios">0</strong>
               </div>
 
-              <div class="balance-row profit">
-                <span>Lucro estimado</span>
-                <strong id="financeiroLucro">R$ 0,00</strong>
+              <div class="balance-row">
+                <span>Faturamento</span>
+                <strong id="resumoFaturamento">R$ 0,00</strong>
               </div>
 
               <div class="progress">
@@ -896,31 +995,342 @@
             </div>
           </div>
 
-          <div class="panel" id="equipe">
+          <div class="panel">
             <div class="panel-header">
               <div>
-                <h2>Equipe</h2>
-                <p>Funcionários e percentuais de comissão.</p>
+                <h2>Ações rápidas</h2>
+                <p>Acesse os recursos mais usados.</p>
               </div>
-              <i data-lucide="users-round"></i>
+              <i data-lucide="zap"></i>
             </div>
 
-            <form class="employee-form" onsubmit="cadastrarFuncionario(event)">
-              <input id="novoUsuario" type="text" placeholder="Usuário" required>
-              <input id="novaSenha" type="password" placeholder="Senha" required>
-              <input id="novoPercentual" type="number" min="0" max="100" placeholder="%">
-              <button class="primary-button" type="submit" title="Cadastrar funcionário">
-                <i data-lucide="user-plus"></i>
+            <div style="display:grid;gap:10px">
+              <button class="primary-button" onclick="abrirPagina('atendimento')">
+                <i data-lucide="plus"></i>
+                Novo atendimento
               </button>
-            </form>
 
-            <div class="employee-list" id="listaFuncionarios">
-              <div class="empty">Carregando equipe...</div>
+              <button class="secondary-button" onclick="abrirPagina('escala')">
+                <i data-lucide="calendar-days"></i>
+                Ver escala
+              </button>
+
+              <button class="secondary-button" onclick="abrirPagina('financeiro')">
+                <i data-lucide="wallet-cards"></i>
+                Ver financeiro
+              </button>
             </div>
           </div>
-        </aside>
+        </div>
+      </section>
 
-      </div>
+      <!-- NOVO ATENDIMENTO -->
+
+      <section class="page" id="page-atendimento">
+        <div class="page-title">
+          <div>
+            <h1>Novo atendimento</h1>
+            <p>Agende uma visita técnica ou serviço de manutenção.</p>
+          </div>
+          <i data-lucide="clipboard-plus"></i>
+        </div>
+
+        <div class="panel large-panel">
+          <form class="service-form" onsubmit="cadastrar(event)">
+            <div class="field">
+              <label for="nome">Funcionário responsável</label>
+              <input id="nome" type="text" placeholder="Nome do funcionário" required>
+            </div>
+
+            <div class="field">
+              <label for="local">Cliente ou local do serviço</label>
+              <input id="local" type="text" placeholder="Ex.: Loja Centro" required>
+            </div>
+
+            <div class="field">
+              <label for="data">Data</label>
+              <input id="data" type="date" min="2026-01-01" max="2028-12-31" required>
+            </div>
+
+            <div class="field">
+              <label for="horario">Horário</label>
+              <input id="horario" type="time" required>
+            </div>
+
+            <div class="field">
+              <label for="tipoServico">Tipo de serviço</label>
+              <select id="tipoServico">
+                <option value="limpeza">Limpeza</option>
+                <option value="automacao">Automação</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="instalacao">Instalação</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="quantidadeAparelhos">Quantidade de aparelhos</label>
+              <input id="quantidadeAparelhos" type="number" min="1" placeholder="Ex.: 4" required>
+            </div>
+
+            <div class="form-actions">
+              <button type="reset" class="secondary-button">
+                Limpar campos
+              </button>
+
+              <button type="submit" class="primary-button">
+                <i data-lucide="plus"></i>
+                Adicionar atendimento
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ESCALA -->
+
+      <section class="page" id="page-escala">
+        <div class="page-title">
+          <div>
+            <h1>Escala de serviços</h1>
+            <p>Visualize e gerencie os atendimentos programados.</p>
+          </div>
+
+          <button class="secondary-button" onclick="exportarTxt()">
+            <i data-lucide="download"></i>
+            Exportar escala
+          </button>
+        </div>
+
+        <div class="panel large-panel">
+          <div class="filters">
+            <input
+              type="search"
+              id="filtroTabela"
+              placeholder="Buscar por funcionário ou local..."
+              oninput="filtrarTabela()"
+            >
+
+            <select id="filtroServico" onchange="filtrarTabela()">
+              <option value="">Todos os serviços</option>
+              <option value="limpeza">Limpeza</option>
+              <option value="automacao">Automação</option>
+              <option value="manutencao">Manutenção</option>
+              <option value="instalacao">Instalação</option>
+            </select>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Funcionário</th>
+                  <th>Local</th>
+                  <th>Data</th>
+                  <th>Horário</th>
+                  <th>Serviço</th>
+                  <th>Aparelhos</th>
+                  <th>Status</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+
+              <tbody id="corpoTabela"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FUNCIONÁRIOS -->
+
+      <section class="page" id="page-funcionarios">
+        <div class="page-title">
+          <div>
+            <h1>Funcionários</h1>
+            <p>Gerencie sua equipe e as comissões.</p>
+          </div>
+          <i data-lucide="users-round"></i>
+        </div>
+
+        <div class="panel large-panel">
+          <form class="employee-form" onsubmit="cadastrarFuncionario(event)">
+            <input id="novoUsuario" type="text" placeholder="Usuário" required>
+            <input id="novaSenha" type="password" placeholder="Senha" required>
+            <input id="novoPercentual" type="number" min="0" max="100" placeholder="% comissão" required>
+
+            <button class="primary-button" type="submit">
+              <i data-lucide="user-plus"></i>
+              Cadastrar
+            </button>
+          </form>
+
+          <div class="employee-list" id="listaFuncionarios">
+            <div class="empty">Carregando equipe...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+
+      <section class="page" id="page-financeiro">
+        <div class="page-title">
+          <div>
+            <h1>Financeiro</h1>
+            <p>Consulte faturamento, comissões e lucro estimado.</p>
+          </div>
+          <i data-lucide="chart-no-axes-combined"></i>
+        </div>
+
+        <div class="metrics">
+          <article class="metric">
+            <span class="metric-label">Faturamento total</span>
+            <strong class="metric-value" id="financeiroFaturamentoGrande">R$ 0,00</strong>
+          </article>
+
+          <article class="metric">
+            <span class="metric-label">Total em comissões</span>
+            <strong class="metric-value" id="financeiroComissoesGrande">R$ 0,00</strong>
+          </article>
+
+          <article class="metric">
+            <span class="metric-label">Lucro estimado</span>
+            <strong class="metric-value" id="financeiroLucroGrande">R$ 0,00</strong>
+          </article>
+
+          <article class="metric">
+            <span class="metric-label">Atendimentos</span>
+            <strong class="metric-value" id="financeiroAtendimentos">0</strong>
+          </article>
+        </div>
+
+        <div class="panel large-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Filtrar período financeiro</h2>
+              <p>Consulte os resultados por intervalo de datas.</p>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input type="date" id="dataInicio">
+            <input type="date" id="dataFim">
+
+            <button class="primary-button" onclick="calcularBalancoPersonalizado()">
+              Calcular período
+            </button>
+          </div>
+
+          <div class="resultado-balanco" id="resultadoBalanco">
+            Selecione um período para visualizar os resultados.
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIGURAÇÕES -->
+
+      <section class="page" id="page-configuracoes">
+        <div class="page-title">
+          <div>
+            <h1>Configurações</h1>
+            <p>Personalize o comportamento do sistema.</p>
+          </div>
+          <i data-lucide="settings"></i>
+        </div>
+
+        <div class="panel large-panel">
+          <div class="settings-grid">
+            <div class="setting-item">
+              <div>
+                <strong>Notificações do sistema</strong>
+                <span>Receber alertas sobre novos atendimentos.</span>
+              </div>
+
+              <label class="switch">
+                <input type="checkbox" id="notificacoes" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <strong>Atualização automática</strong>
+                <span>Atualizar a escala automaticamente.</span>
+              </div>
+
+              <label class="switch">
+                <input type="checkbox" id="atualizacaoAutomatica" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <strong>Modo compacto</strong>
+                <span>Reduzir espaçamentos nas tabelas.</span>
+              </div>
+
+              <label class="switch">
+                <input type="checkbox" id="modoCompacto" onchange="alternarModoCompacto()">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <strong>Confirmação para exclusões</strong>
+                <span>Solicitar confirmação antes de excluir registros.</span>
+              </div>
+
+              <label class="switch">
+                <input type="checkbox" id="confirmarExclusao" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPORTAÇÃO -->
+
+      <section class="page" id="page-exportacao">
+        <div class="page-title">
+          <div>
+            <h1>Exportar dados</h1>
+            <p>Baixe os dados operacionais da PLAR.</p>
+          </div>
+          <i data-lucide="download"></i>
+        </div>
+
+        <div class="panel large-panel">
+          <div class="export-options">
+            <div class="export-card">
+              <i data-lucide="calendar-days"></i>
+              <h3>Escala de serviços</h3>
+              <p>Exporte todos os atendimentos cadastrados.</p>
+              <button class="primary-button" onclick="exportarTxt()">
+                Exportar TXT
+              </button>
+            </div>
+
+            <div class="export-card">
+              <i data-lucide="users"></i>
+              <h3>Funcionários</h3>
+              <p>Exporte a lista de funcionários da empresa.</p>
+              <button class="primary-button" onclick="exportarFuncionarios()">
+                Exportar CSV
+              </button>
+            </div>
+
+            <div class="export-card">
+              <i data-lucide="database"></i>
+              <h3>Backup completo</h3>
+              <p>Baixe um backup dos registros carregados.</p>
+              <button class="primary-button" onclick="exportarBackup()">
+                Fazer backup
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -928,26 +1338,88 @@
     let escalas = [];
     let funcionarios = [];
 
-    const dinheiro = valor =>
-      Number(valor || 0).toLocaleString("pt-BR", {
+    const paginas = {
+      dashboard: [
+        "Visão geral",
+        "Acompanhe a operação da PLAR em um só lugar."
+      ],
+      atendimento: [
+        "Novo atendimento",
+        "Agende uma visita técnica ou serviço de manutenção."
+      ],
+      escala: [
+        "Escala de serviços",
+        "Visualize e gerencie os atendimentos programados."
+      ],
+      funcionarios: [
+        "Funcionários",
+        "Gerencie sua equipe e as comissões."
+      ],
+      financeiro: [
+        "Financeiro",
+        "Consulte faturamento, comissões e lucro estimado."
+      ],
+      configuracoes: [
+        "Configurações",
+        "Personalize o comportamento do sistema."
+      ],
+      exportacao: [
+        "Exportar dados",
+        "Baixe os dados operacionais da PLAR."
+      ]
+    };
+
+    function dinheiro(valor) {
+      return Number(valor || 0).toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL"
       });
-
-    function mostrarFormulario() {
-      document.getElementById("novo-atendimento")
-        .scrollIntoView({ behavior: "smooth" });
     }
+
+    function abrirPagina(nome) {
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+      });
+
+      const pagina = document.getElementById("page-" + nome);
+
+      if (!pagina) return;
+
+      pagina.classList.add("active");
+
+      document.querySelectorAll("[data-page]").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.page === nome
+        );
+      });
+
+      document.getElementById("tituloPagina").textContent = paginas[nome][0];
+      document.getElementById("subtituloPagina").textContent = paginas[nome][1];
+
+      localStorage.setItem("paginaAtualPLAR", nome);
+
+      setTimeout(() => lucide.createIcons(), 50);
+    }
+
+    document.querySelectorAll("[data-page]").forEach(button => {
+      button.addEventListener("click", () => {
+        abrirPagina(button.dataset.page);
+      });
+    });
 
     async function carregarFuncionarios() {
       try {
         const resposta = await fetch("/usuarios");
         funcionarios = await resposta.json();
+
         renderizarFuncionarios();
+
         document.getElementById("totalFuncionarios").textContent = funcionarios.length;
+        document.getElementById("resumoFuncionarios").textContent = funcionarios.length;
       } catch {
         document.getElementById("listaFuncionarios").innerHTML =
-          '<div class="empty">Não foi possível carregar a equipe.</div>';
+          '<div class="empty">Não foi possível carregar os funcionários.</div>';
       }
     }
 
@@ -959,21 +1431,24 @@
         return;
       }
 
-      lista.innerHTML = funcionarios.map(f => `
+      lista.innerHTML = funcionarios.map(funcionario => `
         <div class="employee">
           <div class="employee-info">
             <div class="employee-avatar">
-              ${(f.usuario || "F").substring(0, 2).toUpperCase()}
+              ${(funcionario.usuario || "F").substring(0, 2).toUpperCase()}
             </div>
+
             <div>
-              <strong>${f.usuario}</strong>
+              <strong>${funcionario.usuario}</strong>
               <small>Funcionário operacional</small>
             </div>
           </div>
 
-          <span class="commission">${f.percentual || 0}% comissão</span>
+          <span class="commission">
+            ${funcionario.percentual || 0}% comissão
+          </span>
 
-          <button class="delete" onclick="excluirFuncionario(${f.id})">
+          <button class="delete" onclick="excluirFuncionario(${funcionario.id})">
             Excluir
           </button>
         </div>
@@ -985,12 +1460,25 @@
 
       const usuario = document.getElementById("novoUsuario").value.trim();
       const senha = document.getElementById("novaSenha").value.trim();
-      const percentual = Number(document.getElementById("novoPercentual").value || 0);
+      const percentual = Number(
+        document.getElementById("novoPercentual").value || 0
+      );
+
+      if (!usuario || !senha) {
+        alert("Preencha usuário e senha.");
+        return;
+      }
 
       const resposta = await fetch("/usuarios", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, senha, percentual })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          usuario,
+          senha,
+          percentual
+        })
       });
 
       const dados = await resposta.json();
@@ -1001,13 +1489,17 @@
       }
 
       event.target.reset();
-      carregarFuncionarios();
+      await carregarFuncionarios();
+      alert("Funcionário cadastrado com sucesso.");
     }
 
     async function excluirFuncionario(id) {
       if (!confirm("Deseja excluir este funcionário?")) return;
 
-      await fetch(`/usuarios/${id}`, { method: "DELETE" });
+      await fetch("/usuarios/" + id, {
+        method: "DELETE"
+      });
+
       carregarFuncionarios();
     }
 
@@ -1015,11 +1507,18 @@
       try {
         const resposta = await fetch("/atendimentos");
         escalas = await resposta.json();
+
         renderizarTabela();
         atualizarIndicadores();
+        atualizarFinanceiro();
       } catch {
-        document.getElementById("corpoTabela").innerHTML =
-          '<tr><td colspan="7" class="empty">Não foi possível carregar os atendimentos.</td></tr>';
+        document.getElementById("corpoTabela").innerHTML = `
+          <tr>
+            <td colspan="8" class="empty">
+              Não foi possível carregar os atendimentos.
+            </td>
+          </tr>
+        `;
       }
     }
 
@@ -1027,8 +1526,13 @@
       const corpo = document.getElementById("corpoTabela");
 
       if (!lista.length) {
-        corpo.innerHTML =
-          '<tr><td colspan="7" class="empty">Nenhum atendimento encontrado.</td></tr>';
+        corpo.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty">
+              Nenhum atendimento encontrado.
+            </td>
+          </tr>
+        `;
         return;
       }
 
@@ -1039,9 +1543,10 @@
           <td>${item.data || "-"}</td>
           <td>${item.horario || "-"}</td>
           <td>${item.tipo_servico || "-"}</td>
+          <td>${item.quantidade_aparelhos || "-"}</td>
           <td><span class="status">Agendado</span></td>
           <td>
-            <button class="delete" onclick="excluir(${item.id})">
+            <button class="delete" onclick="excluirAtendimento(${item.id})">
               Excluir
             </button>
           </td>
@@ -1050,15 +1555,21 @@
     }
 
     function filtrarTabela() {
-      const busca = document.getElementById("filtroTabela").value.toLowerCase();
-      const servico = document.getElementById("filtroServico").value;
+      const busca = document
+        .getElementById("filtroTabela")
+        .value
+        .toLowerCase();
+
+      const tipo = document.getElementById("filtroServico").value;
 
       const filtrados = escalas.filter(item => {
-        const texto = `${item.nome} ${item.local}`.toLowerCase();
-        const correspondeBusca = texto.includes(busca);
-        const correspondeServico = !servico || item.tipo_servico === servico;
+        const texto = `
+          ${item.nome || ""}
+          ${item.local || ""}
+        `.toLowerCase();
 
-        return correspondeBusca && correspondeServico;
+        return texto.includes(busca) &&
+          (!tipo || item.tipo_servico === tipo);
       });
 
       renderizarTabela(filtrados);
@@ -1079,7 +1590,9 @@
 
       const resposta = await fetch("/atendimentos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(dados)
       });
 
@@ -1092,34 +1605,128 @@
 
       event.target.reset();
       await carregarTabela();
+
       alert("Atendimento adicionado com sucesso.");
+      abrirPagina("escala");
     }
 
-    async function excluir(id) {
-      if (!confirm("Deseja excluir este atendimento?")) return;
+    async function excluirAtendimento(id) {
+      const confirmar =
+        document.getElementById("confirmarExclusao")?.checked !== false;
 
-      await fetch(`/atendimentos/${id}`, { method: "DELETE" });
+      if (confirmar && !confirm("Deseja excluir este atendimento?")) {
+        return;
+      }
+
+      await fetch("/atendimentos/" + id, {
+        method: "DELETE"
+      });
+
       carregarTabela();
     }
 
     function atualizarIndicadores() {
       const faturamento = escalas.reduce(
-        (total, item) => total + Number(item.valor_total || 0), 0
+        (total, item) => total + Number(item.valor_total || 0),
+        0
       );
 
       const comissoes = escalas.reduce(
-        (total, item) => total + Number(item.valor_comissao || 0), 0
+        (total, item) => total + Number(item.valor_comissao || 0),
+        0
       );
 
       const lucro = faturamento - comissoes;
 
       document.getElementById("totalAtendimentos").textContent = escalas.length;
-      document.getElementById("faturamentoTotal").textContent = dinheiro(faturamento);
-      document.getElementById("lucroTotal").textContent = dinheiro(lucro);
+      document.getElementById("resumoAtendimentos").textContent = escalas.length;
 
-      document.getElementById("financeiroFaturamento").textContent = dinheiro(faturamento);
-      document.getElementById("financeiroComissoes").textContent = dinheiro(comissoes);
-      document.getElementById("financeiroLucro").textContent = dinheiro(lucro);
+      document.getElementById("faturamentoTotal").textContent =
+        dinheiro(faturamento);
+
+      document.getElementById("lucroTotal").textContent =
+        dinheiro(lucro);
+
+      document.getElementById("resumoFaturamento").textContent =
+        dinheiro(faturamento);
+    }
+
+    function atualizarFinanceiro() {
+      const faturamento = escalas.reduce(
+        (total, item) => total + Number(item.valor_total || 0),
+        0
+      );
+
+      const comissoes = escalas.reduce(
+        (total, item) => total + Number(item.valor_comissao || 0),
+        0
+      );
+
+      const lucro = faturamento - comissoes;
+
+      document.getElementById("financeiroFaturamentoGrande").textContent =
+        dinheiro(faturamento);
+
+      document.getElementById("financeiroComissoesGrande").textContent =
+        dinheiro(comissoes);
+
+      document.getElementById("financeiroLucroGrande").textContent =
+        dinheiro(lucro);
+
+      document.getElementById("financeiroAtendimentos").textContent =
+        escalas.length;
+    }
+
+    function calcularBalancoPersonalizado() {
+      const inicio = document.getElementById("dataInicio").value;
+      const fim = document.getElementById("dataFim").value;
+
+      if (!inicio || !fim) {
+        alert("Selecione as duas datas.");
+        return;
+      }
+
+      if (inicio > fim) {
+        alert("A data inicial não pode ser maior que a data final.");
+        return;
+      }
+
+      const filtrados = escalas.filter(item => {
+        return item.data >= inicio && item.data <= fim;
+      });
+
+      const faturamento = filtrados.reduce(
+        (total, item) => total + Number(item.valor_total || 0),
+        0
+      );
+
+      const comissoes = filtrados.reduce(
+        (total, item) => total + Number(item.valor_comissao || 0),
+        0
+      );
+
+      const lucro = faturamento - comissoes;
+
+      document.getElementById("resultadoBalanco").innerHTML = `
+        <p>Período: <strong>${inicio} até ${fim}</strong></p>
+        <p>Atendimentos: <strong>${filtrados.length}</strong></p>
+        <p class="faturamento">Faturamento: ${dinheiro(faturamento)}</p>
+        <p class="comissao">Comissões: ${dinheiro(comissoes)}</p>
+        <p class="lucro">Lucro líquido: ${dinheiro(lucro)}</p>
+      `;
+    }
+
+    function baixarArquivo(conteudo, nome, tipo) {
+      const arquivo = new Blob([conteudo], {
+        type: tipo + ";charset=utf-8"
+      });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(arquivo);
+      link.download = nome;
+      link.click();
+
+      URL.revokeObjectURL(link.href);
     }
 
     function exportarTxt() {
@@ -1131,32 +1738,90 @@
       let texto = "PLAR ERP - ESCALA DE SERVIÇOS\n\n";
 
       escalas.forEach(item => {
-        texto +=
-`Funcionário: ${item.nome}
-Local: ${item.local}
-Data: ${item.data}
-Horário: ${item.horario}
-Serviço: ${item.tipo_servico}
-Aparelhos: ${item.quantidade_aparelhos}
+        texto += `
+Funcionário: ${item.nome || "-"}
+Local: ${item.local || "-"}
+Data: ${item.data || "-"}
+Horário: ${item.horario || "-"}
+Serviço: ${item.tipo_servico || "-"}
+Aparelhos: ${item.quantidade_aparelhos || "-"}
 Valor total: ${dinheiro(item.valor_total)}
 Comissão: ${dinheiro(item.valor_comissao)}
 
 `;
       });
 
-      const arquivo = new Blob([texto], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
+      baixarArquivo(texto, "escala-plar.txt", "text/plain");
+    }
 
-      link.href = URL.createObjectURL(arquivo);
-      link.download = "escala-plar.txt";
-      link.click();
+    function exportarFuncionarios() {
+      if (!funcionarios.length) {
+        alert("Não há funcionários cadastrados.");
+        return;
+      }
 
-      URL.revokeObjectURL(link.href);
+      let csv = "Usuário;Percentual de comissão\n";
+
+      funcionarios.forEach(funcionario => {
+        csv += `${funcionario.usuario};${funcionario.percentual || 0}%\n`;
+      });
+
+      baixarArquivo(csv, "funcionarios-plar.csv", "text/csv");
+    }
+
+    function exportarBackup() {
+      const backup = {
+        dataExportacao: new Date().toISOString(),
+        funcionarios,
+        atendimentos: escalas
+      };
+
+      baixarArquivo(
+        JSON.stringify(backup, null, 2),
+        "backup-plar.json",
+        "application/json"
+      );
+    }
+
+    function alternarModoCompacto() {
+      const ativado = document.getElementById("modoCompacto").checked;
+
+      document.body.classList.toggle("modo-compacto", ativado);
+
+      localStorage.setItem(
+        "modoCompactoPLAR",
+        ativado ? "ativo" : "inativo"
+      );
+    }
+
+    function mostrarNotificacoes() {
+      const ativadas =
+        document.getElementById("notificacoes")?.checked !== false;
+
+      if (!ativadas) {
+        alert("As notificações estão desativadas.");
+        return;
+      }
+
+      alert("Você não possui novas notificações.");
+    }
+
+    const modoSalvo = localStorage.getItem("modoCompactoPLAR");
+
+    if (modoSalvo === "ativo") {
+      document.body.classList.add("modo-compacto");
+      document.getElementById("modoCompacto").checked = true;
     }
 
     lucide.createIcons();
+
     carregarFuncionarios();
     carregarTabela();
+
+    const paginaSalva =
+      localStorage.getItem("paginaAtualPLAR") || "dashboard";
+
+    abrirPagina(paginaSalva);
   </script>
 </body>
 </html>
