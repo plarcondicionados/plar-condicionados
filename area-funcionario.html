@@ -16,19 +16,18 @@
 
   <style>
     :root {
-      --background: #071014;
-      --surface: rgba(14, 29, 36, .96);
-      --surface-light: #142b34;
-      --border: rgba(255, 255, 255, .10);
-      --text: #f1f8fa;
-      --muted: #91a7ae;
-      --blue: #1499dc;
-      --blue-light: #56caff;
+      --bg: #071014;
+      --surface: #0e1d24;
+      --surface-2: #132a33;
+      --border: rgba(255,255,255,.10);
+      --text: #f3f8fa;
+      --muted: #8fa7af;
+      --blue: #1599dc;
+      --blue-light: #5acbff;
       --gold: #c6a052;
-      --green: #38d889;
+      --green: #35d584;
       --red: #ff6674;
-      --orange: #e9a93d;
-      --shadow: 0 18px 45px rgba(0, 0, 0, .25);
+      --orange: #e6a43d;
     }
 
     * {
@@ -44,15 +43,14 @@
       background:
         linear-gradient(
           135deg,
-          rgba(4, 14, 18, .96),
-          rgba(5, 29, 38, .92)
+          rgba(4,14,18,.96),
+          rgba(5,29,38,.93)
         ),
         url("fundo-plar.png") center / cover fixed no-repeat;
     }
 
     button,
-    input,
-    select {
+    input {
       font: inherit;
     }
 
@@ -65,15 +63,13 @@
       min-height: 100vh;
     }
 
-    /* MENU */
-
     .sidebar {
       position: fixed;
       inset: 0 auto 0 0;
       z-index: 10;
       width: 250px;
       padding: 22px 16px;
-      background: rgba(7, 19, 25, .97);
+      background: rgba(7,19,25,.98);
       border-right: 1px solid var(--border);
     }
 
@@ -88,13 +84,12 @@
       width: 48px;
       height: 48px;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 10px;
     }
 
     .brand strong {
       display: block;
       font-size: 17px;
-      letter-spacing: .5px;
     }
 
     .brand small {
@@ -110,7 +105,7 @@
       color: #627c84;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
     }
 
@@ -135,14 +130,7 @@
     .nav button:hover,
     .nav button.active {
       color: white;
-      background: linear-gradient(
-        90deg,
-        rgba(20, 153, 220, .23),
-        rgba(20, 153, 220, .04)
-      );
-    }
-
-    .nav button.active {
+      background: rgba(21,153,220,.16);
       box-shadow: inset 3px 0 var(--blue);
     }
 
@@ -155,12 +143,10 @@
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
-      background: rgba(255, 255, 255, .035);
+      background: rgba(255,255,255,.035);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
-
-    /* CONTEÚDO */
 
     .main {
       width: calc(100% - 250px);
@@ -178,7 +164,6 @@
 
     .topbar h1 {
       font-size: 27px;
-      letter-spacing: -.7px;
     }
 
     .topbar p {
@@ -210,20 +195,39 @@
     }
 
     .logout-button {
-      margin-left: 15px;
-      padding: 10px 13px;
+      margin-left: 16px;
+      padding: 9px 12px;
       color: var(--red);
       font-size: 11px;
       background: transparent;
-      border: 1px solid rgba(255, 102, 116, .3);
+      border: 1px solid rgba(255,102,116,.35);
       border-radius: 8px;
     }
 
     .logout-button:hover {
-      background: rgba(255, 102, 116, .1);
+      background: rgba(255,102,116,.10);
     }
 
-    /* CARDS */
+    .aba {
+      display: none;
+      animation: aparecer .25s ease;
+    }
+
+    .aba.active {
+      display: block;
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     .metrics {
       display: grid;
@@ -240,7 +244,6 @@
       background: linear-gradient(145deg, #142d36, #0b1c23);
       border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: var(--shadow);
     }
 
     .metric::after {
@@ -250,7 +253,7 @@
       width: 110px;
       height: 110px;
       content: "";
-      background: rgba(20, 153, 220, .11);
+      background: rgba(20,153,220,.11);
       border-radius: 50%;
     }
 
@@ -274,21 +277,17 @@
 
     .content-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(290px, .8fr);
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr);
       gap: 20px;
       align-items: start;
     }
 
     .panel {
       padding: 21px;
-      background: var(--surface);
+      background: rgba(14,29,36,.96);
       border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .panel + .panel {
-      margin-top: 20px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.20);
     }
 
     .panel-header {
@@ -316,6 +315,7 @@
     }
 
     input[type="date"] {
+      width: 100%;
       padding: 11px 12px;
       color: var(--text);
       background: #09171d;
@@ -324,11 +324,28 @@
       outline: none;
     }
 
-    input[type="date"]:focus {
-      border-color: var(--blue);
+    .primary-button,
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 13px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
     }
 
-    /* HORÁRIOS */
+    .primary-button {
+      color: #06150e;
+      background: var(--green);
+      border: 0;
+    }
+
+    .secondary-button {
+      color: var(--blue-light);
+      background: transparent;
+      border: 1px solid rgba(90,203,255,.35);
+    }
 
     .schedule {
       display: grid;
@@ -337,11 +354,11 @@
 
     .schedule-item {
       display: grid;
-      grid-template-columns: 76px 1fr auto;
+      grid-template-columns: 76px minmax(0, 1fr) auto;
       align-items: center;
       gap: 15px;
       padding: 15px;
-      background: rgba(255, 255, 255, .025);
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
       border-left: 4px solid var(--blue);
       border-radius: 12px;
@@ -353,17 +370,23 @@
       font-weight: 800;
     }
 
-    .schedule-info strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 13px;
+    .schedule-info {
+      min-width: 0;
     }
 
-    .schedule-info span {
+    .schedule-info strong {
       display: block;
-      margin-top: 3px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .schedule-info span:not(.status) {
+      display: block;
+      margin-top: 4px;
       color: var(--muted);
       font-size: 11px;
+      overflow-wrap: anywhere;
     }
 
     .schedule-value {
@@ -371,11 +394,12 @@
       font-size: 14px;
       font-weight: 800;
       text-align: right;
+      white-space: nowrap;
     }
 
     .schedule-value small {
       display: block;
-      margin-top: 3px;
+      margin-top: 4px;
       color: var(--muted);
       font-size: 9px;
       font-weight: 400;
@@ -404,56 +428,49 @@
     .reject-button {
       color: var(--red);
       background: transparent;
-      border: 1px solid rgba(255, 102, 116, .35);
-    }
-
-    .accept-button:hover {
-      filter: brightness(1.1);
-    }
-
-    .reject-button:hover {
-      background: rgba(255, 102, 116, .1);
+      border: 1px solid rgba(255,102,116,.35);
     }
 
     .status {
-      display: inline-flex;
+      display: inline-flex !important;
+      width: fit-content;
+      margin-top: 8px !important;
       padding: 5px 8px;
       border-radius: 20px;
-      font-size: 10px;
+      font-size: 10px !important;
       font-weight: 700;
     }
 
     .status-pendente {
-      color: var(--orange);
-      background: rgba(233, 169, 61, .12);
+      color: var(--orange) !important;
+      background: rgba(230,164,61,.12);
     }
 
     .status-aceito {
-      color: var(--green);
-      background: rgba(56, 216, 137, .12);
+      color: var(--green) !important;
+      background: rgba(53,213,132,.12);
     }
 
     .status-recusado {
-      color: var(--red);
-      background: rgba(255, 102, 116, .12);
+      color: var(--red) !important;
+      background: rgba(255,102,116,.12);
     }
 
     .status-concluido {
-      color: var(--blue-light);
-      background: rgba(20, 153, 220, .12);
+      color: var(--blue-light) !important;
+      background: rgba(21,153,220,.12);
     }
-
-    /* RESUMO */
 
     .summary {
       display: grid;
-      gap: 15px;
+      gap: 16px;
     }
 
     .summary-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 20px;
       color: var(--muted);
       font-size: 12px;
     }
@@ -461,6 +478,7 @@
     .summary-row strong {
       color: var(--text);
       font-size: 15px;
+      text-align: right;
     }
 
     .summary-row.highlight strong {
@@ -473,20 +491,73 @@
       color: #b9dbe9;
       font-size: 11px;
       line-height: 1.6;
-      background: rgba(20, 153, 220, .08);
-      border: 1px solid rgba(20, 153, 220, .22);
+      background: rgba(20,153,220,.08);
+      border: 1px solid rgba(20,153,220,.22);
       border-radius: 10px;
     }
 
-    .empty {
-      padding: 35px 15px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
+    .table-container {
+      overflow-x: auto;
     }
 
+    table {
+      width: 100%;
+      min-width: 750px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+
+    th {
+      padding: 12px 9px;
+      color: #76939b;
+      font-size: 10px;
+      letter-spacing: .4px;
+      text-align: left;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 9px;
+      color: #d9e7ea;
+      overflow-wrap: anywhere;
+      border-bottom: 1px solid rgba(255,255,255,.055);
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 14%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 12%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 20%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 16%;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 17%;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+      width: 21%;
+    }
+
+    .empty,
     .loading {
-      padding: 30px;
+      padding: 35px 15px;
       color: var(--muted);
       font-size: 12px;
       text-align: center;
@@ -536,10 +607,6 @@
         padding: 22px 15px 35px;
       }
 
-      .topbar {
-        align-items: flex-start;
-      }
-
       .topbar h1 {
         font-size: 21px;
       }
@@ -551,7 +618,6 @@
 
       .metrics {
         grid-template-columns: 1fr;
-        gap: 10px;
       }
 
       .date-filter {
@@ -559,7 +625,7 @@
       }
 
       .schedule-item {
-        grid-template-columns: 65px 1fr;
+        grid-template-columns: 65px minmax(0, 1fr);
       }
 
       .schedule-value {
@@ -612,7 +678,7 @@
 
       <div class="sidebar-footer">
         <strong>Acesso individual</strong><br>
-        Você visualiza somente os seus agendamentos e comissões.
+        Você vê somente seus agendamentos e comissões.
       </div>
     </aside>
 
@@ -639,34 +705,26 @@
         </div>
       </header>
 
-      <!-- ABA AGENDA -->
-
       <section class="aba active" id="aba-agenda">
         <div class="metrics">
           <article class="metric">
             <span class="metric-label">Agendamentos pendentes</span>
             <strong class="metric-value" id="totalPendentes">0</strong>
-            <div class="metric-footer">
-              Aguardando sua resposta
-            </div>
+            <div class="metric-footer">Aguardando sua resposta</div>
           </article>
 
           <article class="metric">
             <span class="metric-label">Serviços aceitos</span>
             <strong class="metric-value" id="totalAceitos">0</strong>
-            <div class="metric-footer">
-              Na sua agenda
-            </div>
+            <div class="metric-footer">Na sua agenda</div>
           </article>
 
           <article class="metric">
-            <span class="metric-label">Comissões previstas</span>
-            <strong class="metric-value" id="comissaoPrevista">
+            <span class="metric-label">Comissões concluídas</span>
+            <strong class="metric-value" id="comissaoConcluida">
               R$ 0,00
             </strong>
-            <div class="metric-footer">
-              Somente seus valores
-            </div>
+            <div class="metric-footer">Confirmadas pela administração</div>
           </article>
         </div>
 
@@ -676,16 +734,17 @@
               <div>
                 <h2>Minha agenda</h2>
                 <p>
-                  Os horários são organizados em intervalos de 30 minutos,
-                  das 08:00 às 18:00.
+                  Horários disponíveis das 08:00 às 17:30,
+                  em intervalos de 30 minutos.
                 </p>
               </div>
             </div>
 
             <div class="date-filter">
               <input type="date" id="filtroData">
+
               <button
-                class="accept-button"
+                class="secondary-button"
                 onclick="carregarAgendamentos()"
               >
                 Consultar dia
@@ -704,7 +763,7 @@
               <div class="panel-header">
                 <div>
                   <h2>Resumo pessoal</h2>
-                  <p>Informações somente da sua produção.</p>
+                  <p>Somente informações da sua produção.</p>
                 </div>
               </div>
 
@@ -720,21 +779,19 @@
                 </div>
 
                 <div class="summary-row highlight">
-                  <span>Total de comissão</span>
+                  <span>Comissões concluídas</span>
                   <strong id="resumoComissao">R$ 0,00</strong>
                 </div>
 
                 <div class="notice">
-                  Os valores exibidos são exclusivamente a sua comissão.
-                  O faturamento total da empresa não é mostrado nesta área.
+                  O percentual de comissão não é exibido nesta área.
+                  Você vê apenas os valores que pertencem a você.
                 </div>
               </div>
             </section>
           </aside>
         </div>
       </section>
-
-      <!-- ABA COMISSÕES -->
 
       <section class="aba" id="aba-comissoes">
         <section class="panel">
@@ -753,6 +810,7 @@
               <strong class="metric-value" id="comissoesAceitas">
                 R$ 0,00
               </strong>
+              <div class="metric-footer">Aguardando conclusão</div>
             </article>
 
             <article class="metric">
@@ -760,6 +818,7 @@
               <strong class="metric-value" id="comissoesConcluidas">
                 R$ 0,00
               </strong>
+              <div class="metric-footer">Confirmadas pelo administrador</div>
             </article>
 
             <article class="metric">
@@ -767,6 +826,7 @@
               <strong class="metric-value" id="servicosRealizados">
                 0
               </strong>
+              <div class="metric-footer">Atendimentos concluídos</div>
             </article>
           </div>
 
@@ -789,8 +849,6 @@
         </section>
       </section>
 
-      <!-- ABA PERFIL -->
-
       <section class="aba" id="aba-perfil">
         <section class="panel">
           <div class="panel-header">
@@ -810,16 +868,10 @@
               <span>Tipo de acesso</span>
               <strong>Funcionário</strong>
             </div>
-
-            <div class="summary-row">
-              <span>Percentual de comissão</span>
-              <strong id="perfilPercentual">-</strong>
-            </div>
           </div>
 
           <div class="notice" style="margin-top:20px">
-            Para alterar seus dados ou percentual de comissão,
-            procure o administrador do sistema.
+            Para alterar seus dados, procure o administrador do sistema.
           </div>
         </section>
       </section>
@@ -875,6 +927,15 @@
       return "status-" + (status || "pendente");
     }
 
+    function dataAtual() {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+
+      return `${ano}-${mes}-${dia}`;
+    }
+
     function mostrarAba(nome, botao) {
       document.querySelectorAll(".aba").forEach(aba => {
         aba.classList.remove("active");
@@ -914,19 +975,10 @@
       }
     }
 
-    function dataAtualFormatada() {
-      const hoje = new Date();
-      const ano = hoje.getFullYear();
-      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-      const dia = String(hoje.getDate()).padStart(2, "0");
-
-      return `${ano}-${mes}-${dia}`;
-    }
-
     async function carregarAgendamentos() {
       const data =
         document.getElementById("filtroData").value ||
-        dataAtualFormatada();
+        dataAtual();
 
       document.getElementById("filtroData").value = data;
 
@@ -939,11 +991,6 @@
       `;
 
       try {
-        /*
-          O backend deve filtrar pelo usuário autenticado.
-          O frontend não envia funcionario_id para tentar impedir
-          que alguém consulte os horários de outra pessoa.
-        */
         const resposta = await fetch(
           `/me/agendamentos?data=${encodeURIComponent(data)}`,
           {
@@ -1002,15 +1049,13 @@
               </strong>
 
               <span>
-                Cliente: ${escaparHTML(item.cliente || item.nome_cliente || "-")}
+                Serviço:
+                ${escaparHTML(formatarServico(item.tipo_servico))}
               </span>
 
               <span>
-                Serviço: ${escaparHTML(formatarServico(item.tipo_servico))}
-              </span>
-
-              <span>
-                Aparelhos: ${escaparHTML(item.quantidade_aparelhos || "-")}
+                Aparelhos:
+                ${escaparHTML(item.quantidade_aparelhos || "-")}
               </span>
 
               <span class="status ${classeStatus(status)}">
@@ -1077,7 +1122,7 @@
 
         if (!requisicao.ok || dados.erro) {
           throw new Error(
-            dados.erro || "Não foi possível responder ao atendimento."
+            dados.erro || "Não foi possível responder."
           );
         }
 
@@ -1094,29 +1139,31 @@
     }
 
     function atualizarResumo() {
-      const pendentes = agendamentos.filter(item =>
-        (item.status_resposta || "pendente") === "pendente"
-      );
+      const pendentes = agendamentos.filter(item => {
+        return (item.status_resposta || "pendente") === "pendente";
+      });
 
-      const aceitos = agendamentos.filter(item =>
-        (item.status_resposta || "") === "aceito"
-      );
+      const aceitos = agendamentos.filter(item => {
+        return (item.status_resposta || "") === "aceito";
+      });
 
-      const concluidos = agendamentos.filter(item =>
-        (item.status_resposta || "") === "concluido"
-      );
+      const concluidos = agendamentos.filter(item => {
+        return (item.status_resposta || "") === "concluido";
+      });
 
       const comissaoAceita = aceitos.reduce(
-        (total, item) => total + Number(item.valor_comissao || 0),
+        (total, item) => {
+          return total + Number(item.valor_comissao || 0);
+        },
         0
       );
 
-      const comissaoTotal = agendamentos
-        .filter(item => (item.status_resposta || "") !== "recusado")
-        .reduce(
-          (total, item) => total + Number(item.valor_comissao || 0),
-          0
-        );
+      const comissaoConcluida = concluidos.reduce(
+        (total, item) => {
+          return total + Number(item.valor_comissao || 0);
+        },
+        0
+      );
 
       document.getElementById("totalPendentes").textContent =
         pendentes.length;
@@ -1124,8 +1171,8 @@
       document.getElementById("totalAceitos").textContent =
         aceitos.length;
 
-      document.getElementById("comissaoPrevista").textContent =
-        dinheiro(comissaoAceita);
+      document.getElementById("comissaoConcluida").textContent =
+        dinheiro(comissaoConcluida);
 
       document.getElementById("resumoAceitos").textContent =
         aceitos.length;
@@ -1134,18 +1181,13 @@
         concluidos.length;
 
       document.getElementById("resumoComissao").textContent =
-        dinheiro(comissaoTotal);
+        dinheiro(comissaoConcluida);
 
       document.getElementById("comissoesAceitas").textContent =
         dinheiro(comissaoAceita);
 
       document.getElementById("comissoesConcluidas").textContent =
-        dinheiro(
-          concluidos.reduce(
-            (total, item) => total + Number(item.valor_comissao || 0),
-            0
-          )
-        );
+        dinheiro(comissaoConcluida);
 
       document.getElementById("servicosRealizados").textContent =
         concluidos.length;
@@ -1202,37 +1244,42 @@
           credentials: "include"
         });
 
-        if (!resposta.ok) return;
+        if (!resposta.ok) {
+          return;
+        }
 
         const perfil = await resposta.json();
 
         document.getElementById("perfilUsuario").textContent =
           perfil.usuario || usuarioNome || "-";
-
-        document.getElementById("perfilPercentual").textContent =
-          `${Number(perfil.percentual || 0)}%`;
       } catch {
         document.getElementById("perfilUsuario").textContent =
           usuarioNome || "-";
       }
     }
 
-    function sair() {
-      sessionStorage.clear();
-      window.location.href = "login.html";
+    async function sair() {
+      try {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+      } finally {
+        sessionStorage.clear();
+        window.location.href = "/";
+      }
     }
 
     function protegerPagina() {
       if (!usuarioId || !usuarioNome || tipoUsuario === "admin") {
-        window.location.href = "login.html";
+        window.location.href = "/";
         return false;
       }
 
       return true;
     }
 
-    document.getElementById("filtroData").value =
-      dataAtualFormatada();
+    document.getElementById("filtroData").value = dataAtual();
 
     document.getElementById("nomeUsuario").textContent =
       usuarioNome || "Funcionário";
