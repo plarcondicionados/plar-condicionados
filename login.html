@@ -1,134 +1,684 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>PLar Condicionados - Acesso Restrito</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: radial-gradient(circle at top, #1a1a1a, #000);
-    color: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .login-box {
-    background: #111;
-    padding: 60px 55px;
-    border-radius: 20px;
-    border: 1px solid #b08d3e;
-    width: 440px;
-    max-width: 90%;
-    text-align: center;
-    box-shadow: 0 0 60px rgba(176, 141, 62, 0.2);
-  }
-  .login-box img {
-    max-width: 220px;
-    margin-bottom: 26px;
-  }
-  .login-box h1 {
-    color: #b08d3e;
-    font-size: 26px;
-    font-weight: 700;
-    margin: 0 0 6px 0;
-    letter-spacing: 2px;
-  }
-  .login-box p {
-    color: #6fa8dc;
-    font-size: 13px;
-    font-weight: 500;
-    margin: 0 0 36px 0;
-    letter-spacing: 3px;
-  }
-  .login-box input {
-    width: 100%;
-    padding: 16px 18px;
-    margin: 10px 0;
-    border-radius: 10px;
-    border: 1px solid #333;
-    background: #1c1c1c;
-    color: #eee;
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    outline: none;
-    transition: border 0.2s;
-  }
-  .login-box input:focus {
-    border-color: #b08d3e;
-  }
-  .login-box button {
-    width: 100%;
-    padding: 16px;
-    margin-top: 20px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #b08d3e, #6fa8dc);
-    color: #000;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .login-box button:hover { opacity: 0.85; }
-  .erro {
-    color: #d9534f;
-    font-size: 14px;
-    margin-top: 16px;
-    min-height: 18px;
-    font-weight: 500;
-  }
-</style>
-</head>
-<body>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<div class="login-box">
-  <img src="logo-plar.png.png" alt="Logo PLar Condicionados" onerror="this.style.display='none'">
-  <h1>PL AR CONDICIONADOS</h1>
-  <p>ÁREA RESTRITA</p>
-  <input type="text" id="usuario" placeholder="Usuário">
-  <input type="password" id="senha" placeholder="Senha">
-  <button onclick="verificarLogin()">Entrar</button>
-  <div class="erro" id="mensagemErro"></div>
-</div>
+  <title>Login | PLAR Condicionados</title>
 
-<script>
-  async function verificarLogin() {
-    const usuario = document.getElementById('usuario').value;
-    const senha = document.getElementById('senha').value;
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    const resposta = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario, senha })
-    });
-    const dados = await resposta.json();
-
-    if (dados.sucesso) {
-      sessionStorage.setItem('usuario_plar', dados.usuario);
-      sessionStorage.setItem('id_plar', dados.id);
-      sessionStorage.setItem('tipo_plar', dados.tipo);
-
-      if (dados.tipo === "admin") {
-        window.location.href = "teste2.html";
-      } else {
-        window.location.href = "area-funcionario.html";
-      }
-    } else {
-      document.getElementById('mensagemErro').innerText = "Usuário ou senha incorretos.";
+  <style>
+    :root {
+      --blue: #6fa8dc;
+      --blue-light: #9bd4ff;
+      --gold: #b08d3e;
+      --gold-light: #e0bd68;
+      --background: #050708;
+      --card: rgba(17, 17, 17, .94);
+      --input: #1b1d1e;
+      --border: rgba(255,255,255,.12);
+      --text: #f4f4f4;
+      --muted: #92999d;
+      --danger: #ff6d76;
+      --success: #53d894;
     }
-  }
 
-  document.getElementById('senha').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') verificarLogin();
-  });
-</script>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      color: var(--text);
+      font-family: "Poppins", sans-serif;
+      background:
+        linear-gradient(
+          120deg,
+          rgba(0,0,0,.93),
+          rgba(4,20,28,.84)
+        ),
+        url("fundo-plar.png") center/cover fixed no-repeat;
+    }
+
+    body::before {
+      position: fixed;
+      top: -160px;
+      right: -100px;
+      width: 420px;
+      height: 420px;
+      content: "";
+      background: rgba(111,168,220,.13);
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+
+    body::after {
+      position: fixed;
+      bottom: -170px;
+      left: -120px;
+      width: 430px;
+      height: 430px;
+      content: "";
+      background: rgba(176,141,62,.11);
+      border-radius: 50%;
+      filter: blur(95px);
+      pointer-events: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .login-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: min(980px, 100%);
+      min-height: 590px;
+      overflow: hidden;
+      background: rgba(10,12,13,.82);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.55);
+      backdrop-filter: blur(15px);
+    }
+
+    /* PAINEL DA MARCA */
+
+    .brand-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(12,45,60,.75),
+          rgba(5,11,14,.89)
+        );
+      border-right: 1px solid var(--border);
+    }
+
+    .brand-logo {
+      width: min(230px, 80%);
+      margin-bottom: 35px;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 25px rgba(0,0,0,.4));
+    }
+
+    .brand-panel h1 {
+      max-width: 380px;
+      margin-bottom: 15px;
+      font-size: clamp(28px, 4vw, 43px);
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+    }
+
+    .brand-panel h1 span {
+      color: var(--gold-light);
+    }
+
+    .brand-panel p {
+      max-width: 370px;
+      color: #b8c7cc;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .benefits {
+      display: grid;
+      gap: 13px;
+      margin-top: 32px;
+    }
+
+    .benefit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #d3dfe2;
+      font-size: 12px;
+    }
+
+    .benefit-icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      color: var(--blue-light);
+      background: rgba(111,168,220,.12);
+      border: 1px solid rgba(111,168,220,.22);
+      border-radius: 9px;
+    }
+
+    .copyright {
+      color: #68777c;
+      font-size: 10px;
+    }
+
+    /* FORMULÁRIO */
+
+    .form-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 55px;
+      background: var(--card);
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .form-header {
+      margin-bottom: 30px;
+    }
+
+    .form-header h2 {
+      margin-bottom: 8px;
+      font-size: 29px;
+      letter-spacing: -.8px;
+    }
+
+    .form-header p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 17px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: #ced8db;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      height: 54px;
+      padding: 0 16px;
+      color: var(--text);
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      outline: none;
+      transition: .2s;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(176,141,62,.12);
+    }
+
+    .input-wrapper input::placeholder {
+      color: #707b80;
+    }
+
+    .password-input {
+      padding-right: 52px !important;
+    }
+
+    .show-password {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      color: #8c979b;
+      background: transparent;
+      border: 0;
+      transform: translateY(-50%);
+    }
+
+    .show-password:hover {
+      color: var(--blue-light);
+    }
+
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .remember input {
+      accent-color: var(--blue);
+    }
+
+    .forgot {
+      color: var(--blue);
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .forgot:hover {
+      text-decoration: underline;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      border-radius: 9px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      color: #ffb4ba;
+      background: rgba(255,109,118,.10);
+      border: 1px solid rgba(255,109,118,.24);
+    }
+
+    .message.success {
+      color: #a8f0c9;
+      background: rgba(83,216,148,.10);
+      border: 1px solid rgba(83,216,148,.24);
+    }
+
+    .login-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      height: 54px;
+      margin-top: 5px;
+      color: #080808;
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--gold), var(--blue));
+      border: 0;
+      border-radius: 11px;
+      transition: .2s;
+    }
+
+    .login-button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .login-button:disabled {
+      cursor: not-allowed;
+      opacity: .65;
+    }
+
+    .security {
+      display: flex;
+      gap: 8px;
+      margin-top: 25px;
+      color: #718086;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .security strong {
+      color: var(--success);
+    }
+
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2px solid rgba(0,0,0,.25);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: girar .7s linear infinite;
+    }
+
+    @keyframes girar {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 15px;
+      }
+
+      .login-layout {
+        display: block;
+        min-height: auto;
+      }
+
+      .brand-panel {
+        min-height: 240px;
+        padding: 30px;
+        text-align: center;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand-logo {
+        width: 190px;
+        margin: 0 auto;
+      }
+
+      .brand-panel h1,
+      .brand-panel p,
+      .benefits,
+      .copyright {
+        display: none;
+      }
+
+      .form-panel {
+        padding: 35px 25px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .login-options {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-layout">
+
+    <section class="brand-panel">
+      <div>
+        <img
+          class="brand-logo"
+          src="logo-plar.png.png"
+          alt="Logo PLAR Condicionados"
+          onerror="this.onerror=null; this.src='logoplarpng.png'"
+        >
+
+        <h1>
+          Gestão inteligente para o seu <span>conforto.</span>
+        </h1>
+
+        <p>
+          Organize atendimentos, funcionários, escalas e resultados
+          financeiros em uma única plataforma.
+        </p>
+
+        <div class="benefits">
+          <div class="benefit">
+            <span class="benefit-icon">✓</span>
+            Acesso separado para administradores e funcionários
+          </div>
+
+          <div class="benefit">
+            <span class="benefit-icon">✓</span>
+            Controle dos próprios agendamentos
+          </div>
+
+          <div class="benefit">
+            <span class="benefit-icon">✓</span>
+            Gestão profissional da operação
+          </div>
+        </div>
+      </div>
+
+      <span class="copyright">
+        PLAR CONDICIONADOS © 2026
+      </span>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-header">
+        <div class="eyebrow">Área restrita</div>
+
+        <h2>Bem-vindo de volta</h2>
+
+        <p>
+          Entre com seu usuário e senha para acessar o sistema.
+        </p>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <div class="field">
+          <label for="usuario">Usuário</label>
+
+          <div class="input-wrapper">
+            <input
+              id="usuario"
+              type="text"
+              placeholder="Digite seu usuário"
+              autocomplete="username"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+
+          <div class="input-wrapper">
+            <input
+              id="senha"
+              class="password-input"
+              type="password"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              type="button"
+              class="show-password"
+              id="mostrarSenha"
+              aria-label="Mostrar senha"
+            >
+              ◉
+            </button>
+          </div>
+        </div>
+
+        <div class="login-options">
+          <label class="remember">
+            <input type="checkbox" id="lembrarUsuario">
+            Lembrar usuário
+          </label>
+
+          <a
+            href="#"
+            class="forgot"
+            onclick="esqueciSenha(event)"
+          >
+            Esqueci minha senha
+          </a>
+        </div>
+
+        <div class="message" id="mensagemErro"></div>
+
+        <button class="login-button" id="botaoLogin" type="submit">
+          Entrar no sistema
+        </button>
+      </form>
+
+      <div class="security">
+        <strong>●</strong>
+        <span>
+          O acesso é controlado de acordo com o tipo de usuário.
+        </span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const usuarioInput = document.getElementById("usuario");
+    const senhaInput = document.getElementById("senha");
+    const lembrarUsuario = document.getElementById("lembrarUsuario");
+    const botaoLogin = document.getElementById("botaoLogin");
+    const mensagemErro = document.getElementById("mensagemErro");
+    const mostrarSenha = document.getElementById("mostrarSenha");
+
+    function mostrarMensagem(texto, tipo = "error") {
+      mensagemErro.textContent = texto;
+      mensagemErro.className = "message show " + tipo;
+    }
+
+    function limparMensagem() {
+      mensagemErro.textContent = "";
+      mensagemErro.className = "message";
+    }
+
+    function alterarCarregamento(ativo) {
+      botaoLogin.disabled = ativo;
+
+      if (ativo) {
+        botaoLogin.innerHTML = `
+          <span class="spinner"></span>
+          Verificando acesso...
+        `;
+      } else {
+        botaoLogin.textContent = "Entrar no sistema";
+      }
+    }
+
+    mostrarSenha.addEventListener("click", () => {
+      const estaVisivel = senhaInput.type === "text";
+
+      senhaInput.type = estaVisivel ? "password" : "text";
+      mostrarSenha.textContent = estaVisivel ? "◉" : "◌";
+      mostrarSenha.setAttribute(
+        "aria-label",
+        estaVisivel ? "Mostrar senha" : "Ocultar senha"
+      );
+    });
+
+    const usuarioSalvo = localStorage.getItem("usuario_plar");
+
+    if (usuarioSalvo) {
+      usuarioInput.value = usuarioSalvo;
+      lembrarUsuario.checked = true;
+    }
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      limparMensagem();
+
+      const usuario = usuarioInput.value.trim();
+      const senha = senhaInput.value;
+
+      if (!usuario || !senha) {
+        mostrarMensagem("Preencha usuário e senha.");
+        return;
+      }
+
+      if (lembrarUsuario.checked) {
+        localStorage.setItem("usuario_plar", usuario);
+      } else {
+        localStorage.removeItem("usuario_plar");
+      }
+
+      alterarCarregamento(true);
+
+      try {
+        const resposta = await fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            usuario,
+            senha
+          })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.sucesso) {
+          throw new Error(
+            dados.erro || "Usuário ou senha incorretos."
+          );
+        }
+
+        /*
+          Mantém as informações usadas pelo seu sistema atual.
+          A segurança verdadeira deve ser feita pela sessão do backend.
+        */
+        sessionStorage.setItem("usuario_plar", dados.usuario || usuario);
+        sessionStorage.setItem("id_plar", dados.id);
+        sessionStorage.setItem("tipo_plar", dados.tipo);
+
+        mostrarMensagem("Login realizado. Redirecionando...", "success");
+
+        setTimeout(() => {
+          if (dados.tipo === "admin") {
+            window.location.href = "teste2.html";
+          } else {
+            window.location.href = "area-funcionario.html";
+          }
+        }, 700);
+
+      } catch (erro) {
+        mostrarMensagem(
+          erro.message || "Não foi possível realizar o login."
+        );
+
+        alterarCarregamento(false);
+      }
+    });
+
+    function esqueciSenha(event) {
+      event.preventDefault();
+
+      mostrarMensagem(
+        "Procure o administrador para redefinir sua senha."
+      );
+    }
+
+    senhaInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        loginForm.requestSubmit();
+      }
+    });
+  </script>
 </body>
 </html>
