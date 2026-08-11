@@ -878,419 +878,505 @@
     </main>
   </div>
 
-  <script>
-    let agendamentos = [];
+ <script>
+  let agendamentos = [];
 
-    const usuarioId = sessionStorage.getItem("id_plar");
-    const usuarioNome = sessionStorage.getItem("usuario_plar");
-    const tipoUsuario = sessionStorage.getItem("tipo_plar");
+  const usuarioId = sessionStorage.getItem("id_plar");
+  const usuarioNome = sessionStorage.getItem("usuario_plar");
+  const tipoUsuario = sessionStorage.getItem("tipo_plar");
 
-    function dinheiro(valor) {
-      return Number(valor || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
+  function dinheiro(valor) {
+    return Number(valor || 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+  }
+
+  function escaparHTML(valor) {
+    return String(valor ?? "")
+      .replaceAll("&", "&")
+      .replaceAll("<", "<")
+      .replaceAll(">", ">")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatarServico(servico) {
+    const nomes = {
+      limpeza: "Limpeza",
+      automacao: "Automação",
+      manutencao: "Manutenção",
+      instalacao: "Instalação"
+    };
+
+    return nomes[servico] || servico || "Outros";
+  }
+
+  function formatarStatus(status) {
+    const nomes = {
+      pendente: "Pendente",
+      aceito: "Aceito",
+      recusado: "Recusado",
+      em_andamento: "Em andamento",
+      concluido: "Concluído",
+      cancelado: "Cancelado"
+    };
+
+    return nomes[status] || "Pendente";
+  }
+
+  function classeStatus(status) {
+    return "status-" + (status || "pendente");
+  }
+
+  function dataAtual() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  function mostrarAba(nome, botao) {
+    document.querySelectorAll(".aba").forEach(aba => {
+      aba.classList.remove("active");
+    });
+
+    const aba = document.getElementById("aba-" + nome);
+
+    if (aba) {
+      aba.classList.add("active");
     }
 
-    function escaparHTML(valor) {
-      return String(valor ?? "")
-        .replaceAll("&", "&")
-        .replaceAll("<", "<")
-        .replaceAll(">", ">")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+    document.querySelectorAll(".nav button").forEach(item => {
+      item.classList.remove("active");
+    });
 
-    function formatarServico(servico) {
-      const nomes = {
-        limpeza: "Limpeza",
-        automacao: "Automação",
-        manutencao: "Manutenção",
-        instalacao: "Instalação"
-      };
-
-      return nomes[servico] || servico || "Outros";
-    }
-
-    function formatarStatus(status) {
-      const nomes = {
-        pendente: "Pendente",
-        aceito: "Aceito",
-        recusado: "Recusado",
-        concluido: "Concluído"
-      };
-
-      return nomes[status] || status || "Pendente";
-    }
-
-    function classeStatus(status) {
-      return "status-" + (status || "pendente");
-    }
-
-    function dataAtual() {
-      const hoje = new Date();
-      const ano = hoje.getFullYear();
-      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-      const dia = String(hoje.getDate()).padStart(2, "0");
-
-      return `${ano}-${mes}-${dia}`;
-    }
-
-    function mostrarAba(nome, botao) {
-      document.querySelectorAll(".aba").forEach(aba => {
-        aba.classList.remove("active");
-      });
-
-      document.getElementById("aba-" + nome).classList.add("active");
-
-      document.querySelectorAll(".nav button").forEach(item => {
-        item.classList.remove("active");
-      });
-
+    if (botao) {
       botao.classList.add("active");
+    }
 
-      const titulos = {
-        agenda: [
-          "Minha agenda",
-          "Consulte seus horários e responda aos atendimentos."
-        ],
-        comissoes: [
-          "Minhas comissões",
-          "Acompanhe somente os valores destinados a você."
-        ],
-        perfil: [
-          "Meu perfil",
-          "Dados da sua conta de funcionário."
-        ]
-      };
+    const titulos = {
+      agenda: [
+        "Minha agenda",
+        "Consulte seus horários e responda aos atendimentos."
+      ],
+      comissoes: [
+        "Minhas comissões",
+        "Acompanhe somente os valores destinados a você."
+      ],
+      perfil: [
+        "Meu perfil",
+        "Dados da sua conta de funcionário."
+      ]
+    };
 
+    if (titulos[nome]) {
       document.getElementById("tituloPagina").textContent =
         titulos[nome][0];
 
       document.getElementById("subtituloPagina").textContent =
         titulos[nome][1];
-
-      if (nome === "comissoes") {
-        renderizarComissoes();
-      }
     }
 
-    async function carregarAgendamentos() {
-      const data =
-        document.getElementById("filtroData").value ||
-        dataAtual();
+    if (nome === "comissoes") {
+      renderizarComissoes();
+    }
+  }
 
-      document.getElementById("filtroData").value = data;
+  async function carregarAgendamentos() {
+    const campoData = document.getElementById("filtroData");
 
-      const lista = document.getElementById("listaAgendamentos");
+    const data = campoData.value || dataAtual();
 
+    campoData.value = data;
+
+    const lista = document.getElementById(
+      "listaAgendamentos"
+    );
+
+    lista.innerHTML = `
+      <div class="loading">
+        Carregando seus horários...
+      </div>
+    `;
+
+    try {
+      const resposta = await fetch(
+        `/me/agendamentos?data=${encodeURIComponent(data)}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json"
+          }
+        }
+      );
+
+      if (resposta.status === 401) {
+        sessionStorage.clear();
+        window.location.href = "/";
+        return;
+      }
+
+      if (!resposta.ok) {
+        throw new Error(
+          "Não foi possível carregar sua agenda."
+        );
+      }
+
+      agendamentos = await resposta.json();
+
+      renderizarAgendamentos();
+      atualizarResumo();
+      renderizarComissoes();
+
+    } catch (erro) {
       lista.innerHTML = `
-        <div class="loading">
-          Carregando seus horários...
+        <div class="empty">
+          ${escaparHTML(erro.message)}
+        </div>
+      `;
+    }
+  }
+
+  function renderizarAgendamentos() {
+    const lista = document.getElementById(
+      "listaAgendamentos"
+    );
+
+    if (!agendamentos.length) {
+      lista.innerHTML = `
+        <div class="empty">
+          Você não possui agendamentos para este dia.
         </div>
       `;
 
-      try {
-        const resposta = await fetch(
-          `/me/agendamentos?data=${encodeURIComponent(data)}`,
-          {
-            credentials: "include"
-          }
-        );
+      return;
+    }
 
-        if (!resposta.ok) {
-          throw new Error("Não foi possível carregar sua agenda.");
-        }
+    const ordenados = [...agendamentos].sort((a, b) => {
+      return String(a.horario || "")
+        .localeCompare(String(b.horario || ""));
+    });
 
-        agendamentos = await resposta.json();
+    lista.innerHTML = ordenados.map(item => {
+      const status = item.status_resposta || "pendente";
+      const podeResponder = status === "pendente";
 
-        renderizarAgendamentos();
-        atualizarResumo();
-        renderizarComissoes();
-      } catch (erro) {
-        lista.innerHTML = `
-          <div class="empty">
-            ${escaparHTML(erro.message)}
+      return `
+        <article class="schedule-item">
+          <div class="schedule-time">
+            ${escaparHTML(item.horario || "--:--")}
           </div>
-        `;
-      }
-    }
 
-    function renderizarAgendamentos() {
-      const lista = document.getElementById("listaAgendamentos");
+          <div class="schedule-info">
+            <strong>
+              ${escaparHTML(
+                item.local || "Local não informado"
+              )}
+            </strong>
 
-      if (!agendamentos.length) {
-        lista.innerHTML = `
-          <div class="empty">
-            Você não possui agendamentos para este dia.
+            <span>
+              Serviço:
+              ${escaparHTML(
+                formatarServico(item.tipo_servico)
+              )}
+            </span>
+
+            <span>
+              Aparelhos:
+              ${escaparHTML(
+                item.quantidade_aparelhos || "-"
+              )}
+            </span>
+
+            <span class="status ${classeStatus(status)}">
+              ${formatarStatus(status)}
+            </span>
           </div>
-        `;
 
-        return;
-      }
+          <div class="schedule-value">
+            ${dinheiro(item.valor_comissao)}
+            <small>Minha comissão</small>
+          </div>
 
-      const ordenados = [...agendamentos].sort((a, b) => {
-        return String(a.horario).localeCompare(String(b.horario));
-      });
+          ${
+            podeResponder
+              ? `
+                <div class="schedule-actions">
+                  <button
+                    class="accept-button"
+                    type="button"
+                    onclick="responderAgendamento(
+                      ${Number(item.id)},
+                      'aceito'
+                    )"
+                  >
+                    Aceitar atendimento
+                  </button>
 
-      lista.innerHTML = ordenados.map(item => {
-        const status = item.status_resposta || "pendente";
-        const podeResponder = status === "pendente";
-
-        return `
-          <article class="schedule-item">
-            <div class="schedule-time">
-              ${escaparHTML(item.horario || "--:--")}
-            </div>
-
-            <div class="schedule-info">
-              <strong>
-                ${escaparHTML(item.local || "Local não informado")}
-              </strong>
-
-              <span>
-                Serviço:
-                ${escaparHTML(formatarServico(item.tipo_servico))}
-              </span>
-
-              <span>
-                Aparelhos:
-                ${escaparHTML(item.quantidade_aparelhos || "-")}
-              </span>
-
-              <span class="status ${classeStatus(status)}">
-                ${formatarStatus(status)}
-              </span>
-            </div>
-
-            <div class="schedule-value">
-              ${dinheiro(item.valor_comissao)}
-              <small>Minha comissão</small>
-            </div>
-
-            ${
-              podeResponder
-                ? `
-                  <div class="schedule-actions">
-                    <button
-                      class="accept-button"
-                      onclick="responderAgendamento(${item.id}, 'aceito')"
-                    >
-                      Aceitar atendimento
-                    </button>
-
-                    <button
-                      class="reject-button"
-                      onclick="responderAgendamento(${item.id}, 'recusado')"
-                    >
-                      Recusar
-                    </button>
-                  </div>
-                `
-                : ""
-            }
-          </article>
-        `;
-      }).join("");
-    }
-
-    async function responderAgendamento(id, resposta) {
-      const mensagem = resposta === "aceito"
-        ? "Deseja aceitar este atendimento?"
-        : "Deseja recusar este atendimento?";
-
-      if (!confirm(mensagem)) {
-        return;
-      }
-
-      try {
-        const requisicao = await fetch(
-          `/me/agendamentos/${id}/resposta`,
-          {
-            method: "PUT",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              resposta
-            })
+                  <button
+                    class="reject-button"
+                    type="button"
+                    onclick="responderAgendamento(
+                      ${Number(item.id)},
+                      'recusado'
+                    )"
+                  >
+                    Recusar
+                  </button>
+                </div>
+              `
+              : ""
           }
-        );
+        </article>
+      `;
+    }).join("");
+  }
 
-        const dados = await requisicao.json();
+  async function responderAgendamento(id, resposta) {
+    const mensagem = resposta === "aceito"
+      ? "Deseja aceitar este atendimento?"
+      : "Deseja recusar este atendimento?";
 
-        if (!requisicao.ok || dados.erro) {
-          throw new Error(
-            dados.erro || "Não foi possível responder."
-          );
-        }
-
-        await carregarAgendamentos();
-
-        alert(
-          resposta === "aceito"
-            ? "Atendimento aceito."
-            : "Atendimento recusado."
-        );
-      } catch (erro) {
-        alert(erro.message);
-      }
+    if (!window.confirm(mensagem)) {
+      return;
     }
 
-    function atualizarResumo() {
-      const pendentes = agendamentos.filter(item => {
-        return (item.status_resposta || "pendente") === "pendente";
-      });
-
-      const aceitos = agendamentos.filter(item => {
-        return (item.status_resposta || "") === "aceito";
-      });
-
-      const concluidos = agendamentos.filter(item => {
-        return (item.status_resposta || "") === "concluido";
-      });
-
-      const comissaoAceita = aceitos.reduce(
-        (total, item) => {
-          return total + Number(item.valor_comissao || 0);
-        },
-        0
+    try {
+      const respostaHttp = await fetch(
+        `/me/agendamentos/${Number(id)}/resposta`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            resposta
+          })
+        }
       );
 
-      const comissaoConcluida = concluidos.reduce(
-        (total, item) => {
-          return total + Number(item.valor_comissao || 0);
-        },
-        0
-      );
-
-      document.getElementById("totalPendentes").textContent =
-        pendentes.length;
-
-      document.getElementById("totalAceitos").textContent =
-        aceitos.length;
-
-      document.getElementById("comissaoConcluida").textContent =
-        dinheiro(comissaoConcluida);
-
-      document.getElementById("resumoAceitos").textContent =
-        aceitos.length;
-
-      document.getElementById("resumoConcluidos").textContent =
-        concluidos.length;
-
-      document.getElementById("resumoComissao").textContent =
-        dinheiro(comissaoConcluida);
-
-      document.getElementById("comissoesAceitas").textContent =
-        dinheiro(comissaoAceita);
-
-      document.getElementById("comissoesConcluidas").textContent =
-        dinheiro(comissaoConcluida);
-
-      document.getElementById("servicosRealizados").textContent =
-        concluidos.length;
-    }
-
-    function renderizarComissoes() {
-      const tabela = document.getElementById("tabelaComissoes");
-
-      const itens = agendamentos.filter(item => {
-        return (item.status_resposta || "") !== "recusado";
-      });
-
-      if (!itens.length) {
-        tabela.innerHTML = `
-          <tr>
-            <td colspan="6" class="empty">
-              Nenhuma comissão disponível.
-            </td>
-          </tr>
-        `;
-
-        return;
-      }
-
-      tabela.innerHTML = itens.map(item => {
-        const status = item.status_resposta || "pendente";
-
-        return `
-          <tr>
-            <td>${escaparHTML(item.data || "-")}</td>
-            <td>${escaparHTML(item.horario || "-")}</td>
-            <td>${escaparHTML(item.local || "-")}</td>
-            <td>
-              ${escaparHTML(formatarServico(item.tipo_servico))}
-            </td>
-            <td>
-              <strong style="color:var(--green)">
-                ${dinheiro(item.valor_comissao)}
-              </strong>
-            </td>
-            <td>
-              <span class="status ${classeStatus(status)}">
-                ${formatarStatus(status)}
-              </span>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    async function carregarPerfil() {
-      try {
-        const resposta = await fetch("/meu-perfil", {
-          credentials: "include"
-        });
-
-        if (!resposta.ok) {
-          return;
-        }
-
-        const perfil = await resposta.json();
-
-        document.getElementById("perfilUsuario").textContent =
-          perfil.usuario || usuarioNome || "-";
-      } catch {
-        document.getElementById("perfilUsuario").textContent =
-          usuarioNome || "-";
-      }
-    }
-
-    async function sair() {
-      try {
-        await fetch("/logout", {
-          method: "POST",
-          credentials: "include"
-        });
-      } finally {
+      if (respostaHttp.status === 401) {
         sessionStorage.clear();
         window.location.href = "/";
+        return;
       }
+
+      const dados = await respostaHttp.json();
+
+      if (!respostaHttp.ok || dados.erro) {
+        throw new Error(
+          dados.erro || "Não foi possível responder."
+        );
+      }
+
+      await carregarAgendamentos();
+
+      window.alert(
+        resposta === "aceito"
+          ? "Atendimento aceito."
+          : "Atendimento recusado."
+      );
+
+    } catch (erro) {
+      window.alert(erro.message);
+    }
+  }
+
+  function atualizarResumo() {
+    const pendentes = agendamentos.filter(item => {
+      return (
+        item.status_resposta || "pendente"
+      ) === "pendente";
+    });
+
+    const aceitos = agendamentos.filter(item => {
+      return item.status_resposta === "aceito";
+    });
+
+    const concluidos = agendamentos.filter(item => {
+      return item.status_resposta === "concluido";
+    });
+
+    const comissaoAceita = aceitos.reduce(
+      (total, item) => {
+        return total + Number(item.valor_comissao || 0);
+      },
+      0
+    );
+
+    const comissaoConcluida = concluidos.reduce(
+      (total, item) => {
+        return total + Number(item.valor_comissao || 0);
+      },
+      0
+    );
+
+    document.getElementById("totalPendentes").textContent =
+      pendentes.length;
+
+    document.getElementById("totalAceitos").textContent =
+      aceitos.length;
+
+    document.getElementById("comissaoConcluida").textContent =
+      dinheiro(comissaoConcluida);
+
+    document.getElementById("resumoAceitos").textContent =
+      aceitos.length;
+
+    document.getElementById("resumoConcluidos").textContent =
+      concluidos.length;
+
+    document.getElementById("resumoComissao").textContent =
+      dinheiro(comissaoConcluida);
+
+    document.getElementById("comissoesAceitas").textContent =
+      dinheiro(comissaoAceita);
+
+    document.getElementById("comissoesConcluidas").textContent =
+      dinheiro(comissaoConcluida);
+
+    document.getElementById("servicosRealizados").textContent =
+      concluidos.length;
+  }
+
+  function renderizarComissoes() {
+    const tabela = document.getElementById(
+      "tabelaComissoes"
+    );
+
+    const itens = agendamentos.filter(item => {
+      return item.status_resposta !== "recusado";
+    });
+
+    if (!itens.length) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty">
+            Nenhuma comissão disponível.
+          </td>
+        </tr>
+      `;
+
+      return;
     }
 
-    function protegerPagina() {
-      if (!usuarioId || !usuarioNome || tipoUsuario === "admin") {
+    tabela.innerHTML = itens.map(item => {
+      const status = item.status_resposta || "pendente";
+
+      return `
+        <tr>
+          <td>
+            ${escaparHTML(item.data || "-")}
+          </td>
+
+          <td>
+            ${escaparHTML(item.horario || "-")}
+          </td>
+
+          <td>
+            ${escaparHTML(item.local || "-")}
+          </td>
+
+          <td>
+            ${escaparHTML(
+              formatarServico(item.tipo_servico)
+            )}
+          </td>
+
+          <td>
+            <strong style="color:var(--green)">
+              ${dinheiro(item.valor_comissao)}
+            </strong>
+          </td>
+
+          <td>
+            <span class="status ${classeStatus(status)}">
+              ${formatarStatus(status)}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function carregarPerfil() {
+    try {
+      const resposta = await fetch("/meu-perfil", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (resposta.status === 401) {
+        sessionStorage.clear();
         window.location.href = "/";
-        return false;
+        return;
       }
 
-      return true;
+      if (!resposta.ok) {
+        return;
+      }
+
+      const perfil = await resposta.json();
+
+      document.getElementById("perfilUsuario").textContent =
+        perfil.usuario || usuarioNome || "-";
+
+    } catch {
+      document.getElementById("perfilUsuario").textContent =
+        usuarioNome || "-";
+    }
+  }
+
+  async function sair() {
+    try {
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+    } finally {
+      sessionStorage.clear();
+      window.location.href = "/";
+    }
+  }
+
+  function protegerPagina() {
+    if (
+      !usuarioId ||
+      !usuarioNome ||
+      tipoUsuario === "admin"
+    ) {
+      sessionStorage.clear();
+      window.location.href = "/";
+      return false;
     }
 
-    document.getElementById("filtroData").value = dataAtual();
+    return true;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("filtroData").value =
+      dataAtual();
 
     document.getElementById("nomeUsuario").textContent =
       usuarioNome || "Funcionário";
 
     document.getElementById("avatarUsuario").textContent =
-      (usuarioNome || "F").substring(0, 2).toUpperCase();
+      (usuarioNome || "F")
+        .substring(0, 2)
+        .toUpperCase();
 
     if (protegerPagina()) {
       carregarAgendamentos();
       carregarPerfil();
     }
-  </script>
-</body>
-</html>
+  });
+</script>
