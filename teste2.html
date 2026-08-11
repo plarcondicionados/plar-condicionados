@@ -18,11 +18,11 @@
 
   <style>
     :root {
-      --background: #071014;
+      --bg: #071014;
       --sidebar: #09171d;
-      --surface: rgba(14, 29, 36, .95);
-      --surface-light: #142b34;
-      --border: rgba(255, 255, 255, .10);
+      --surface: #0e1d24;
+      --surface-2: #142d36;
+      --border: rgba(255,255,255,.1);
       --text: #f1f8fa;
       --muted: #91a7ae;
       --blue: #1499dc;
@@ -30,7 +30,7 @@
       --gold: #c6a052;
       --green: #38d889;
       --red: #ff6674;
-      --shadow: 0 18px 45px rgba(0, 0, 0, .25);
+      --orange: #e6a43d;
     }
 
     * {
@@ -39,26 +39,13 @@
       padding: 0;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
     body {
       min-height: 100vh;
       color: var(--text);
       font-family: Inter, Arial, sans-serif;
       background:
-        linear-gradient(
-          135deg,
-          rgba(4, 14, 18, .96),
-          rgba(5, 29, 38, .92)
-        ),
+        linear-gradient(135deg, rgba(4,14,18,.96), rgba(5,29,38,.94)),
         url("fundo-plar.png") center / cover fixed no-repeat;
-    }
-
-    body.modo-compacto td {
-      padding-top: 8px;
-      padding-bottom: 8px;
     }
 
     button,
@@ -76,36 +63,33 @@
       min-height: 100vh;
     }
 
-    /* MENU LATERAL */
-
     .sidebar {
       position: fixed;
       inset: 0 auto 0 0;
-      z-index: 20;
-      width: 250px;
-      padding: 22px 16px;
-      background: rgba(7, 19, 25, .97);
+      z-index: 10;
+      width: 245px;
+      padding: 22px 15px;
+      background: rgba(7,19,25,.98);
       border-right: 1px solid var(--border);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 11px;
-      padding: 3px 8px 28px;
+      gap: 10px;
+      padding: 5px 8px 28px;
     }
 
     .brand img {
       width: 48px;
       height: 48px;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 10px;
     }
 
     .brand strong {
       display: block;
       font-size: 17px;
-      letter-spacing: .5px;
     }
 
     .brand small {
@@ -113,15 +97,15 @@
       margin-top: 4px;
       color: var(--blue-light);
       font-size: 9px;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.3px;
     }
 
     .menu-title {
-      padding: 16px 12px 8px;
+      padding: 15px 12px 8px;
       color: #627c84;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
     }
 
@@ -140,109 +124,96 @@
       text-align: left;
       background: transparent;
       border: 0;
-      border-radius: 10px;
-      transition: .2s;
+      border-radius: 9px;
     }
 
     .nav button:hover,
     .nav button.active {
       color: white;
-      background: linear-gradient(
-        90deg,
-        rgba(20, 153, 220, .23),
-        rgba(20, 153, 220, .04)
-      );
-    }
-
-    .nav button.active {
+      background: rgba(20,153,220,.16);
       box-shadow: inset 3px 0 var(--blue);
     }
 
     .sidebar-footer {
       position: absolute;
-      right: 16px;
+      right: 15px;
       bottom: 20px;
-      left: 16px;
-      padding: 14px;
+      left: 15px;
+      padding: 13px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.5;
-      background: rgba(255, 255, 255, .035);
+      background: rgba(255,255,255,.035);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 11px;
     }
-
-    /* ÁREA PRINCIPAL */
 
     .main {
-      width: calc(100% - 250px);
-      margin-left: 250px;
-      padding: 28px 34px 50px;
+      width: calc(100% - 245px);
+      margin-left: 245px;
+      padding: 27px 32px 50px;
     }
 
-    .topbar {
+    .topbar,
+    .page-title,
+    .panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 30px;
+      gap: 18px;
+    }
+
+    .topbar {
+      margin-bottom: 28px;
     }
 
     .topbar h1 {
       font-size: 27px;
-      letter-spacing: -.7px;
     }
 
-    .topbar p {
-      margin-top: 6px;
+    .topbar p,
+    .page-title p,
+    .panel-header p {
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
-    .top-actions,
     .profile {
       display: flex;
       align-items: center;
-      gap: 11px;
-    }
-
-    .icon-button {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-
-    .icon-button:hover {
-      color: white;
-      border-color: var(--blue);
+      gap: 10px;
     }
 
     .avatar {
       display: grid;
       place-items: center;
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       color: white;
-      font-weight: 700;
+      font-weight: 800;
       background: linear-gradient(135deg, var(--blue), #125778);
       border-radius: 50%;
     }
 
     .profile small {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
     }
 
-    /* ABAS */
+    .logout {
+      margin-left: 12px;
+      padding: 8px 11px;
+      color: var(--red);
+      font-size: 11px;
+      background: transparent;
+      border: 1px solid rgba(255,102,116,.35);
+      border-radius: 7px;
+    }
 
     .page {
       display: none;
-      animation: aparecer .25s ease;
+      animation: aparecer .2s ease;
     }
 
     .page.active {
@@ -252,7 +223,7 @@
     @keyframes aparecer {
       from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(7px);
       }
 
       to {
@@ -262,174 +233,71 @@
     }
 
     .page-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 24px;
+      align-items: flex-start;
+      margin-bottom: 22px;
     }
 
     .page-title h2 {
-      margin-bottom: 6px;
-      font-size: 25px;
+      font-size: 24px;
     }
-
-    .page-title p {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    /* CARDS */
 
     .metrics {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 22px;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
     .metric {
-      position: relative;
-      min-height: 130px;
-      padding: 20px;
-      overflow: hidden;
+      min-height: 120px;
+      padding: 19px;
       background: linear-gradient(145deg, #142d36, #0b1c23);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .metric::after {
-      position: absolute;
-      right: -35px;
-      bottom: -40px;
-      width: 110px;
-      height: 110px;
-      content: "";
-      background: rgba(20, 153, 220, .11);
-      border-radius: 50%;
-    }
-
-    .metric-icon {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      color: var(--blue-light);
+      border-radius: 15px;
     }
 
     .metric-label {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .metric-value {
       display: block;
-      margin-top: 13px;
-      font-size: 25px;
+      margin-top: 12px;
+      font-size: 24px;
       font-weight: 800;
     }
 
     .metric-footer {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      color: var(--green);
-      font-size: 11px;
+      margin-top: 9px;
+      color: var(--blue-light);
+      font-size: 10px;
     }
 
     .content-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(290px, .8fr);
-      gap: 20px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr);
+      gap: 18px;
       align-items: start;
     }
 
     .panel {
-      padding: 21px;
-      background: var(--surface);
+      padding: 20px;
+      background: rgba(14,29,36,.97);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .large-panel {
-      max-width: 1150px;
+      border-radius: 15px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.2);
     }
 
     .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .panel-header h3 {
       font-size: 16px;
     }
 
-    .panel-header p {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    /* BOTÕES E FORMULÁRIOS */
-
-    .primary-button,
-    .secondary-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 11px 15px;
-      border-radius: 9px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .primary-button {
-      color: white;
-      background: linear-gradient(135deg, var(--blue), #126e9c);
-      border: 0;
-      box-shadow: 0 7px 20px rgba(20, 153, 220, .2);
-    }
-
-    .primary-button:hover {
-      filter: brightness(1.12);
-      transform: translateY(-1px);
-    }
-
-    .secondary-button {
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid var(--border);
-    }
-
-    .secondary-button:hover {
-      color: white;
-      border-color: var(--blue);
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 11px 12px;
-      color: var(--text);
-      background: #09171d;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(20, 153, 220, .12);
-    }
-
-    .service-form {
+    .form-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 13px;
@@ -446,31 +314,81 @@
       font-weight: 600;
     }
 
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #09171d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(20,153,220,.12);
+    }
+
     .form-actions {
       display: flex;
       grid-column: 1 / -1;
       justify-content: flex-end;
-      gap: 9px;
-      margin-top: 4px;
+      gap: 8px;
+      margin-top: 5px;
     }
 
-    .employee-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr 130px auto;
-      gap: 9px;
-      margin-bottom: 18px;
+    .primary,
+    .secondary,
+    .danger,
+    .success,
+    .warning {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
     }
 
-    /* TABELAS */
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--blue), #126e9c);
+      border: 0;
+    }
+
+    .secondary {
+      color: var(--blue-light);
+      background: transparent;
+      border: 1px solid rgba(90,203,255,.35);
+    }
+
+    .danger {
+      color: var(--red);
+      background: transparent;
+      border: 1px solid rgba(255,102,116,.35);
+    }
+
+    .success {
+      color: #06150e;
+      background: var(--green);
+      border: 0;
+    }
+
+    .warning {
+      color: #241902;
+      background: var(--orange);
+      border: 0;
+    }
 
     .filters {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
       gap: 9px;
-      margin-bottom: 17px;
-    }
-
-    .filters > * {
-      flex: 1;
+      margin-bottom: 16px;
     }
 
     .table-container {
@@ -479,81 +397,122 @@
 
     table {
       width: 100%;
-      min-width: 760px;
+      min-width: 1100px;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     th {
-      padding: 12px 10px;
+      padding: 12px 9px;
       color: #76939b;
-      font-size: 10px;
-      letter-spacing: .7px;
+      font-size: 9px;
+      letter-spacing: .5px;
       text-align: left;
       text-transform: uppercase;
       border-bottom: 1px solid var(--border);
     }
 
     td {
-      padding: 14px 10px;
+      padding: 13px 9px;
       color: #d9e7ea;
-      border-bottom: 1px solid rgba(255, 255, 255, .055);
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(255,255,255,.055);
     }
 
     tr:hover td {
-      background: rgba(20, 153, 220, .04);
+      background: rgba(20,153,220,.04);
     }
 
     .status {
       display: inline-flex;
       padding: 5px 8px;
-      color: var(--green);
-      font-size: 10px;
-      font-weight: 700;
-      background: rgba(56, 216, 137, .1);
       border-radius: 20px;
+      font-size: 9px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    .delete {
+    .status-pendente {
+      color: var(--orange);
+      background: rgba(230,164,61,.12);
+    }
+
+    .status-aceito {
+      color: var(--green);
+      background: rgba(56,216,137,.12);
+    }
+
+    .status-recusado,
+    .status-cancelado {
       color: var(--red);
-      font-size: 11px;
-      background: transparent;
-      border: 0;
+      background: rgba(255,102,116,.12);
     }
 
-    .delete:hover {
-      text-decoration: underline;
+    .status-em_andamento {
+      color: var(--gold);
+      background: rgba(198,160,82,.12);
     }
 
-    .empty {
-      padding: 28px 10px;
+    .status-concluido {
+      color: var(--blue-light);
+      background: rgba(20,153,220,.12);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .actions button {
+      padding: 6px 8px;
+      font-size: 9px;
+    }
+
+    .summary {
+      display: grid;
+      gap: 15px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
       color: var(--muted);
       font-size: 12px;
-      text-align: center;
     }
 
-    /* FUNCIONÁRIOS */
+    .summary-row strong {
+      color: var(--text);
+      text-align: right;
+    }
+
+    .summary-row.highlight strong {
+      color: var(--green);
+      font-size: 19px;
+    }
 
     .employee-list {
       display: grid;
       gap: 9px;
+      margin-top: 20px;
     }
 
     .employee {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       padding: 12px;
-      background: rgba(255, 255, 255, .025);
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 10px;
     }
 
     .employee-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     .employee-avatar {
@@ -562,206 +521,71 @@
       width: 34px;
       height: 34px;
       color: white;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       background: linear-gradient(135deg, var(--gold), #765c21);
-      border-radius: 9px;
+      border-radius: 8px;
     }
 
-    .employee strong {
+    .employee-info strong {
       display: block;
       font-size: 12px;
     }
 
-    .employee small {
+    .employee-info small {
       color: var(--muted);
       font-size: 10px;
     }
 
-    .commission {
-      color: var(--blue-light);
-      font-size: 11px;
-      font-weight: 700;
+    .employee-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .percentage-input {
+    .percentage {
       width: 75px;
-      padding: 7px 8px;
+      padding: 7px;
       text-align: center;
     }
 
-    /* FINANCEIRO */
-
     .chart-wrapper {
       position: relative;
-      height: 340px;
+      height: 330px;
     }
 
-    .balance {
+    .export-grid {
       display: grid;
-      gap: 15px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
     }
 
-    .balance-row {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .balance-row strong {
-      color: var(--text);
-    }
-
-    .balance-row.profit strong {
-      color: var(--green);
-      font-size: 19px;
-    }
-
-    .progress {
-      height: 7px;
-      overflow: hidden;
-      background: #061116;
-      border-radius: 10px;
-    }
-
-    .progress span {
-      display: block;
-      width: 72%;
-      height: 100%;
-      background: linear-gradient(90deg, var(--blue), var(--blue-light));
-      border-radius: inherit;
-    }
-
-    .resultado-balanco {
-      padding: 17px;
-      color: var(--muted);
-      background: #09171d;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 13px;
-    }
-
-    .resultado-balanco p {
-      margin: 7px 0;
-    }
-
-    .resultado-balanco .faturamento {
-      color: var(--blue-light);
-      font-weight: 700;
-    }
-
-    .resultado-balanco .comissao {
-      color: var(--gold);
-      font-weight: 700;
-    }
-
-    .resultado-balanco .lucro {
-      color: var(--green);
-      font-weight: 700;
-    }
-
-    /* CONFIGURAÇÕES E EXPORTAÇÃO */
-
-    .settings-grid,
-    .export-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    .setting-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 18px;
-      background: rgba(255, 255, 255, .025);
+    .export-card {
+      padding: 20px;
+      background: rgba(255,255,255,.025);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
 
-    .setting-item strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 13px;
-    }
-
-    .setting-item span {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .switch {
-      position: relative;
-      flex-shrink: 0;
-      width: 44px;
-      height: 24px;
-    }
-
-    .switch input {
-      display: none;
-    }
-
-    .slider {
-      position: absolute;
-      inset: 0;
-      cursor: pointer;
-      background: #263940;
-      border-radius: 20px;
-      transition: .2s;
-    }
-
-    .slider::before {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 18px;
-      height: 18px;
-      content: "";
-      background: white;
-      border-radius: 50%;
-      transition: .2s;
-    }
-
-    .switch input:checked + .slider {
-      background: var(--blue);
-    }
-
-    .switch input:checked + .slider::before {
-      transform: translateX(20px);
-    }
-
-    .export-options {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .export-card {
-      padding: 22px;
-      background: rgba(255, 255, 255, .025);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
-
     .export-card h3 {
-      margin: 12px 0 7px;
+      margin-bottom: 8px;
       font-size: 14px;
     }
 
     .export-card p {
       min-height: 40px;
-      margin-bottom: 17px;
+      margin-bottom: 15px;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
     }
 
-    .export-icon {
-      color: var(--blue-light);
-      font-size: 25px;
+    .empty,
+    .loading {
+      padding: 30px 10px;
+      color: var(--muted);
+      text-align: center;
     }
-
-    /* RESPONSIVO */
 
     @media (max-width: 1100px) {
       .metrics {
@@ -772,15 +596,15 @@
         grid-template-columns: 1fr;
       }
 
-      .export-options {
+      .export-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
     @media (max-width: 760px) {
       .sidebar {
-        width: 70px;
-        padding: 15px 9px;
+        width: 68px;
+        padding: 15px 8px;
       }
 
       .brand {
@@ -795,8 +619,9 @@
 
       .brand div,
       .menu-title,
-      .nav button span,
-      .sidebar-footer {
+      .nav button span:last-child,
+      .sidebar-footer,
+      .profile {
         display: none;
       }
 
@@ -806,46 +631,20 @@
       }
 
       .main {
-        width: calc(100% - 70px);
-        margin-left: 70px;
-        padding: 22px 15px 35px;
+        width: calc(100% - 68px);
+        margin-left: 68px;
+        padding: 22px 14px 35px;
       }
 
       .topbar h1 {
         font-size: 21px;
       }
 
-      .profile {
-        display: none;
-      }
-
-      .metrics {
-        gap: 10px;
-      }
-
-      .metric {
-        min-height: 112px;
-        padding: 14px;
-      }
-
-      .metric-value {
-        font-size: 20px;
-      }
-
-      .service-form,
-      .employee-form,
-      .settings-grid,
-      .export-options {
+      .metrics,
+      .form-grid,
+      .filters,
+      .export-grid {
         grid-template-columns: 1fr;
-      }
-
-      .form-actions {
-        display: grid;
-        grid-column: auto;
-      }
-
-      .filters {
-        display: grid;
       }
 
       .page-title {
@@ -853,13 +652,21 @@
         flex-direction: column;
       }
 
-      .employee {
-        align-items: flex-start;
-        flex-wrap: wrap;
+      .form-actions {
+        display: grid;
       }
 
-      .chart-wrapper {
-        height: 280px;
+      .employee {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .employee-tools {
+        width: 100%;
+      }
+
+      .employee-tools .percentage {
+        flex: 1;
       }
     }
   </style>
@@ -867,18 +674,17 @@
 
 <body>
   <div class="app">
-
     <aside class="sidebar">
       <div class="brand">
         <img
           src="logo-plar.png.png"
-          alt="Logo PLAR Condicionados"
-          onerror="this.onerror=null; this.src='logoplarpng.png'"
+          alt="Logo PLAR"
+          onerror="this.onerror=null;this.src='logoplarpng.png'"
         >
 
         <div>
           <strong>PLAR ERP</strong>
-          <small>GESTÃO INTELIGENTE</small>
+          <small>ADMINISTRAÇÃO</small>
         </div>
       </div>
 
@@ -909,14 +715,10 @@
           <span>R$</span>
           <span>Financeiro</span>
         </button>
-      </nav>
 
-      <div class="menu-title">Sistema</div>
-
-      <nav class="nav">
-        <button data-page="configuracoes">
-          <span>⚙</span>
-          <span>Configurações</span>
+        <button data-page="auditoria">
+          <span>⌁</span>
+          <span>Histórico</span>
         </button>
 
         <button data-page="exportacao">
@@ -927,7 +729,7 @@
 
       <div class="sidebar-footer">
         <strong>PLAR Condicionados</strong><br>
-        Gestão operacional de serviços e manutenção.
+        Gestão operacional de serviços.
       </div>
     </aside>
 
@@ -940,47 +742,32 @@
           </p>
         </div>
 
-        <div class="top-actions">
-          <button
-            class="icon-button"
-            type="button"
-            onclick="mostrarNotificacoes()"
-            title="Notificações"
-          >
-            🔔
-          </button>
+        <div class="profile">
+          <div class="avatar">PL</div>
 
-          <div class="profile">
-            <div class="avatar">PL</div>
-
-            <div>
-              <strong>Administrador</strong><br>
-              <small>Acesso administrativo</small>
-            </div>
+          <div>
+            <strong>Administrador</strong><br>
+            <small>Acesso administrativo</small>
           </div>
+
+          <button class="logout" onclick="sair()">
+            Sair
+          </button>
         </div>
       </header>
-
-      <!-- DASHBOARD -->
 
       <section class="page active" id="page-dashboard">
         <div class="metrics">
           <article class="metric">
-            <span class="metric-label">Atendimentos registrados</span>
+            <span class="metric-label">Atendimentos</span>
             <strong class="metric-value" id="totalAtendimentos">0</strong>
-
-            <div class="metric-footer">
-              ✓ Operação atualizada
-            </div>
+            <div class="metric-footer">Todos os registros</div>
           </article>
 
           <article class="metric">
             <span class="metric-label">Funcionários ativos</span>
             <strong class="metric-value" id="totalFuncionarios">0</strong>
-
-            <div class="metric-footer">
-              ✓ Equipe operacional
-            </div>
+            <div class="metric-footer">Equipe operacional</div>
           </article>
 
           <article class="metric">
@@ -988,10 +775,7 @@
             <strong class="metric-value" id="faturamentoTotal">
               R$ 0,00
             </strong>
-
-            <div class="metric-footer">
-              ↑ Visão financeira
-            </div>
+            <div class="metric-footer">Calculado pelo servidor</div>
           </article>
 
           <article class="metric">
@@ -999,109 +783,126 @@
             <strong class="metric-value" id="lucroTotal">
               R$ 0,00
             </strong>
-
-            <div class="metric-footer">
-              ↑ Após comissões
-            </div>
+            <div class="metric-footer">Após custos e comissões</div>
           </article>
         </div>
 
         <div class="content-grid">
-          <div class="panel">
+          <section class="panel">
             <div class="panel-header">
               <div>
                 <h3>Resumo da operação</h3>
-                <p>Principais dados do sistema.</p>
+                <p>Status atual dos atendimentos.</p>
               </div>
             </div>
 
-            <div class="balance">
-              <div class="balance-row">
-                <span>Total de atendimentos</span>
-                <strong id="resumoAtendimentos">0</strong>
+            <div class="summary">
+              <div class="summary-row">
+                <span>Atendimentos pendentes</span>
+                <strong id="resumoPendentes">0</strong>
               </div>
 
-              <div class="balance-row">
-                <span>Funcionários cadastrados</span>
-                <strong id="resumoFuncionarios">0</strong>
+              <div class="summary-row">
+                <span>Atendimentos aceitos</span>
+                <strong id="resumoAceitos">0</strong>
               </div>
 
-              <div class="balance-row">
-                <span>Faturamento</span>
-                <strong id="resumoFaturamento">R$ 0,00</strong>
+              <div class="summary-row">
+                <span>Em andamento</span>
+                <strong id="resumoAndamento">0</strong>
               </div>
 
-              <div class="progress">
-                <span></span>
+              <div class="summary-row">
+                <span>Concluídos</span>
+                <strong id="resumoConcluidos">0</strong>
+              </div>
+
+              <div class="summary-row">
+                <span>Comissões pendentes</span>
+                <strong id="resumoComissoesPendentes">
+                  R$ 0,00
+                </strong>
+              </div>
+
+              <div class="summary-row highlight">
+                <span>Comissões concluídas</span>
+                <strong id="resumoComissoesConcluidas">
+                  R$ 0,00
+                </strong>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="panel">
+          <section class="panel">
             <div class="panel-header">
               <div>
                 <h3>Ações rápidas</h3>
-                <p>Acesse os recursos mais usados.</p>
+                <p>Recursos mais utilizados.</p>
               </div>
             </div>
 
-            <div style="display:grid;gap:10px">
+            <div style="display:grid;gap:9px">
               <button
-                class="primary-button"
-                type="button"
+                class="primary"
                 onclick="abrirPagina('atendimento')"
               >
                 ＋ Novo atendimento
               </button>
 
               <button
-                class="secondary-button"
-                type="button"
+                class="secondary"
                 onclick="abrirPagina('escala')"
               >
                 ▣ Ver escala
               </button>
 
               <button
-                class="secondary-button"
-                type="button"
+                class="secondary"
                 onclick="abrirPagina('financeiro')"
               >
                 R$ Ver financeiro
               </button>
             </div>
-          </div>
+          </section>
         </div>
       </section>
-
-      <!-- NOVO ATENDIMENTO -->
 
       <section class="page" id="page-atendimento">
         <div class="page-title">
           <div>
             <h2>Novo atendimento</h2>
-            <p>Agende uma visita técnica ou serviço.</p>
+            <p>Cadastre cliente, agenda, serviço, custo e funcionário.</p>
           </div>
         </div>
 
-        <div class="panel large-panel">
-          <form class="service-form" id="formAtendimento">
+        <section class="panel">
+          <form class="form-grid" id="formAtendimento">
             <div class="field">
-              <label for="nome">Funcionário responsável</label>
+              <label for="cliente">Cliente</label>
               <input
-                id="nome"
+                id="cliente"
                 type="text"
-                placeholder="Nome do funcionário"
+                placeholder="Nome do cliente"
                 required
               >
             </div>
 
             <div class="field">
-              <label for="local">Cliente ou local do serviço</label>
+              <label for="nome">Funcionário responsável</label>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Usuário cadastrado"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="local">Local do serviço</label>
               <input
                 id="local"
                 type="text"
-                placeholder="Ex.: Loja Centro"
+                placeholder="Endereço ou unidade"
                 required
               >
             </div>
@@ -1111,20 +912,25 @@
               <input
                 id="data"
                 type="date"
-                min="2026-01-01"
-                max="2028-12-31"
                 required
               >
             </div>
 
             <div class="field">
               <label for="horario">Horário</label>
-              <input id="horario" type="time" required>
+              <input
+                id="horario"
+                type="time"
+                min="08:00"
+                max="17:30"
+                step="1800"
+                required
+              >
             </div>
 
             <div class="field">
               <label for="tipoServico">Tipo de serviço</label>
-              <select id="tipoServico">
+              <select id="tipoServico" required>
                 <option value="limpeza">Limpeza</option>
                 <option value="automacao">Automação</option>
                 <option value="manutencao">Manutenção</option>
@@ -1141,7 +947,21 @@
                 id="quantidadeAparelhos"
                 type="number"
                 min="1"
+                step="1"
                 placeholder="Ex.: 4"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="custo">Custo do serviço</label>
+
+              <input
+                id="custo"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
                 required
               >
             </div>
@@ -1149,46 +969,48 @@
             <div class="form-actions">
               <button
                 type="reset"
-                class="secondary-button"
+                class="secondary"
               >
                 Limpar campos
               </button>
 
               <button
                 type="submit"
-                class="primary-button"
+                class="primary"
               >
                 ＋ Adicionar atendimento
               </button>
             </div>
           </form>
-        </div>
+        </section>
       </section>
-
-      <!-- ESCALA -->
 
       <section class="page" id="page-escala">
         <div class="page-title">
           <div>
             <h2>Escala de serviços</h2>
-            <p>Visualize e gerencie os atendimentos programados.</p>
+            <p>Gerencie agenda, status, custos e comissões.</p>
           </div>
 
           <button
-            class="secondary-button"
-            type="button"
-            onclick="exportarTxt()"
+            class="secondary"
+            onclick="carregarAtendimentos()"
           >
-            ⇩ Exportar escala
+            ↻ Atualizar
           </button>
         </div>
 
-        <div class="panel large-panel">
+        <section class="panel">
           <div class="filters">
             <input
-              type="search"
               id="filtroTabela"
-              placeholder="Buscar por funcionário ou local..."
+              type="search"
+              placeholder="Buscar cliente, funcionário ou local"
+            >
+
+            <input
+              id="filtroDataEscala"
+              type="date"
             >
 
             <select id="filtroServico">
@@ -1198,299 +1020,261 @@
               <option value="manutencao">Manutenção</option>
               <option value="instalacao">Instalação</option>
             </select>
+
+            <select id="filtroStatus">
+              <option value="">Todos os status</option>
+              <option value="pendente">Pendente</option>
+              <option value="aceito">Aceito</option>
+              <option value="recusado">Recusado</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
           </div>
 
           <div class="table-container">
             <table>
               <thead>
                 <tr>
+                  <th>Cliente</th>
                   <th>Funcionário</th>
                   <th>Local</th>
                   <th>Data</th>
                   <th>Horário</th>
                   <th>Serviço</th>
-                  <th>Aparelhos</th>
                   <th>Valor</th>
+                  <th>Comissão</th>
                   <th>Status</th>
-                  <th>Ação</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
 
               <tbody id="corpoTabela"></tbody>
             </table>
           </div>
-        </div>
+        </section>
       </section>
-
-      <!-- FUNCIONÁRIOS -->
 
       <section class="page" id="page-funcionarios">
         <div class="page-title">
           <div>
             <h2>Funcionários</h2>
-            <p>Gerencie sua equipe e suas comissões.</p>
+            <p>Cadastre usuários e configure comissões.</p>
           </div>
         </div>
 
-        <div class="panel large-panel">
-          <form class="employee-form" id="formFuncionario">
-            <input
-              id="novoUsuario"
-              type="text"
-              placeholder="Usuário"
-              required
-            >
-
-            <input
-              id="novaSenha"
-              type="password"
-              placeholder="Senha"
-              required
-            >
-
-            <input
-              id="novoPercentual"
-              type="number"
-              min="0"
-              max="100"
-              placeholder="% comissão"
-              required
-            >
-
-            <button class="primary-button" type="submit">
-              ＋ Cadastrar
-            </button>
-          </form>
-
-          <div class="employee-list" id="listaFuncionarios">
-            <div class="empty">Carregando equipe...</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- FINANCEIRO: ESTA É A ÚNICA ABA FINANCEIRA -->
-
-      <section class="page" id="page-financeiro">
-        <div class="metrics">
-          <article class="metric">
-            <span class="metric-label">Faturamento total</span>
-            <strong
-              class="metric-value"
-              id="financeiroFaturamentoGrande"
-            >
-              R$ 0,00
-            </strong>
-          </article>
-
-          <article class="metric">
-            <span class="metric-label">Total em comissões</span>
-            <strong
-              class="metric-value"
-              id="financeiroComissoesGrande"
-            >
-              R$ 0,00
-            </strong>
-          </article>
-
-          <article class="metric">
-            <span class="metric-label">Lucro estimado</span>
-            <strong
-              class="metric-value"
-              id="financeiroLucroGrande"
-            >
-              R$ 0,00
-            </strong>
-          </article>
-
-          <article class="metric">
-            <span class="metric-label">Atendimentos</span>
-            <strong
-              class="metric-value"
-              id="financeiroAtendimentos"
-            >
-              0
-            </strong>
-          </article>
-        </div>
-
-        <div class="content-grid">
-          <div class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Desempenho financeiro</h3>
-                <p>Faturamento, comissões e lucro por serviço.</p>
-              </div>
+        <section class="panel">
+          <form class="form-grid" id="formFuncionario">
+            <div class="field">
+              <label for="novoUsuario">Usuário</label>
+              <input id="novoUsuario" type="text" required>
             </div>
 
-            <div class="chart-wrapper">
-              <canvas id="graficoFinanceiro"></canvas>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Filtrar período</h3>
-                <p>Consulte os resultados por intervalo.</p>
-              </div>
+            <div class="field">
+              <label for="novaSenha">Senha</label>
+              <input id="novaSenha" type="password" required>
             </div>
 
-            <div class="filters" style="display:grid">
-              <input type="date" id="dataInicio">
-              <input type="date" id="dataFim">
+            <div class="field">
+              <label for="novoPercentual">
+                Percentual de comissão
+              </label>
 
-              <button
-                class="primary-button"
-                type="button"
-                onclick="calcularBalancoPersonalizado()"
+              <input
+                id="novoPercentual"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                required
               >
-                Calcular período
+            </div>
+
+            <div class="form-actions">
+              <button class="primary" type="submit">
+                ＋ Cadastrar funcionário
               </button>
             </div>
+          </form>
 
-            <div
-              class="resultado-balanco"
-              id="resultadoBalanco"
-            >
-              Selecione um período para visualizar os resultados.
-            </div>
-          </div>
-        </div>
+          <div id="listaFuncionarios" class="employee-list"></div>
+        </section>
       </section>
 
-      <!-- CONFIGURAÇÕES -->
-
-      <section class="page" id="page-configuracoes">
+      <section class="page" id="page-financeiro">
         <div class="page-title">
           <div>
-            <h2>Configurações</h2>
-            <p>Personalize o comportamento do sistema.</p>
+            <h2>Financeiro</h2>
+            <p>Valores calculados diretamente pelo servidor.</p>
           </div>
         </div>
 
-        <div class="panel large-panel">
-          <div class="settings-grid">
-            <div class="setting-item">
-              <div>
-                <strong>Notificações do sistema</strong>
-                <span>Receber alertas administrativos.</span>
-              </div>
+        <section class="panel">
+          <div class="filters">
+            <input id="dataInicio" type="date">
+            <input id="dataFim" type="date">
 
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  id="notificacoes"
-                  checked
-                >
-                <span class="slider"></span>
-              </label>
-            </div>
+            <button
+              class="primary"
+              onclick="carregarFinanceiro()"
+            >
+              Calcular período
+            </button>
 
-            <div class="setting-item">
-              <div>
-                <strong>Atualização automática</strong>
-                <span>Atualizar a escala automaticamente.</span>
-              </div>
-
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  id="atualizacaoAutomatica"
-                  checked
-                >
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="setting-item">
-              <div>
-                <strong>Modo compacto</strong>
-                <span>Reduzir espaçamento das tabelas.</span>
-              </div>
-
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  id="modoCompacto"
-                >
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="setting-item">
-              <div>
-                <strong>Confirmar exclusões</strong>
-                <span>Confirmar antes de apagar registros.</span>
-              </div>
-
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  id="confirmarExclusao"
-                  checked
-                >
-                <span class="slider"></span>
-              </label>
-            </div>
+            <button
+              class="secondary"
+              onclick="limparPeriodo()"
+            >
+              Período completo
+            </button>
           </div>
-        </div>
+
+          <div class="metrics">
+            <article class="metric">
+              <span class="metric-label">Faturamento</span>
+              <strong id="financeiroFaturamento" class="metric-value">
+                R$ 0,00
+              </strong>
+            </article>
+
+            <article class="metric">
+              <span class="metric-label">Custos</span>
+              <strong id="financeiroCustos" class="metric-value">
+                R$ 0,00
+              </strong>
+            </article>
+
+            <article class="metric">
+              <span class="metric-label">Comissões</span>
+              <strong id="financeiroComissoes" class="metric-value">
+                R$ 0,00
+              </strong>
+            </article>
+
+            <article class="metric">
+              <span class="metric-label">Lucro estimado</span>
+              <strong id="financeiroLucro" class="metric-value">
+                R$ 0,00
+              </strong>
+            </article>
+          </div>
+
+          <div class="content-grid">
+            <section class="panel">
+              <div class="summary">
+                <div class="summary-row">
+                  <span>Atendimentos</span>
+                  <strong id="financeiroAtendimentos">0</strong>
+                </div>
+
+                <div class="summary-row">
+                  <span>Comissões pendentes</span>
+                  <strong id="financeiroPendentes">
+                    R$ 0,00
+                  </strong>
+                </div>
+
+                <div class="summary-row highlight">
+                  <span>Comissões concluídas</span>
+                  <strong id="financeiroConcluidas">
+                    R$ 0,00
+                  </strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="chart-wrapper">
+                <canvas id="graficoFinanceiro"></canvas>
+              </div>
+            </section>
+          </div>
+        </section>
       </section>
 
-      <!-- EXPORTAÇÃO -->
+      <section class="page" id="page-auditoria">
+        <div class="page-title">
+          <div>
+            <h2>Histórico de alterações</h2>
+            <p>Registro das ações administrativas.</p>
+          </div>
+
+          <button class="secondary" onclick="carregarAuditoria()">
+            ↻ Atualizar
+          </button>
+        </div>
+
+        <section class="panel">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Usuário</th>
+                  <th>Ação</th>
+                  <th>Tabela</th>
+                  <th>Registro</th>
+                  <th>Detalhes</th>
+                </tr>
+              </thead>
+
+              <tbody id="corpoAuditoria"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
 
       <section class="page" id="page-exportacao">
         <div class="page-title">
           <div>
             <h2>Exportar dados</h2>
-            <p>Baixe os dados operacionais da PLAR.</p>
+            <p>Downloads protegidos pela sessão administrativa.</p>
           </div>
         </div>
 
-        <div class="panel large-panel">
-          <div class="export-options">
-            <div class="export-card">
-              <div class="export-icon">▣</div>
-              <h3>Escala de serviços</h3>
-              <p>Exporte todos os atendimentos cadastrados.</p>
+        <section class="panel">
+          <div class="export-grid">
+            <article class="export-card">
+              <h3>Atendimentos</h3>
+              <p>
+                Clientes, agenda, valores, custos,
+                comissões e status.
+              </p>
 
               <button
-                class="primary-button"
-                type="button"
-                onclick="exportarTxt()"
-              >
-                Exportar TXT
-              </button>
-            </div>
-
-            <div class="export-card">
-              <div class="export-icon">♙</div>
-              <h3>Funcionários</h3>
-              <p>Exporte a lista de funcionários e comissões.</p>
-
-              <button
-                class="primary-button"
-                type="button"
-                onclick="exportarFuncionarios()"
+                class="primary"
+                onclick="exportarAtendimentos()"
               >
                 Exportar CSV
               </button>
-            </div>
+            </article>
 
-            <div class="export-card">
-              <div class="export-icon">◆</div>
-              <h3>Backup completo</h3>
-              <p>Baixe um backup dos dados carregados.</p>
+            <article class="export-card">
+              <h3>Histórico</h3>
+              <p>
+                Ações administrativas realizadas no ERP.
+              </p>
 
               <button
-                class="primary-button"
-                type="button"
-                onclick="exportarBackup()"
+                class="primary"
+                onclick="exportarAuditoria()"
               >
-                Fazer backup
+                Exportar CSV
               </button>
-            </div>
+            </article>
+
+            <article class="export-card">
+              <h3>Escala</h3>
+              <p>
+                Baixe a escala atual em formato TXT.
+              </p>
+
+              <button class="primary" onclick="exportarTxt()">
+                Exportar TXT
+              </button>
+            </article>
           </div>
-        </div>
+        </section>
       </section>
     </main>
   </div>
@@ -1507,28 +1291,37 @@
       ],
       atendimento: [
         "Novo atendimento",
-        "Agende uma visita técnica ou serviço."
+        "Cadastre cliente, agenda, serviço e custos."
       ],
       escala: [
         "Escala de serviços",
-        "Visualize e gerencie os atendimentos programados."
+        "Gerencie agenda, status, custos e comissões."
       ],
       funcionarios: [
         "Funcionários",
-        "Gerencie sua equipe e suas comissões."
+        "Cadastre usuários e configure comissões."
       ],
       financeiro: [
         "Financeiro",
-        "Acompanhe faturamento, comissões e lucro."
+        "Valores calculados diretamente pelo servidor."
       ],
-      configuracoes: [
-        "Configurações",
-        "Personalize o comportamento do sistema."
+      auditoria: [
+        "Histórico de alterações",
+        "Registro das ações administrativas."
       ],
       exportacao: [
         "Exportar dados",
-        "Baixe os dados operacionais da PLAR."
+        "Downloads protegidos pela sessão."
       ]
+    };
+
+    const nomesStatus = {
+      pendente: "Pendente",
+      aceito: "Aceito",
+      recusado: "Recusado",
+      em_andamento: "Em andamento",
+      concluido: "Concluído",
+      cancelado: "Cancelado"
     };
 
     function dinheiro(valor) {
@@ -1558,21 +1351,58 @@
       return nomes[servico] || servico || "Outros";
     }
 
-    function abrirPagina(nome) {
-      document.querySelectorAll(".page").forEach(page => {
-        page.classList.remove("active");
+    function formatarStatus(status) {
+      return nomesStatus[status] || "Pendente";
+    }
+
+    function classeStatus(status) {
+      return "status-" + (status || "pendente");
+    }
+
+    async function api(url, opcoes = {}) {
+      const resposta = await fetch(url, {
+        credentials: "include",
+        ...opcoes
       });
 
+      if (resposta.status === 401) {
+        sessionStorage.clear();
+        window.location.href = "/";
+        throw new Error("Sessão expirada.");
+      }
+
+      const tipo = resposta.headers.get("content-type") || "";
+
+      const dados = tipo.includes("application/json")
+        ? await resposta.json()
+        : {};
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro || "Não foi possível concluir a operação."
+        );
+      }
+
+      return dados;
+    }
+
+    function abrirPagina(nome) {
       const pagina = document.getElementById("page-" + nome);
 
-      if (!pagina) return;
+      if (!pagina) {
+        return;
+      }
+
+      document.querySelectorAll(".page").forEach(item => {
+        item.classList.remove("active");
+      });
 
       pagina.classList.add("active");
 
-      document.querySelectorAll("[data-page]").forEach(button => {
-        button.classList.toggle(
+      document.querySelectorAll("[data-page]").forEach(botao => {
+        botao.classList.toggle(
           "active",
-          button.dataset.page === nome
+          botao.dataset.page === nome
         );
       });
 
@@ -1584,47 +1414,55 @@
 
       localStorage.setItem("paginaAtualPLAR", nome);
 
+      if (nome === "escala") {
+        carregarAtendimentos();
+      }
+
+      if (nome === "funcionarios") {
+        carregarFuncionarios();
+      }
+
       if (nome === "financeiro") {
-        setTimeout(atualizarGraficoFinanceiro, 50);
+        carregarFinanceiro();
+      }
+
+      if (nome === "auditoria") {
+        carregarAuditoria();
       }
     }
 
-    document.querySelectorAll("[data-page]").forEach(button => {
-      button.addEventListener("click", () => {
-        abrirPagina(button.dataset.page);
-      });
-    });
-
     async function carregarFuncionarios() {
+      const lista = document.getElementById(
+        "listaFuncionarios"
+      );
+
+      lista.innerHTML = `
+        <div class="loading">
+          Carregando funcionários...
+        </div>
+      `;
+
       try {
-        const resposta = await fetch("/usuarios", {
-          credentials: "include"
-        });
+        funcionarios = await api("/usuarios");
 
-        if (!resposta.ok) {
-          throw new Error("Erro ao carregar funcionários.");
-        }
-
-        funcionarios = await resposta.json();
+        document.getElementById(
+          "totalFuncionarios"
+        ).textContent = funcionarios.length;
 
         renderizarFuncionarios();
-
-        document.getElementById("totalFuncionarios").textContent =
-          funcionarios.length;
-
-        document.getElementById("resumoFuncionarios").textContent =
-          funcionarios.length;
       } catch (erro) {
-        document.getElementById("listaFuncionarios").innerHTML = `
+        lista.innerHTML = `
           <div class="empty">
-            Não foi possível carregar os funcionários.
+            ${escaparHTML(erro.message)}
           </div>
         `;
       }
     }
 
     function renderizarFuncionarios() {
-      const lista = document.getElementById("listaFuncionarios");
+      const lista = document.getElementById(
+        "listaFuncionarios"
+      );
 
       if (!funcionarios.length) {
         lista.innerHTML = `
@@ -1638,13 +1476,14 @@
 
       lista.innerHTML = funcionarios.map(funcionario => {
         const usuario = escaparHTML(funcionario.usuario);
-        const percentual = Number(funcionario.percentual || 0);
         const iniciais = usuario.substring(0, 2).toUpperCase();
 
         return `
           <div class="employee">
             <div class="employee-info">
-              <div class="employee-avatar">${iniciais}</div>
+              <div class="employee-avatar">
+                ${iniciais}
+              </div>
 
               <div>
                 <strong>${usuario}</strong>
@@ -1652,33 +1491,31 @@
               </div>
             </div>
 
-            <input
-              class="percentage-input"
-              type="number"
-              min="0"
-              max="100"
-              value="${percentual}"
-              id="percentual-${funcionario.id}"
-              title="Percentual de comissão"
-            >
+            <div class="employee-tools">
+              <input
+                class="percentage"
+                id="percentual-${Number(funcionario.id)}"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value="${Number(funcionario.percentual || 0)}"
+              >
 
-            <span class="commission">% comissão</span>
+              <button
+                class="secondary"
+                onclick="salvarPercentual(${Number(funcionario.id)})"
+              >
+                Salvar %
+              </button>
 
-            <button
-              class="secondary-button"
-              type="button"
-              onclick="salvarPercentual(${funcionario.id})"
-            >
-              Salvar
-            </button>
-
-            <button
-              class="delete"
-              type="button"
-              onclick="excluirFuncionario(${funcionario.id})"
-            >
-              Excluir
-            </button>
+              <button
+                class="danger"
+                onclick="excluirFuncionario(${Number(funcionario.id)})"
+              >
+                Excluir
+              </button>
+            </div>
           </div>
         `;
       }).join("");
@@ -1697,18 +1534,12 @@
         .value;
 
       const percentual = Number(
-        document.getElementById("novoPercentual").value || 0
+        document.getElementById("novoPercentual").value
       );
 
-      if (!usuario || !senha) {
-        alert("Preencha usuário e senha.");
-        return;
-      }
-
       try {
-        const resposta = await fetch("/usuarios", {
+        await api("/usuarios", {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
@@ -1719,52 +1550,34 @@
           })
         });
 
-        const dados = await resposta.json();
-
-        if (!resposta.ok || dados.erro) {
-          throw new Error(
-            dados.erro || "Não foi possível cadastrar o funcionário."
-          );
-        }
-
         event.target.reset();
         await carregarFuncionarios();
 
-        alert("Funcionário cadastrado com sucesso.");
+        alert("Funcionário cadastrado.");
       } catch (erro) {
         alert(erro.message);
       }
     }
 
     async function salvarPercentual(id) {
-      const campo = document.getElementById("percentual-" + id);
-      const percentual = Number(campo.value);
-
-      if (percentual < 0 || percentual > 100) {
-        alert("O percentual deve estar entre 0 e 100.");
-        return;
-      }
+      const percentual = Number(
+        document.getElementById(
+          "percentual-" + id
+        ).value
+      );
 
       try {
-        const resposta = await fetch("/usuarios/" + id, {
+        await api("/usuarios/" + id, {
           method: "PUT",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ percentual })
+          body: JSON.stringify({
+            percentual
+          })
         });
 
-        const dados = await resposta.json();
-
-        if (!resposta.ok || dados.erro) {
-          throw new Error(
-            dados.erro || "Não foi possível atualizar o percentual."
-          );
-        }
-
         alert("Percentual atualizado.");
-        carregarFuncionarios();
       } catch (erro) {
         alert(erro.message);
       }
@@ -1776,54 +1589,92 @@
       }
 
       try {
-        const resposta = await fetch("/usuarios/" + id, {
-          method: "DELETE",
-          credentials: "include"
+        await api("/usuarios/" + id, {
+          method: "DELETE"
         });
 
-        if (!resposta.ok) {
-          throw new Error("Não foi possível excluir o funcionário.");
-        }
+        await carregarFuncionarios();
 
-        carregarFuncionarios();
+        alert("Funcionário excluído.");
       } catch (erro) {
         alert(erro.message);
       }
     }
 
-    async function carregarTabela() {
+    async function carregarAtendimentos() {
+      const corpo = document.getElementById("corpoTabela");
+
+      corpo.innerHTML = `
+        <tr>
+          <td colspan="10" class="loading">
+            Carregando atendimentos...
+          </td>
+        </tr>
+      `;
+
       try {
-        const resposta = await fetch("/atendimentos", {
-          credentials: "include"
-        });
-
-        if (!resposta.ok) {
-          throw new Error("Erro ao carregar atendimentos.");
-        }
-
-        escalas = await resposta.json();
+        escalas = await api("/atendimentos");
 
         renderizarTabela();
         atualizarIndicadores();
-        atualizarFinanceiro();
       } catch (erro) {
-        document.getElementById("corpoTabela").innerHTML = `
+        corpo.innerHTML = `
           <tr>
-            <td colspan="9" class="empty">
-              Não foi possível carregar os atendimentos.
+            <td colspan="10" class="empty">
+              ${escaparHTML(erro.message)}
             </td>
           </tr>
         `;
       }
     }
 
-    function renderizarTabela(lista = escalas) {
+    function obterListaFiltrada() {
+      const busca = document
+        .getElementById("filtroTabela")
+        .value
+        .trim()
+        .toLowerCase();
+
+      const data = document.getElementById(
+        "filtroDataEscala"
+      ).value;
+
+      const servico = document.getElementById(
+        "filtroServico"
+      ).value;
+
+      const status = document.getElementById(
+        "filtroStatus"
+      ).value;
+
+      return escalas.filter(item => {
+        const texto = [
+          item.cliente,
+          item.nome,
+          item.local,
+          item.funcionario_usuario,
+          item.tipo_servico
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return (
+          (!busca || texto.includes(busca)) &&
+          (!data || item.data === data) &&
+          (!servico || item.tipo_servico === servico) &&
+          (!status || item.status === status)
+        );
+      });
+    }
+
+    function renderizarTabela() {
       const corpo = document.getElementById("corpoTabela");
+      const lista = obterListaFiltrada();
 
       if (!lista.length) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="9" class="empty">
+            <td colspan="10" class="empty">
               Nenhum atendimento encontrado.
             </td>
           </tr>
@@ -1833,124 +1684,372 @@
       }
 
       corpo.innerHTML = lista.map(item => {
-        const nome = escaparHTML(item.nome || "-");
-        const local = escaparHTML(item.local || "-");
-        const data = escaparHTML(item.data || "-");
-        const horario = escaparHTML(item.horario || "-");
-        const servico = escaparHTML(
-          formatarServico(item.tipo_servico)
+        const status = item.status || "pendente";
+
+        const podeIniciar = status === "aceito";
+
+        const podeConcluir = (
+          status === "aceito" ||
+          status === "em_andamento"
         );
 
         return `
           <tr>
-            <td><strong>${nome}</strong></td>
-            <td>${local}</td>
-            <td>${data}</td>
-            <td>${horario}</td>
-            <td>${servico}</td>
-            <td>${item.quantidade_aparelhos || "-"}</td>
-            <td>${dinheiro(item.valor_total)}</td>
             <td>
-              <span class="status">Agendado</span>
+              <strong>
+                ${escaparHTML(
+                  item.cliente ||
+                  item.local ||
+                  "-"
+                )}
+              </strong>
             </td>
+
             <td>
-              <button
-                class="delete"
-                type="button"
-                onclick="excluirAtendimento(${item.id})"
-              >
-                Excluir
-              </button>
+              ${escaparHTML(
+                item.funcionario_usuario ||
+                item.nome ||
+                "-"
+              )}
+            </td>
+
+            <td>${escaparHTML(item.local || "-")}</td>
+            <td>${escaparHTML(item.data || "-")}</td>
+            <td>${escaparHTML(item.horario || "-")}</td>
+
+            <td>
+              ${escaparHTML(
+                formatarServico(item.tipo_servico)
+              )}
+            </td>
+
+            <td>${dinheiro(item.valor_total)}</td>
+            <td>${dinheiro(item.valor_comissao)}</td>
+
+            <td>
+              <span class="status ${classeStatus(status)}">
+                ${formatarStatus(status)}
+              </span>
+            </td>
+
+            <td>
+              <div class="actions">
+                ${
+                  podeIniciar
+                    ? `
+                      <button
+                        class="warning"
+                        onclick="alterarStatus(
+                          ${Number(item.id)},
+                          'em_andamento'
+                        )"
+                      >
+                        Iniciar
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
+                  podeConcluir
+                    ? `
+                      <button
+                        class="success"
+                        onclick="concluirAtendimento(
+                          ${Number(item.id)}
+                        )"
+                      >
+                        Concluir
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
+                  ![
+                    "concluido",
+                    "cancelado",
+                    "recusado"
+                  ].includes(status)
+                    ? `
+                      <button
+                        class="secondary"
+                        onclick="editarAtendimento(
+                          ${Number(item.id)}
+                        )"
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        class="danger"
+                        onclick="cancelarAtendimento(
+                          ${Number(item.id)}
+                        )"
+                      >
+                        Cancelar
+                      </button>
+                    `
+                    : ""
+                }
+
+                <button
+                  class="danger"
+                  onclick="excluirAtendimento(
+                    ${Number(item.id)}
+                  )"
+                >
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         `;
       }).join("");
     }
 
-    function filtrarTabela() {
-      const busca = document
-        .getElementById("filtroTabela")
-        .value
-        .toLowerCase();
-
-      const tipo = document.getElementById("filtroServico").value;
-
-      const filtrados = escalas.filter(item => {
-        const texto = `
-          ${item.nome || ""}
-          ${item.local || ""}
-        `.toLowerCase();
-
-        const correspondeBusca = texto.includes(busca);
-        const correspondeTipo =
-          !tipo || item.tipo_servico === tipo;
-
-        return correspondeBusca && correspondeTipo;
-      });
-
-      renderizarTabela(filtrados);
-    }
-
-    async function cadastrar(event) {
+    async function cadastrarAtendimento(event) {
       event.preventDefault();
 
       const dados = {
-        nome: document.getElementById("nome").value.trim(),
-        local: document.getElementById("local").value.trim(),
+        cliente: document
+          .getElementById("cliente")
+          .value
+          .trim(),
+
+        nome: document
+          .getElementById("nome")
+          .value
+          .trim(),
+
+        local: document
+          .getElementById("local")
+          .value
+          .trim(),
+
         data: document.getElementById("data").value,
+
         horario: document.getElementById("horario").value,
-        tipo_servico: document.getElementById("tipoServico").value,
-        quantidade_aparelhos:
-          document.getElementById("quantidadeAparelhos").value
+
+        tipo_servico: document
+          .getElementById("tipoServico")
+          .value,
+
+        quantidade_aparelhos: document
+          .getElementById("quantidadeAparelhos")
+          .value,
+
+        custo: document.getElementById("custo").value
       };
 
       try {
-        const resposta = await fetch("/atendimentos", {
+        await api("/atendimentos", {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(dados)
         });
 
-        const retorno = await resposta.json();
-
-        if (!resposta.ok || retorno.erro) {
-          throw new Error(
-            retorno.erro || "Não foi possível cadastrar o atendimento."
-          );
-        }
-
         event.target.reset();
-        await carregarTabela();
+        document.getElementById("custo").value = "0";
 
-        alert("Atendimento adicionado com sucesso.");
+        await carregarAtendimentos();
+
+        alert("Cliente e atendimento cadastrados.");
         abrirPagina("escala");
       } catch (erro) {
         alert(erro.message);
       }
     }
 
-    async function excluirAtendimento(id) {
-      const confirmar =
-        document.getElementById("confirmarExclusao").checked;
-
-      if (confirmar && !confirm("Deseja excluir este atendimento?")) {
+    async function alterarStatus(id, status) {
+      if (!confirm(
+        "Alterar o status para " +
+        formatarStatus(status) +
+        "?"
+      )) {
         return;
       }
 
       try {
-        const resposta = await fetch("/atendimentos/" + id, {
-          method: "DELETE",
-          credentials: "include"
-        });
+        await api(
+          `/atendimentos/${id}/status`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status })
+          }
+        );
 
-        if (!resposta.ok) {
-          throw new Error("Não foi possível excluir o atendimento.");
-        }
+        await carregarAtendimentos();
+      } catch (erro) {
+        alert(erro.message);
+      }
+    }
 
-        await carregarTabela();
+    async function concluirAtendimento(id) {
+      if (!confirm(
+        "Confirmar conclusão do atendimento?"
+      )) {
+        return;
+      }
+
+      try {
+        await api(
+          `/atendimentos/${id}/concluir`,
+          {
+            method: "PUT"
+          }
+        );
+
+        await carregarAtendimentos();
+
+        alert(
+          "Atendimento concluído e comissão liberada."
+        );
+      } catch (erro) {
+        alert(erro.message);
+      }
+    }
+
+    async function cancelarAtendimento(id) {
+      if (!confirm("Deseja cancelar este atendimento?")) {
+        return;
+      }
+
+      try {
+        await api(
+          `/atendimentos/${id}/status`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              status: "cancelado"
+            })
+          }
+        );
+
+        await carregarAtendimentos();
+      } catch (erro) {
+        alert(erro.message);
+      }
+    }
+
+    async function editarAtendimento(id) {
+      const item = escalas.find(atendimento => {
+        return Number(atendimento.id) === Number(id);
+      });
+
+      if (!item) {
+        alert("Atendimento não encontrado.");
+        return;
+      }
+
+      const cliente = prompt(
+        "Cliente:",
+        item.cliente || ""
+      );
+
+      if (cliente === null) {
+        return;
+      }
+
+      const local = prompt(
+        "Local:",
+        item.local || ""
+      );
+
+      if (local === null) {
+        return;
+      }
+
+      const data = prompt(
+        "Data no formato AAAA-MM-DD:",
+        item.data || ""
+      );
+
+      if (data === null) {
+        return;
+      }
+
+      const horario = prompt(
+        "Horário no formato HH:MM:",
+        item.horario || ""
+      );
+
+      if (horario === null) {
+        return;
+      }
+
+      const quantidade = prompt(
+        "Quantidade de aparelhos:",
+        item.quantidade_aparelhos || "1"
+      );
+
+      if (quantidade === null) {
+        return;
+      }
+
+      const custo = prompt(
+        "Custo:",
+        item.custo || "0"
+      );
+
+      if (custo === null) {
+        return;
+      }
+
+      try {
+        await api(
+          `/atendimentos/${id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              cliente,
+              local,
+              data,
+              horario,
+              tipo_servico: item.tipo_servico,
+              quantidade_aparelhos: quantidade,
+              custo
+            })
+          }
+        );
+
+        await carregarAtendimentos();
+
+        alert("Atendimento atualizado.");
+      } catch (erro) {
+        alert(erro.message);
+      }
+    }
+
+    async function excluirAtendimento(id) {
+      if (!confirm(
+        "Excluir este atendimento definitivamente?"
+      )) {
+        return;
+      }
+
+      try {
+        await api(
+          `/atendimentos/${id}`,
+          {
+            method: "DELETE"
+          }
+        );
+
+        await carregarAtendimentos();
+
+        alert("Atendimento excluído.");
       } catch (erro) {
         alert(erro.message);
       }
@@ -1958,110 +2057,178 @@
 
     function atualizarIndicadores() {
       const faturamento = escalas.reduce(
-        (total, item) => total + Number(item.valor_total || 0),
+        (total, item) => {
+          return total + Number(item.valor_total || 0);
+        },
+        0
+      );
+
+      const custos = escalas.reduce(
+        (total, item) => {
+          return total + Number(item.custo || 0);
+        },
         0
       );
 
       const comissoes = escalas.reduce(
-        (total, item) => total + Number(item.valor_comissao || 0),
+        (total, item) => {
+          return total + Number(item.valor_comissao || 0);
+        },
         0
       );
 
-      const lucro = faturamento - comissoes;
+      const contar = status => {
+        return escalas.filter(item => {
+          return (item.status || "pendente") === status;
+        }).length;
+      };
+
+      const comissoesPendentes = escalas
+        .filter(item => {
+          return ![
+            "concluido",
+            "recusado",
+            "cancelado"
+          ].includes(item.status || "pendente");
+        })
+        .reduce((total, item) => {
+          return total + Number(item.valor_comissao || 0);
+        }, 0);
+
+      const comissoesConcluidas = escalas
+        .filter(item => {
+          return item.status === "concluido";
+        })
+        .reduce((total, item) => {
+          return total + Number(item.valor_comissao || 0);
+        }, 0);
 
       document.getElementById("totalAtendimentos").textContent =
-        escalas.length;
-
-      document.getElementById("resumoAtendimentos").textContent =
         escalas.length;
 
       document.getElementById("faturamentoTotal").textContent =
         dinheiro(faturamento);
 
       document.getElementById("lucroTotal").textContent =
-        dinheiro(lucro);
+        dinheiro(faturamento - custos - comissoes);
 
-      document.getElementById("resumoFaturamento").textContent =
-        dinheiro(faturamento);
+      document.getElementById("resumoPendentes").textContent =
+        contar("pendente");
+
+      document.getElementById("resumoAceitos").textContent =
+        contar("aceito");
+
+      document.getElementById("resumoAndamento").textContent =
+        contar("em_andamento");
+
+      document.getElementById("resumoConcluidos").textContent =
+        contar("concluido");
+
+      document.getElementById(
+        "resumoComissoesPendentes"
+      ).textContent = dinheiro(comissoesPendentes);
+
+      document.getElementById(
+        "resumoComissoesConcluidas"
+      ).textContent = dinheiro(comissoesConcluidas);
     }
 
-    function atualizarFinanceiro() {
-      const faturamento = escalas.reduce(
-        (total, item) => total + Number(item.valor_total || 0),
-        0
-      );
+    async function carregarFinanceiro() {
+      const inicio = document.getElementById(
+        "dataInicio"
+      ).value;
 
-      const comissoes = escalas.reduce(
-        (total, item) => total + Number(item.valor_comissao || 0),
-        0
-      );
+      const fim = document.getElementById(
+        "dataFim"
+      ).value;
 
-      const lucro = faturamento - comissoes;
+      const parametros = new URLSearchParams();
 
-      document.getElementById(
-        "financeiroFaturamentoGrande"
-      ).textContent = dinheiro(faturamento);
+      if (inicio) {
+        parametros.set("inicio", inicio);
+      }
 
-      document.getElementById(
-        "financeiroComissoesGrande"
-      ).textContent = dinheiro(comissoes);
+      if (fim) {
+        parametros.set("fim", fim);
+      }
 
-      document.getElementById(
-        "financeiroLucroGrande"
-      ).textContent = dinheiro(lucro);
+      try {
+        const relatorio = await api(
+          "/relatorios/financeiro?" +
+          parametros.toString()
+        );
 
-      document.getElementById(
-        "financeiroAtendimentos"
-      ).textContent = escalas.length;
+        const resumo = relatorio.resumo;
 
-      atualizarGraficoFinanceiro();
+        document.getElementById(
+          "financeiroFaturamento"
+        ).textContent = dinheiro(resumo.faturamento);
+
+        document.getElementById(
+          "financeiroCustos"
+        ).textContent = dinheiro(resumo.custos);
+
+        document.getElementById(
+          "financeiroComissoes"
+        ).textContent = dinheiro(resumo.comissoes);
+
+        document.getElementById(
+          "financeiroLucro"
+        ).textContent = dinheiro(resumo.lucro);
+
+        document.getElementById(
+          "financeiroAtendimentos"
+        ).textContent = resumo.atendimentos;
+
+        document.getElementById(
+          "financeiroPendentes"
+        ).textContent = dinheiro(
+          resumo.comissoes_pendentes
+        );
+
+        document.getElementById(
+          "financeiroConcluidas"
+        ).textContent = dinheiro(
+          resumo.comissoes_concluidas
+        );
+
+        desenharGrafico(relatorio.por_servico);
+      } catch (erro) {
+        alert(erro.message);
+      }
     }
 
-    function atualizarGraficoFinanceiro() {
-      const canvas = document.getElementById("graficoFinanceiro");
+    function limparPeriodo() {
+      document.getElementById("dataInicio").value = "";
+      document.getElementById("dataFim").value = "";
+      carregarFinanceiro();
+    }
+
+    function desenharGrafico(porServico) {
+      const canvas = document.getElementById(
+        "graficoFinanceiro"
+      );
 
       if (!canvas || typeof Chart === "undefined") {
         return;
       }
 
-      const porServico = {};
+      const nomes = Object.keys(porServico || {});
 
-      escalas.forEach(item => {
-        const servico = formatarServico(item.tipo_servico);
-
-        if (!porServico[servico]) {
-          porServico[servico] = {
-            faturamento: 0,
-            comissoes: 0,
-            lucro: 0
-          };
-        }
-
-        const faturamento = Number(item.valor_total || 0);
-        const comissao = Number(item.valor_comissao || 0);
-        const lucro = faturamento - comissao;
-
-        porServico[servico].faturamento += faturamento;
-        porServico[servico].comissoes += comissao;
-        porServico[servico].lucro += lucro;
-      });
-
-      const servicos = Object.keys(porServico);
-
-      const labels = servicos.length
-        ? servicos
+      const labels = nomes.length
+        ? nomes
         : ["Sem dados"];
 
-      const faturamento = servicos.length
-        ? servicos.map(item => porServico[item].faturamento)
+      const faturamento = nomes.length
+        ? nomes.map(nome => porServico[nome].faturamento)
         : [0];
 
-      const comissoes = servicos.length
-        ? servicos.map(item => porServico[item].comissoes)
+      const comissoes = nomes.length
+        ? nomes.map(nome => porServico[nome].comissoes)
         : [0];
 
-      const lucro = servicos.length
-        ? servicos.map(item => porServico[item].lucro)
+      const lucro = nomes.length
+        ? nomes.map(nome => porServico[nome].lucro)
         : [0];
 
       if (graficoFinanceiro) {
@@ -2079,19 +2246,19 @@
               label: "Faturamento",
               data: faturamento,
               backgroundColor: "#1499dc",
-              borderRadius: 7
+              borderRadius: 6
             },
             {
               label: "Comissões",
               data: comissoes,
               backgroundColor: "#c6a052",
-              borderRadius: 7
+              borderRadius: 6
             },
             {
               label: "Lucro",
               data: lucro,
               backgroundColor: "#38d889",
-              borderRadius: 7
+              borderRadius: 6
             }
           ]
         },
@@ -2100,25 +2267,21 @@
           responsive: true,
           maintainAspectRatio: false,
 
-          interaction: {
-            mode: "index",
-            intersect: false
-          },
-
           plugins: {
             legend: {
               labels: {
-                color: "#91a7ae",
-                font: {
-                  family: "Inter"
-                }
+                color: "#91a7ae"
               }
             },
 
             tooltip: {
               callbacks: {
-                label: context => {
-                  return `${context.dataset.label}: ${dinheiro(context.raw)}`;
+                label(context) {
+                  return (
+                    context.dataset.label +
+                    ": " +
+                    dinheiro(context.raw)
+                  );
                 }
               }
             }
@@ -2128,10 +2291,6 @@
             x: {
               ticks: {
                 color: "#91a7ae"
-              },
-
-              grid: {
-                color: "rgba(255,255,255,.06)"
               }
             },
 
@@ -2141,11 +2300,9 @@
               ticks: {
                 color: "#91a7ae",
 
-                callback: value => dinheiro(value)
-              },
-
-              grid: {
-                color: "rgba(255,255,255,.06)"
+                callback(value) {
+                  return dinheiro(value);
+                }
               }
             }
           }
@@ -2153,64 +2310,95 @@
       });
     }
 
-    function calcularBalancoPersonalizado() {
-      const inicio = document.getElementById("dataInicio").value;
-      const fim = document.getElementById("dataFim").value;
-
-      if (!inicio || !fim) {
-        alert("Selecione as duas datas.");
-        return;
-      }
-
-      if (inicio > fim) {
-        alert("A data inicial não pode ser maior que a final.");
-        return;
-      }
-
-      const filtrados = escalas.filter(item => {
-        return item.data >= inicio && item.data <= fim;
-      });
-
-      const faturamento = filtrados.reduce(
-        (total, item) => total + Number(item.valor_total || 0),
-        0
+    async function carregarAuditoria() {
+      const corpo = document.getElementById(
+        "corpoAuditoria"
       );
 
-      const comissoes = filtrados.reduce(
-        (total, item) => total + Number(item.valor_comissao || 0),
-        0
-      );
-
-      const lucro = faturamento - comissoes;
-
-      document.getElementById("resultadoBalanco").innerHTML = `
-        <p>Período: <strong>${escaparHTML(inicio)} até ${escaparHTML(fim)}</strong></p>
-        <p>Atendimentos: <strong>${filtrados.length}</strong></p>
-        <p class="faturamento">
-          Faturamento: ${dinheiro(faturamento)}
-        </p>
-        <p class="comissao">
-          Comissões: ${dinheiro(comissoes)}
-        </p>
-        <p class="lucro">
-          Lucro líquido: ${dinheiro(lucro)}
-        </p>
+      corpo.innerHTML = `
+        <tr>
+          <td colspan="6" class="loading">
+            Carregando histórico...
+          </td>
+        </tr>
       `;
+
+      try {
+        const registros = await api("/auditoria");
+
+        if (!registros.length) {
+          corpo.innerHTML = `
+            <tr>
+              <td colspan="6" class="empty">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          `;
+
+          return;
+        }
+
+        corpo.innerHTML = registros.map(item => {
+          return `
+            <tr>
+              <td>${escaparHTML(item.criado_em)}</td>
+              <td>${escaparHTML(item.usuario || "-")}</td>
+              <td>${escaparHTML(item.acao)}</td>
+              <td>${escaparHTML(item.tabela)}</td>
+              <td>${escaparHTML(item.registro_id || "-")}</td>
+              <td>${escaparHTML(item.detalhes || "-")}</td>
+            </tr>
+          `;
+        }).join("");
+      } catch (erro) {
+        corpo.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty">
+              ${escaparHTML(erro.message)}
+            </td>
+          </tr>
+        `;
+      }
     }
 
-    function baixarArquivo(conteudo, nome, tipo) {
-      const arquivo = new Blob([conteudo], {
-        type: tipo + ";charset=utf-8"
-      });
-
+    function baixar(url) {
       const link = document.createElement("a");
-      const url = URL.createObjectURL(arquivo);
 
       link.href = url;
-      link.download = nome;
-      link.click();
+      link.style.display = "none";
 
-      URL.revokeObjectURL(url);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function exportarAtendimentos() {
+      const inicio = document.getElementById(
+        "dataInicio"
+      ).value;
+
+      const fim = document.getElementById(
+        "dataFim"
+      ).value;
+
+      const parametros = new URLSearchParams();
+
+      if (inicio) {
+        parametros.set("inicio", inicio);
+      }
+
+      if (fim) {
+        parametros.set("fim", fim);
+      }
+
+      baixar(
+        "/exportar/atendimentos.csv?" +
+        parametros.toString()
+      );
+    }
+
+    function exportarAuditoria() {
+      baixar("/exportar/auditoria.csv");
     }
 
     function exportarTxt() {
@@ -2222,112 +2410,113 @@
       let texto = "PLAR ERP - ESCALA DE SERVIÇOS\n\n";
 
       escalas.forEach(item => {
-        texto += `
-Funcionário: ${item.nome || "-"}
-Local: ${item.local || "-"}
-Data: ${item.data || "-"}
-Horário: ${item.horario || "-"}
-Serviço: ${formatarServico(item.tipo_servico)}
-Aparelhos: ${item.quantidade_aparelhos || "-"}
-Valor total: ${dinheiro(item.valor_total)}
-Comissão: ${dinheiro(item.valor_comissao)}
-
-`;
+        texto += [
+          `Cliente: ${item.cliente || "-"}`,
+          `Funcionário: ${
+            item.funcionario_usuario ||
+            item.nome ||
+            "-"
+          }`,
+          `Local: ${item.local || "-"}`,
+          `Data: ${item.data || "-"}`,
+          `Horário: ${item.horario || "-"}`,
+          `Serviço: ${
+            formatarServico(item.tipo_servico)
+          }`,
+          `Status: ${
+            formatarStatus(item.status)
+          }`,
+          `Valor: ${dinheiro(item.valor_total)}`,
+          `Comissão: ${
+            dinheiro(item.valor_comissao)
+          }`,
+          ""
+        ].join("\n") + "\n";
       });
 
-      baixarArquivo(
-        texto,
-        "escala-plar.txt",
-        "text/plain"
+      const arquivo = new Blob(
+        [texto],
+        {
+          type: "text/plain;charset=utf-8"
+        }
       );
+
+      const url = URL.createObjectURL(arquivo);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "escala-plar.txt";
+      link.click();
+
+      URL.revokeObjectURL(url);
     }
 
-    function exportarFuncionarios() {
-      if (!funcionarios.length) {
-        alert("Não há funcionários cadastrados.");
-        return;
+    async function sair() {
+      try {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+      } finally {
+        sessionStorage.clear();
+        window.location.href = "/";
       }
+    }
 
-      let csv = "Usuário;Percentual de comissão\n";
-
-      funcionarios.forEach(funcionario => {
-        csv += `${funcionario.usuario};${funcionario.percentual || 0}%\n`;
+    document.querySelectorAll("[data-page]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        abrirPagina(botao.dataset.page);
       });
-
-      baixarArquivo(
-        csv,
-        "funcionarios-plar.csv",
-        "text/csv"
-      );
-    }
-
-    function exportarBackup() {
-      const backup = {
-        dataExportacao: new Date().toISOString(),
-        funcionarios,
-        atendimentos: escalas
-      };
-
-      baixarArquivo(
-        JSON.stringify(backup, null, 2),
-        "backup-plar.json",
-        "application/json"
-      );
-    }
-
-    function mostrarNotificacoes() {
-      const notificacoesAtivas =
-        document.getElementById("notificacoes").checked;
-
-      if (!notificacoesAtivas) {
-        alert("As notificações estão desativadas.");
-        return;
-      }
-
-      alert("Você não possui novas notificações.");
-    }
-
-    const modoSalvo = localStorage.getItem("modoCompactoPLAR");
-
-    if (modoSalvo === "ativo") {
-      document.body.classList.add("modo-compacto");
-      document.getElementById("modoCompacto").checked = true;
-    }
-
-    document
-      .getElementById("modoCompacto")
-      .addEventListener("change", event => {
-        const ativado = event.target.checked;
-
-        document.body.classList.toggle("modo-compacto", ativado);
-
-        localStorage.setItem(
-          "modoCompactoPLAR",
-          ativado ? "ativo" : "inativo"
-        );
-      });
-
-    document
-      .getElementById("filtroTabela")
-      .addEventListener("input", filtrarTabela);
-
-    document
-      .getElementById("filtroServico")
-      .addEventListener("change", filtrarTabela);
+    });
 
     document
       .getElementById("formAtendimento")
-      .addEventListener("submit", cadastrar);
+      .addEventListener(
+        "submit",
+        cadastrarAtendimento
+      );
 
     document
       .getElementById("formFuncionario")
-      .addEventListener("submit", cadastrarFuncionario);
+      .addEventListener(
+        "submit",
+        cadastrarFuncionario
+      );
+
+    document
+      .getElementById("filtroTabela")
+      .addEventListener(
+        "input",
+        renderizarTabela
+      );
+
+    document
+      .getElementById("filtroDataEscala")
+      .addEventListener(
+        "change",
+        renderizarTabela
+      );
+
+    document
+      .getElementById("filtroServico")
+      .addEventListener(
+        "change",
+        renderizarTabela
+      );
+
+    document
+      .getElementById("filtroStatus")
+      .addEventListener(
+        "change",
+        renderizarTabela
+      );
 
     carregarFuncionarios();
-    carregarTabela();
+    carregarAtendimentos();
 
     const paginaSalva =
-      localStorage.getItem("paginaAtualPLAR") || "dashboard";
+      localStorage.getItem("paginaAtualPLAR") ||
+      "dashboard";
 
     abrirPagina(paginaSalva);
   </script>
