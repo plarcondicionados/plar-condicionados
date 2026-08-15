@@ -3,7 +3,6 @@ from flask import (
     request,
     jsonify,
     send_from_directory,
-    send_file,
     session,
     redirect
 )
@@ -14,11 +13,9 @@ from werkzeug.security import (
 )
 
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from io import BytesIO, StringIO
 import sqlite3
-import csv
 import os
 
 
@@ -45,8 +42,23 @@ app.config.update(
 
 
 # ============================================================
-# CONSTANTES
+# CONFIGURAÇÃO DA EMPRESA
 # ============================================================
+
+NOME_EMPRESA = "PLAR Condicionados"
+CIDADE_EMPRESA = "Ribeirão Preto - SP"
+
+SERVICOS = {
+    "manutencao_preventiva": (
+        "Manutenção preventiva"
+    ),
+    "limpeza_higienizacao": (
+        "Limpeza e higienização de evaporadora"
+    ),
+    "automacao": (
+        "Automação de ar-condicionado"
+    )
+}
 
 STATUS_VALIDOS = {
     "pendente",
@@ -89,14 +101,18 @@ def conectar():
     return conexao
 
 
+def agora():
+    return datetime.now().isoformat(timespec="seconds")
+
+
 def coluna_existe(conexao, tabela, coluna):
     colunas = conexao.execute(
         f"PRAGMA table_info({tabela})"
     ).fetchall()
 
     return any(
-        coluna_atual["name"] == coluna
-        for coluna_atual in colunas
+        item["name"] == coluna
+        for item in colunas
     )
 
 
@@ -125,12 +141,49 @@ def criar_tabelas():
     """)
 
     conexao.execute("""
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            telefone TEXT NOT NULL,
+            email TEXT,
+            endereco TEXT,
+            cidade TEXT DEFAULT 'Ribeirão Preto - SP',
+            consentimento_lgpd INTEGER NOT NULL DEFAULT 0,
+            criado_em TEXT NOT NULL,
+            atualizado_em TEXT NOT NULL
+        )
+    """)
+
+    conexao.execute("""
         CREATE TABLE IF NOT EXISTS atendimentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT,
+            cliente TEXT,
+            cliente_id INTEGER,
+            telefone_cliente TEXT,
             local TEXT,
             data TEXT,
-            horario TEXT
+            horario TEXT,
+            duracao_minutos INTEGER DEFAULT 30,
+            tipo_servico TEXT,
+            quantidade_aparelhos INTEGER DEFAULT 1,
+            valor_total REAL DEFAULT 0,
+            custo REAL DEFAULT 0,
+            valor_comissao REAL DEFAULT 0,
+            funcionario_id INTEGER,
+            status_resposta TEXT DEFAULT 'pendente',
+            origem TEXT DEFAULT 'admin',
+            consentimento_lgpd INTEGER DEFAULT 0,
+            observacoes TEXT,
+            criado_em TEXT,
+            atualizado_em TEXT,
+            concluido_em TEXT,
+            FOREIGN KEY (cliente_id)
+                REFERENCES clientes(id)
+                ON DELETE SET NULL,
+            FOREIGN KEY (funcionario_id)
+                REFERENCES usuarios(id)
+                ON DELETE SET NULL
         )
     """)
 
@@ -146,21 +199,35 @@ def criar_tabelas():
         )
     """)
 
-    colunas_atendimento = {
+    colunas_atendimentos = {
         "cliente": "TEXT",
+        "cliente_id": "INTEGER",
+        "telefone_cliente": "TEXT",
         "tipo_servico": "TEXT",
-        "quantidade_aparelhos": "INTEGER DEFAULT 0",
+        "quantidade_aparelhos": (
+            "INTEGER DEFAULT 1"
+        ),
+        "duracao_minutos": (
+            "INTEGER DEFAULT 30"
+        ),
         "valor_total": "REAL DEFAULT 0",
         "custo": "REAL DEFAULT 0",
         "valor_comissao": "REAL DEFAULT 0",
         "funcionario_id": "INTEGER",
-        "status_resposta": "TEXT DEFAULT 'pendente'",
+        "status_resposta": (
+            "TEXT DEFAULT 'pendente'"
+        ),
+        "origem": "TEXT DEFAULT 'admin'",
+        "consentimento_lgpd": (
+            "INTEGER DEFAULT 0"
+        ),
+        "observacoes": "TEXT",
         "criado_em": "TEXT",
         "atualizado_em": "TEXT",
         "concluido_em": "TEXT"
     }
 
-    for coluna, tipo in colunas_atendimento.items():
+    for coluna, tipo in colunas_atendimentos.items():
         adicionar_coluna(
             conexao,
             "atendimentos",
@@ -168,62 +235,65 @@ def criar_tabelas():
             tipo
         )
 
-    agora = datetime.now().isoformat(timespec="seconds")
+    momento = agora()
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
         SET status_resposta = 'pendente'
         WHERE status_resposta IS NULL
         OR status_resposta = ''
-        """
-    )
+    """)
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
-        SET cliente = COALESCE(cliente, local, 'Não informado')
-        WHERE cliente IS NULL
-        """
-    )
+        SET quantidade_aparelhos = 1
+        WHERE quantidade_aparelhos IS NULL
+        OR quantidade_aparelhos <= 0
+    """)
 
-    conexao.execute(
-        """
+    conexao.execute("""
+        UPDATE atendimentos
+        SET duracao_minutos =
+            quantidade_aparelhos * 30
+        WHERE duracao_minutos IS NULL
+        OR duracao_minutos <= 0
+    """)
+
+    conexao.execute("""
+        UPDATE atendimentos
+        SET cliente = COALESCE(
+            cliente,
+            local,
+            'Não informado'
+        )
+        WHERE cliente IS NULL
+    """)
+
+    conexao.execute("""
         UPDATE atendimentos
         SET criado_em = ?
         WHERE criado_em IS NULL
-        """,
-        (agora,)
-    )
+    """, (momento,))
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
         SET atualizado_em = criado_em
         WHERE atualizado_em IS NULL
-        """
-    )
+    """)
 
-    conexao.execute(
-        """
-        UPDATE atendimentos
-        SET custo = 0
-        WHERE custo IS NULL
-        """
-    )
-
-    admin = conexao.execute(
-        """
+    admin = conexao.execute("""
         SELECT id
         FROM usuarios
-        WHERE usuario = ?
-        """,
-        ("PLAR",)
-    ).fetchone()
+        WHERE usuario = 'PLAR'
+    """).fetchone()
 
     if not admin:
-        conexao.execute(
-            """
+        senha_inicial = os.environ.get(
+            "PLAR_ADMIN_PASSWORD",
+            "Edilson123"
+        )
+
+        conexao.execute("""
             INSERT INTO usuarios
             (
                 usuario,
@@ -233,41 +303,40 @@ def criar_tabelas():
                 criado_em
             )
             VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                "PLAR",
-                generate_password_hash("Edilson123"),
-                "admin",
-                0,
-                agora
-            )
-        )
+        """, (
+            "PLAR",
+            generate_password_hash(senha_inicial),
+            "admin",
+            0,
+            momento
+        ))
 
         print("Administrador inicial criado.")
         print("Usuário: PLAR")
-        print("Senha: Edilson123")
-    else:
-        conexao.execute(
-            """
-            UPDATE usuarios
-            SET tipo = 'admin'
-            WHERE usuario = 'PLAR'
-            """
-        )
+        print("Altere a senha após o primeiro acesso.")
 
     conexao.execute("""
-        CREATE INDEX IF NOT EXISTS idx_atendimentos_funcionario
+        CREATE INDEX IF NOT EXISTS
+        idx_atendimentos_data_horario
+        ON atendimentos(data, horario)
+    """)
+
+    conexao.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_atendimentos_funcionario
         ON atendimentos(funcionario_id)
     """)
 
     conexao.execute("""
-        CREATE INDEX IF NOT EXISTS idx_atendimentos_data
-        ON atendimentos(data)
+        CREATE INDEX IF NOT EXISTS
+        idx_atendimentos_status
+        ON atendimentos(status_resposta)
     """)
 
     conexao.execute("""
-        CREATE INDEX IF NOT EXISTS idx_atendimentos_status
-        ON atendimentos(status_resposta)
+        CREATE INDEX IF NOT EXISTS
+        idx_clientes_telefone
+        ON clientes(telefone)
     """)
 
     conexao.commit()
@@ -278,11 +347,159 @@ criar_tabelas()
 
 
 # ============================================================
-# FUNÇÕES AUXILIARES
+# UTILITÁRIOS
 # ============================================================
 
-def agora():
-    return datetime.now().isoformat(timespec="seconds")
+def numero(valor, padrao=0):
+    try:
+        return float(valor)
+    except (TypeError, ValueError):
+        return padrao
+
+
+def inteiro(valor, padrao=0):
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        return padrao
+
+
+def data_valida(data):
+    try:
+        datetime.strptime(
+            str(data),
+            "%Y-%m-%d"
+        )
+
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def hora_em_minutos(horario):
+    try:
+        objeto = datetime.strptime(
+            str(horario),
+            "%H:%M"
+        )
+
+        return objeto.hour * 60 + objeto.minute
+    except (TypeError, ValueError):
+        return None
+
+
+def limite_expediente(data):
+    objeto = datetime.strptime(
+        data,
+        "%Y-%m-%d"
+    )
+
+    dia_semana = objeto.weekday()
+
+    if dia_semana == 6:
+        return None
+
+    if dia_semana == 5:
+        return 8 * 60, 14 * 60
+
+    return 8 * 60, 17 * 60 + 30
+
+
+def horario_valido(data, horario, duracao=30):
+    if not data_valida(data):
+        return False, "Data inválida."
+
+    minutos = hora_em_minutos(horario)
+
+    if minutos is None:
+        return False, "Horário inválido."
+
+    if minutos % 30 != 0:
+        return False, (
+            "O horário deve ser em intervalos de 30 minutos."
+        )
+
+    limites = limite_expediente(data)
+
+    if limites is None:
+        return False, (
+            "A empresa não atende aos domingos."
+        )
+
+    inicio, fim = limites
+    final = minutos + int(duracao)
+
+    if minutos < inicio or final > fim:
+        return False, (
+            "O horário está fora do expediente."
+        )
+
+    return True, ""
+
+
+def data_hora_agendamento(data, horario):
+    return datetime.strptime(
+        f"{data} {horario}",
+        "%Y-%m-%d %H:%M"
+    )
+
+
+def antecedencia_valida(data, horario):
+    agendamento = data_hora_agendamento(
+        data,
+        horario
+    )
+
+    limite = datetime.now() + timedelta(hours=2)
+
+    return agendamento >= limite
+
+
+def normalizar_telefone(telefone):
+    return "".join(
+        caractere
+        for caractere in str(telefone or "")
+        if caractere.isdigit()
+    )
+
+
+def servico_valido(servico):
+    return str(servico or "").strip().lower() in SERVICOS
+
+
+def duracao_por_aparelhos(quantidade):
+    return max(1, int(quantidade)) * 30
+
+
+def calcular_valores(
+    tipo_servico,
+    quantidade_aparelhos,
+    percentual
+):
+    quantidade = max(
+        1,
+        int(quantidade_aparelhos)
+    )
+
+    valores = {
+        "manutencao_preventiva": 200,
+        "limpeza_higienizacao": 180,
+        "automacao": 950
+    }
+
+    valor_unitario = valores.get(
+        tipo_servico,
+        200
+    )
+
+    valor_total = valor_unitario * quantidade
+
+    valor_comissao = round(
+        valor_total * float(percentual) / 100,
+        2
+    )
+
+    return round(valor_total, 2), valor_comissao
 
 
 def usuario_da_sessao():
@@ -293,14 +510,11 @@ def usuario_da_sessao():
 
     conexao = conectar()
 
-    usuario = conexao.execute(
-        """
+    usuario = conexao.execute("""
         SELECT id, usuario, tipo, percentual
         FROM usuarios
         WHERE id = ?
-        """,
-        (usuario_id,)
-    ).fetchone()
+    """, (usuario_id,)).fetchone()
 
     conexao.close()
 
@@ -340,10 +554,15 @@ def exigir_admin(funcao):
 
         if usuario["tipo"] != "admin":
             if request.path.endswith(".html"):
-                return redirect("/area-funcionario.html")
+                return redirect(
+                    "/area-funcionario.html"
+                )
 
             return jsonify({
-                "erro": "Acesso permitido somente ao administrador."
+                "erro": (
+                    "Acesso permitido somente "
+                    "ao administrador."
+                )
             }), 403
 
         return funcao(*args, **kwargs)
@@ -355,104 +574,30 @@ def senha_valida(senha_salva, senha_digitada):
     if not senha_salva:
         return False
 
-    senha_salva = str(senha_salva)
+    valor = str(senha_salva)
 
-    hash_valido = (
-        senha_salva.startswith("pbkdf2:")
-        or senha_salva.startswith("scrypt:")
-        or senha_salva.startswith("argon2:")
+    eh_hash = (
+        valor.startswith("pbkdf2:")
+        or valor.startswith("scrypt:")
+        or valor.startswith("argon2:")
     )
 
-    if hash_valido:
+    if eh_hash:
         try:
             return check_password_hash(
-                senha_salva,
+                valor,
                 senha_digitada
             )
         except (ValueError, TypeError):
             return False
 
-    return senha_salva == senha_digitada
+    return valor == senha_digitada
 
 
-def data_valida(data):
-    try:
-        datetime.strptime(data, "%Y-%m-%d")
-        return True
-    except (ValueError, TypeError):
-        return False
-
-
-def horario_valido(horario):
-    try:
-        horario_objeto = datetime.strptime(
-            horario,
-            "%H:%M"
-        )
-    except (ValueError, TypeError):
-        return False
-
-    minutos = (
-        horario_objeto.hour * 60
-        + horario_objeto.minute
-    )
-
-    inicio = 8 * 60
-    fim = 17 * 60 + 30
-
-    if minutos < inicio or minutos > fim:
-        return False
-
-    return horario_objeto.minute in (0, 30)
-
-
-def numero(dado, padrao=0):
-    try:
-        return float(dado)
-    except (ValueError, TypeError):
-        return padrao
-
-
-def inteiro(dado, padrao=0):
-    try:
-        return int(dado)
-    except (ValueError, TypeError):
-        return padrao
-
-
-def calcular_valores(
-    tipo_servico,
-    quantidade_aparelhos,
-    percentual
+def transicao_permitida(
+    status_atual,
+    novo_status
 ):
-    tipo_servico = str(
-        tipo_servico or ""
-    ).strip().lower()
-
-    quantidade_aparelhos = max(
-        1,
-        int(quantidade_aparelhos)
-    )
-
-    if tipo_servico == "limpeza":
-        valor_total = 200 * quantidade_aparelhos
-    else:
-        extras = max(
-            0,
-            quantidade_aparelhos - 2
-        )
-
-        valor_total = 950 + (extras * 100)
-
-    valor_comissao = round(
-        valor_total * float(percentual) / 100,
-        2
-    )
-
-    return round(valor_total, 2), valor_comissao
-
-
-def transicao_permitida(status_atual, novo_status):
     return novo_status in TRANSICOES.get(
         status_atual,
         set()
@@ -468,8 +613,7 @@ def registrar_auditoria(
 ):
     conexao = conectar()
 
-    conexao.execute(
-        """
+    conexao.execute("""
         INSERT INTO auditoria
         (
             usuario_id,
@@ -480,19 +624,75 @@ def registrar_auditoria(
             criado_em
         )
         VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            usuario_id,
-            acao,
-            tabela,
-            registro_id,
-            detalhes,
-            agora()
-        )
-    )
+    """, (
+        usuario_id,
+        acao,
+        tabela,
+        registro_id,
+        detalhes,
+        agora()
+    ))
 
     conexao.commit()
     conexao.close()
+
+
+def conflito_horario(
+    conexao,
+    data,
+    horario,
+    duracao,
+    funcionario_id=None,
+    ignorar_id=None
+):
+    inicio_novo = hora_em_minutos(horario)
+    fim_novo = inicio_novo + duracao
+
+    consulta = """
+        SELECT id, horario, duracao_minutos
+        FROM atendimentos
+        WHERE data = ?
+        AND COALESCE(status_resposta, 'pendente')
+        NOT IN ('recusado', 'cancelado')
+    """
+
+    parametros = [data]
+
+    if funcionario_id:
+        consulta += " AND funcionario_id = ?"
+        parametros.append(funcionario_id)
+
+    if ignorar_id:
+        consulta += " AND id != ?"
+        parametros.append(ignorar_id)
+
+    registros = conexao.execute(
+        consulta,
+        parametros
+    ).fetchall()
+
+    for registro in registros:
+        inicio_existente = hora_em_minutos(
+            registro["horario"]
+        )
+
+        duracao_existente = (
+            registro["duracao_minutos"] or 30
+        )
+
+        fim_existente = (
+            inicio_existente + duracao_existente
+        )
+
+        existe_intersecao = (
+            inicio_novo < fim_existente
+            and fim_novo > inicio_existente
+        )
+
+        if existe_intersecao:
+            return True
+
+    return False
 
 
 def dados_atendimento(linha):
@@ -501,6 +701,13 @@ def dados_atendimento(linha):
     dados["status"] = (
         dados.get("status_resposta")
         or "pendente"
+    )
+
+    dados["duracao_minutos"] = (
+        dados.get("duracao_minutos")
+        or duracao_por_aparelhos(
+            dados.get("quantidade_aparelhos") or 1
+        )
     )
 
     dados["lucro_estimado"] = round(
@@ -521,15 +728,15 @@ def dados_atendimento(linha):
 def login():
     dados = request.get_json(silent=True) or {}
 
-    usuario_digitado = str(
+    usuario_nome = str(
         dados.get("usuario", "")
     ).strip()
 
-    senha_digitada = str(
+    senha = str(
         dados.get("senha", "")
     )
 
-    if not usuario_digitado or not senha_digitada:
+    if not usuario_nome or not senha:
         return jsonify({
             "sucesso": False,
             "erro": "Informe usuário e senha."
@@ -537,26 +744,15 @@ def login():
 
     conexao = conectar()
 
-    usuario = conexao.execute(
-        """
+    usuario = conexao.execute("""
         SELECT *
         FROM usuarios
         WHERE usuario = ?
-        """,
-        (usuario_digitado,)
-    ).fetchone()
+    """, (usuario_nome,)).fetchone()
 
-    if not usuario:
-        conexao.close()
-
-        return jsonify({
-            "sucesso": False,
-            "erro": "Usuário ou senha inválidos."
-        }), 401
-
-    if not senha_valida(
+    if not usuario or not senha_valida(
         usuario["senha"],
-        senha_digitada
+        senha
     ):
         conexao.close()
 
@@ -567,24 +763,21 @@ def login():
 
     senha_salva = str(usuario["senha"])
 
-    hash_valido = (
+    eh_hash = (
         senha_salva.startswith("pbkdf2:")
         or senha_salva.startswith("scrypt:")
         or senha_salva.startswith("argon2:")
     )
 
-    if not hash_valido:
-        conexao.execute(
-            """
+    if not eh_hash:
+        conexao.execute("""
             UPDATE usuarios
             SET senha = ?
             WHERE id = ?
-            """,
-            (
-                generate_password_hash(senha_digitada),
-                usuario["id"]
-            )
-        )
+        """, (
+            generate_password_hash(senha),
+            usuario["id"]
+        ))
 
         conexao.commit()
 
@@ -592,7 +785,6 @@ def login():
 
     session.clear()
     session.permanent = True
-
     session["usuario_id"] = usuario["id"]
     session["usuario"] = usuario["usuario"]
     session["tipo_usuario"] = usuario["tipo"]
@@ -652,6 +844,22 @@ def pagina_funcionario():
     )
 
 
+@app.route("/agendar")
+def pagina_agendamento():
+    return send_from_directory(
+        str(BASE_DIR),
+        "agendar.html"
+    )
+
+
+@app.route("/agendar.html")
+def pagina_agendamento_html():
+    return send_from_directory(
+        str(BASE_DIR),
+        "agendar.html"
+    )
+
+
 @app.route("/fundo-plar.png")
 def imagem_fundo():
     return send_from_directory(
@@ -680,7 +888,7 @@ def imagem_logo_fallback():
 # PERFIL
 # ============================================================
 
-@app.route("/meu-perfil", methods=["GET"])
+@app.route("/meu-perfil")
 @exigir_login
 def meu_perfil():
     usuario = usuario_da_sessao()
@@ -693,6 +901,403 @@ def meu_perfil():
 
 
 # ============================================================
+# SERVIÇOS E HORÁRIOS PÚBLICOS
+# ============================================================
+
+@app.route("/api/servicos", methods=["GET"])
+def listar_servicos():
+    return jsonify([
+        {
+            "codigo": codigo,
+            "nome": nome
+        }
+        for codigo, nome in SERVICOS.items()
+    ])
+
+
+@app.route(
+    "/api/horarios-disponiveis",
+    methods=["GET"]
+)
+def horarios_disponiveis():
+    data = request.args.get(
+        "data",
+        ""
+    ).strip()
+
+    quantidade = inteiro(
+        request.args.get(
+            "quantidade",
+            1
+        ),
+        1
+    )
+
+    quantidade = max(1, quantidade)
+    duracao = duracao_por_aparelhos(quantidade)
+
+    if not data_valida(data):
+        return jsonify({
+            "erro": "Informe uma data válida."
+        }), 400
+
+    limites = limite_expediente(data)
+
+    if limites is None:
+        return jsonify({
+            "data": data,
+            "duracao_minutos": duracao,
+            "horarios": []
+        })
+
+    inicio, fim = limites
+    conexao = conectar()
+
+    horarios = []
+
+    minuto_atual = inicio
+
+    while minuto_atual + duracao <= fim:
+        horario = (
+            f"{minuto_atual // 60:02d}:"
+            f"{minuto_atual % 60:02d}"
+        )
+
+        disponivel = (
+            antecedencia_valida(data, horario)
+            and not conflito_horario(
+                conexao,
+                data,
+                horario,
+                duracao
+            )
+        )
+
+        if disponivel:
+            horarios.append(horario)
+
+        minuto_atual += 30
+
+    conexao.close()
+
+    return jsonify({
+        "data": data,
+        "duracao_minutos": duracao,
+        "horarios": horarios
+    })
+
+
+# ============================================================
+# AGENDAMENTO PÚBLICO
+# ============================================================
+
+@app.route(
+    "/api/agendamentos-publicos",
+    methods=["POST"]
+)
+def criar_agendamento_publico():
+    dados = request.get_json(silent=True) or {}
+
+    nome = str(
+        dados.get("nome", "")
+    ).strip()
+
+    telefone = normalizar_telefone(
+        dados.get("telefone")
+    )
+
+    endereco = str(
+        dados.get("endereco", "")
+    ).strip()
+
+    data = str(
+        dados.get("data", "")
+    ).strip()
+
+    horario = str(
+        dados.get("horario", "")
+    ).strip()
+
+    tipo_servico = str(
+        dados.get("tipo_servico", "")
+    ).strip().lower()
+
+    quantidade = inteiro(
+        dados.get("quantidade_aparelhos"),
+        0
+    )
+
+    observacoes = str(
+        dados.get("observacoes", "")
+    ).strip()
+
+    consentimento = bool(
+        dados.get("consentimento_lgpd")
+    )
+
+    if len(nome) < 2:
+        return jsonify({
+            "erro": "Informe seu nome completo."
+        }), 400
+
+    if len(telefone) < 10:
+        return jsonify({
+            "erro": "Informe um WhatsApp válido."
+        }), 400
+
+    if not endereco:
+        return jsonify({
+            "erro": "Informe o endereço do atendimento."
+        }), 400
+
+    if quantidade <= 0:
+        return jsonify({
+            "erro": (
+                "Informe a quantidade de aparelhos."
+            )
+        }), 400
+
+    if not servico_valido(tipo_servico):
+        return jsonify({
+            "erro": "Escolha um serviço válido."
+        }), 400
+
+    duracao = duracao_por_aparelhos(quantidade)
+
+    valido, mensagem = horario_valido(
+        data,
+        horario,
+        duracao
+    )
+
+    if not valido:
+        return jsonify({
+            "erro": mensagem
+        }), 400
+
+    if not antecedencia_valida(data, horario):
+        return jsonify({
+            "erro": (
+                "O agendamento precisa ser feito "
+                "com pelo menos 2 horas de antecedência."
+            )
+        }), 400
+
+    if not consentimento:
+        return jsonify({
+            "erro": (
+                "É necessário aceitar a política "
+                "de privacidade."
+            )
+        }), 400
+
+    conexao = conectar()
+
+    if conflito_horario(
+        conexao,
+        data,
+        horario,
+        duracao
+    ):
+        conexao.close()
+
+        return jsonify({
+            "erro": (
+                "Esse horário não está mais disponível."
+            )
+        }), 409
+
+    momento = agora()
+
+    cliente = conexao.execute("""
+        SELECT id
+        FROM clientes
+        WHERE telefone = ?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (telefone,)).fetchone()
+
+    if cliente:
+        cliente_id = cliente["id"]
+
+        conexao.execute("""
+            UPDATE clientes
+            SET nome = ?,
+                endereco = ?,
+                consentimento_lgpd = 1,
+                atualizado_em = ?
+            WHERE id = ?
+        """, (
+            nome,
+            endereco,
+            momento,
+            cliente_id
+        ))
+    else:
+        cursor_cliente = conexao.execute("""
+            INSERT INTO clientes
+            (
+                nome,
+                telefone,
+                endereco,
+                cidade,
+                consentimento_lgpd,
+                criado_em,
+                atualizado_em
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            nome,
+            telefone,
+            endereco,
+            CIDADE_EMPRESA,
+            1,
+            momento,
+            momento
+        ))
+
+        cliente_id = cursor_cliente.lastrowid
+
+    cursor = conexao.execute("""
+        INSERT INTO atendimentos
+        (
+            cliente,
+            cliente_id,
+            telefone_cliente,
+            local,
+            data,
+            horario,
+            duracao_minutos,
+            tipo_servico,
+            quantidade_aparelhos,
+            valor_total,
+            custo,
+            valor_comissao,
+            funcionario_id,
+            status_resposta,
+            origem,
+            consentimento_lgpd,
+            observacoes,
+            criado_em,
+            atualizado_em
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        nome,
+        cliente_id,
+        telefone,
+        endereco,
+        data,
+        horario,
+        duracao,
+        tipo_servico,
+        quantidade,
+        0,
+        0,
+        0,
+        None,
+        "pendente",
+        "publico",
+        1,
+        observacoes,
+        momento,
+        momento
+    ))
+
+    atendimento_id = cursor.lastrowid
+
+    conexao.commit()
+    conexao.close()
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": (
+            "Solicitação enviada. "
+            "Aguarde a confirmação da PLAR."
+        ),
+        "id": atendimento_id,
+        "status": "pendente"
+    }), 201
+
+
+# ============================================================
+# CLIENTES — ADMINISTRADOR
+# ============================================================
+
+@app.route("/clientes", methods=["GET"])
+@exigir_admin
+def listar_clientes():
+    conexao = conectar()
+
+    clientes = conexao.execute("""
+        SELECT *
+        FROM clientes
+        ORDER BY nome
+    """).fetchall()
+
+    conexao.close()
+
+    return jsonify([
+        dict(cliente)
+        for cliente in clientes
+    ])
+
+
+@app.route("/clientes/<int:cliente_id>", methods=["PUT"])
+@exigir_admin
+def editar_cliente(cliente_id):
+    dados = request.get_json(silent=True) or {}
+
+    nome = str(
+        dados.get("nome", "")
+    ).strip()
+
+    telefone = normalizar_telefone(
+        dados.get("telefone")
+    )
+
+    endereco = str(
+        dados.get("endereco", "")
+    ).strip()
+
+    if not nome or len(telefone) < 10:
+        return jsonify({
+            "erro": "Nome e telefone são obrigatórios."
+        }), 400
+
+    conexao = conectar()
+
+    resultado = conexao.execute("""
+        UPDATE clientes
+        SET nome = ?,
+            telefone = ?,
+            endereco = ?,
+            atualizado_em = ?
+        WHERE id = ?
+    """, (
+        nome,
+        telefone,
+        endereco,
+        agora(),
+        cliente_id
+    ))
+
+    conexao.commit()
+    alterado = resultado.rowcount
+    conexao.close()
+
+    if not alterado:
+        return jsonify({
+            "erro": "Cliente não encontrado."
+        }), 404
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Cliente atualizado."
+    })
+
+
+# ============================================================
 # FUNCIONÁRIOS
 # ============================================================
 
@@ -701,14 +1306,12 @@ def meu_perfil():
 def listar_usuarios():
     conexao = conectar()
 
-    usuarios = conexao.execute(
-        """
+    usuarios = conexao.execute("""
         SELECT id, usuario, tipo, percentual, criado_em
         FROM usuarios
         WHERE tipo = 'funcionario'
         ORDER BY usuario
-        """
-    ).fetchall()
+    """).fetchall()
 
     conexao.close()
 
@@ -744,14 +1347,13 @@ def criar_usuario():
 
     if percentual < 0 or percentual > 100:
         return jsonify({
-            "erro": "O percentual deve estar entre 0 e 100."
+            "erro": "Percentual deve estar entre 0 e 100."
         }), 400
 
     conexao = conectar()
 
     try:
-        cursor = conexao.execute(
-            """
+        cursor = conexao.execute("""
             INSERT INTO usuarios
             (
                 usuario,
@@ -761,15 +1363,13 @@ def criar_usuario():
                 criado_em
             )
             VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                usuario,
-                generate_password_hash(senha),
-                "funcionario",
-                percentual,
-                agora()
-            )
-        )
+        """, (
+            usuario,
+            generate_password_hash(senha),
+            "funcionario",
+            percentual,
+            agora()
+        ))
 
         conexao.commit()
         novo_id = cursor.lastrowid
@@ -778,7 +1378,7 @@ def criar_usuario():
         conexao.close()
 
         return jsonify({
-            "erro": "Já existe um usuário com esse nome."
+            "erro": "Esse usuário já existe."
         }), 400
 
     conexao.close()
@@ -788,20 +1388,21 @@ def criar_usuario():
         "FUNCIONARIO_CRIADO",
         "usuarios",
         novo_id,
-        f"Usuário criado: {usuario}"
+        usuario
     )
 
     return jsonify({
         "sucesso": True,
-        "mensagem": "Funcionário criado.",
         "id": novo_id
     }), 201
 
 
-@app.route("/usuarios/<int:id_usuario>", methods=["PUT"])
+@app.route(
+    "/usuarios/<int:id_usuario>",
+    methods=["PUT"]
+)
 @exigir_admin
 def editar_usuario(id_usuario):
-    administrador = usuario_da_sessao()
     dados = request.get_json(silent=True) or {}
 
     percentual = numero(
@@ -811,51 +1412,28 @@ def editar_usuario(id_usuario):
 
     if percentual < 0 or percentual > 100:
         return jsonify({
-            "erro": "O percentual deve estar entre 0 e 100."
+            "erro": "Percentual deve estar entre 0 e 100."
         }), 400
 
     conexao = conectar()
 
-    funcionario = conexao.execute(
-        """
-        SELECT id, usuario
-        FROM usuarios
-        WHERE id = ?
-        AND tipo = 'funcionario'
-        """,
-        (id_usuario,)
-    ).fetchone()
-
-    if not funcionario:
-        conexao.close()
-
-        return jsonify({
-            "erro": "Funcionário não encontrado."
-        }), 404
-
-    conexao.execute(
-        """
+    resultado = conexao.execute("""
         UPDATE usuarios
         SET percentual = ?
         WHERE id = ?
         AND tipo = 'funcionario'
-        """,
-        (
-            percentual,
-            id_usuario
-        )
-    )
+    """, (
+        percentual,
+        id_usuario
+    ))
 
     conexao.commit()
     conexao.close()
 
-    registrar_auditoria(
-        administrador["id"],
-        "PERCENTUAL_ATUALIZADO",
-        "usuarios",
-        id_usuario,
-        f"Novo percentual: {percentual}"
-    )
+    if not resultado.rowcount:
+        return jsonify({
+            "erro": "Funcionário não encontrado."
+        }), 404
 
     return jsonify({
         "sucesso": True,
@@ -863,21 +1441,20 @@ def editar_usuario(id_usuario):
     })
 
 
-@app.route("/usuarios/<int:id_usuario>", methods=["DELETE"])
+@app.route(
+    "/usuarios/<int:id_usuario>",
+    methods=["DELETE"]
+)
 @exigir_admin
 def excluir_usuario(id_usuario):
-    administrador = usuario_da_sessao()
     conexao = conectar()
 
-    funcionario = conexao.execute(
-        """
-        SELECT id, usuario
+    funcionario = conexao.execute("""
+        SELECT usuario
         FROM usuarios
         WHERE id = ?
         AND tipo = 'funcionario'
-        """,
-        (id_usuario,)
-    ).fetchone()
+    """, (id_usuario,)).fetchone()
 
     if not funcionario:
         conexao.close()
@@ -886,38 +1463,24 @@ def excluir_usuario(id_usuario):
             "erro": "Funcionário não encontrado."
         }), 404
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
         SET funcionario_id = NULL,
             atualizado_em = ?
         WHERE funcionario_id = ?
-        """,
-        (
-            agora(),
-            id_usuario
-        )
-    )
+    """, (
+        agora(),
+        id_usuario
+    ))
 
-    conexao.execute(
-        """
+    conexao.execute("""
         DELETE FROM usuarios
         WHERE id = ?
         AND tipo = 'funcionario'
-        """,
-        (id_usuario,)
-    )
+    """, (id_usuario,))
 
     conexao.commit()
     conexao.close()
-
-    registrar_auditoria(
-        administrador["id"],
-        "FUNCIONARIO_EXCLUIDO",
-        "usuarios",
-        id_usuario,
-        f"Usuário excluído: {funcionario['usuario']}"
-    )
 
     return jsonify({
         "sucesso": True,
@@ -926,7 +1489,7 @@ def excluir_usuario(id_usuario):
 
 
 # ============================================================
-# ATENDIMENTOS
+# ATENDIMENTOS ADMINISTRATIVOS
 # ============================================================
 
 @app.route("/atendimentos", methods=["GET"])
@@ -934,8 +1497,7 @@ def excluir_usuario(id_usuario):
 def listar_atendimentos():
     conexao = conectar()
 
-    atendimentos = conexao.execute(
-        """
+    atendimentos = conexao.execute("""
         SELECT
             a.*,
             u.usuario AS funcionario_usuario
@@ -943,14 +1505,13 @@ def listar_atendimentos():
         LEFT JOIN usuarios u
             ON u.id = a.funcionario_id
         ORDER BY a.data, a.horario
-        """
-    ).fetchall()
+    """).fetchall()
 
     conexao.close()
 
     return jsonify([
-        dados_atendimento(atendimento)
-        for atendimento in atendimentos
+        dados_atendimento(item)
+        for item in atendimentos
     ])
 
 
@@ -960,12 +1521,12 @@ def adicionar_atendimento():
     administrador = usuario_da_sessao()
     dados = request.get_json(silent=True) or {}
 
-    nome = str(
+    nome_funcionario = str(
         dados.get("nome", "")
     ).strip()
 
     cliente = str(
-        dados.get("cliente", dados.get("local", ""))
+        dados.get("cliente", "")
     ).strip()
 
     local = str(
@@ -984,9 +1545,12 @@ def adicionar_atendimento():
         dados.get("tipo_servico", "")
     ).strip().lower()
 
-    quantidade = inteiro(
-        dados.get("quantidade_aparelhos"),
-        0
+    quantidade = max(
+        1,
+        inteiro(
+            dados.get("quantidade_aparelhos"),
+            0
+        )
     )
 
     custo = numero(
@@ -994,39 +1558,32 @@ def adicionar_atendimento():
         0
     )
 
-    funcionario_usuario = nome
-
     if not cliente:
         return jsonify({
-            "erro": "Informe o cliente ou local."
+            "erro": "Informe o cliente."
         }), 400
 
     if not local:
         return jsonify({
-            "erro": "Informe o local do serviço."
+            "erro": "Informe o local."
         }), 400
 
-    if not data or not data_valida(data):
+    if not servico_valido(tipo_servico):
         return jsonify({
-            "erro": "Informe uma data válida."
+            "erro": "Informe um serviço válido."
         }), 400
 
-    if not horario_valido(horario):
-        return jsonify({
-            "erro": (
-                "O horário deve estar entre 08:00 e 17:30 "
-                "em intervalos de 30 minutos."
-            )
-        }), 400
+    duracao = duracao_por_aparelhos(quantidade)
 
-    if not tipo_servico:
-        return jsonify({
-            "erro": "Informe o tipo de serviço."
-        }), 400
+    valido, mensagem = horario_valido(
+        data,
+        horario,
+        duracao
+    )
 
-    if quantidade <= 0:
+    if not valido:
         return jsonify({
-            "erro": "A quantidade deve ser maior que zero."
+            "erro": mensagem
         }), 400
 
     if custo < 0:
@@ -1036,50 +1593,35 @@ def adicionar_atendimento():
 
     conexao = conectar()
 
-    funcionario = conexao.execute(
-        """
+    funcionario = conexao.execute("""
         SELECT id, usuario, percentual
         FROM usuarios
         WHERE usuario = ?
         AND tipo = 'funcionario'
-        """,
-        (funcionario_usuario,)
-    ).fetchone()
+    """, (
+        nome_funcionario,
+    )).fetchone()
 
     if not funcionario:
         conexao.close()
 
         return jsonify({
-            "erro": (
-                "Funcionário não encontrado. "
-                "Informe exatamente o usuário cadastrado."
-            )
+            "erro": "Funcionário não encontrado."
         }), 400
 
-    conflito = conexao.execute(
-        """
-        SELECT id
-        FROM atendimentos
-        WHERE funcionario_id = ?
-        AND data = ?
-        AND horario = ?
-        AND COALESCE(status_resposta, 'pendente')
-            NOT IN ('recusado', 'cancelado')
-        """,
-        (
-            funcionario["id"],
-            data,
-            horario
-        )
-    ).fetchone()
-
-    if conflito:
+    if conflito_horario(
+        conexao,
+        data,
+        horario,
+        duracao,
+        funcionario["id"]
+    ):
         conexao.close()
 
         return jsonify({
             "erro": (
-                "Esse funcionário já possui um atendimento "
-                "nesse dia e horário."
+                "O funcionário já possui conflito "
+                "nesse período."
             )
         }), 409
 
@@ -1091,8 +1633,7 @@ def adicionar_atendimento():
 
     momento = agora()
 
-    cursor = conexao.execute(
-        """
+    cursor = conexao.execute("""
         INSERT INTO atendimentos
         (
             nome,
@@ -1100,6 +1641,7 @@ def adicionar_atendimento():
             local,
             data,
             horario,
+            duracao_minutos,
             tipo_servico,
             quantidade_aparelhos,
             valor_total,
@@ -1107,274 +1649,50 @@ def adicionar_atendimento():
             valor_comissao,
             funcionario_id,
             status_resposta,
+            origem,
             criado_em,
             atualizado_em
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            funcionario["usuario"],
-            cliente,
-            local,
-            data,
-            horario,
-            tipo_servico,
-            quantidade,
-            valor_total,
-            custo,
-            valor_comissao,
-            funcionario["id"],
-            "pendente",
-            momento,
-            momento
-        )
-    )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        funcionario["usuario"],
+        cliente,
+        local,
+        data,
+        horario,
+        duracao,
+        tipo_servico,
+        quantidade,
+        valor_total,
+        custo,
+        valor_comissao,
+        funcionario["id"],
+        "pendente",
+        "admin",
+        momento,
+        momento
+    ))
+
+    atendimento_id = cursor.lastrowid
 
     conexao.commit()
-    novo_id = cursor.lastrowid
     conexao.close()
 
     registrar_auditoria(
         administrador["id"],
         "ATENDIMENTO_CRIADO",
         "atendimentos",
-        novo_id,
-        f"Cliente: {cliente}; Local: {local}"
+        atendimento_id,
+        f"Cliente: {cliente}"
     )
 
     return jsonify({
         "sucesso": True,
-        "mensagem": "Atendimento criado.",
-        "id": novo_id,
+        "id": atendimento_id,
         "valor_total": valor_total,
         "valor_comissao": valor_comissao
     }), 201
 
-
-@app.route(
-    "/atendimentos/<int:id_atendimento>",
-    methods=["PUT"]
-)
-@exigir_admin
-def editar_atendimento(id_atendimento):
-    administrador = usuario_da_sessao()
-    dados = request.get_json(silent=True) or {}
-
-    conexao = conectar()
-
-    atendimento = conexao.execute(
-        """
-        SELECT *
-        FROM atendimentos
-        WHERE id = ?
-        """,
-        (id_atendimento,)
-    ).fetchone()
-
-    if not atendimento:
-        conexao.close()
-
-        return jsonify({
-            "erro": "Atendimento não encontrado."
-        }), 404
-
-    cliente = str(
-        dados.get(
-            "cliente",
-            atendimento["cliente"] or atendimento["local"] or ""
-        )
-    ).strip()
-
-    local = str(
-        dados.get(
-            "local",
-            atendimento["local"] or ""
-        )
-    ).strip()
-
-    data = str(
-        dados.get(
-            "data",
-            atendimento["data"] or ""
-        )
-    ).strip()
-
-    horario = str(
-        dados.get(
-            "horario",
-            atendimento["horario"] or ""
-        )
-    ).strip()
-
-    tipo_servico = str(
-        dados.get(
-            "tipo_servico",
-            atendimento["tipo_servico"] or ""
-        )
-    ).strip().lower()
-
-    quantidade = inteiro(
-        dados.get(
-            "quantidade_aparelhos",
-            atendimento["quantidade_aparelhos"]
-        ),
-        0
-    )
-
-    custo = numero(
-        dados.get(
-            "custo",
-            atendimento["custo"]
-        ),
-        0
-    )
-
-    funcionario_id = atendimento["funcionario_id"]
-
-    if not data_valida(data):
-        conexao.close()
-
-        return jsonify({
-            "erro": "Data inválida."
-        }), 400
-
-    if not horario_valido(horario):
-        conexao.close()
-
-        return jsonify({
-            "erro": "Horário inválido."
-        }), 400
-
-    if quantidade <= 0:
-        conexao.close()
-
-        return jsonify({
-            "erro": "Quantidade inválida."
-        }), 400
-
-    funcionario = conexao.execute(
-        """
-        SELECT percentual
-        FROM usuarios
-        WHERE id = ?
-        """,
-        (funcionario_id,)
-    ).fetchone()
-
-    percentual = (
-        funcionario["percentual"]
-        if funcionario
-        else 0
-    )
-
-    valor_total, valor_comissao = calcular_valores(
-        tipo_servico,
-        quantidade,
-        percentual
-    )
-
-    conexao.execute(
-        """
-        UPDATE atendimentos
-        SET cliente = ?,
-            local = ?,
-            data = ?,
-            horario = ?,
-            tipo_servico = ?,
-            quantidade_aparelhos = ?,
-            valor_total = ?,
-            custo = ?,
-            valor_comissao = ?,
-            atualizado_em = ?
-        WHERE id = ?
-        """,
-        (
-            cliente,
-            local,
-            data,
-            horario,
-            tipo_servico,
-            quantidade,
-            valor_total,
-            custo,
-            valor_comissao,
-            agora(),
-            id_atendimento
-        )
-    )
-
-    conexao.commit()
-    conexao.close()
-
-    registrar_auditoria(
-        administrador["id"],
-        "ATENDIMENTO_EDITADO",
-        "atendimentos",
-        id_atendimento,
-        "Dados do atendimento atualizados."
-    )
-
-    return jsonify({
-        "sucesso": True,
-        "mensagem": "Atendimento atualizado.",
-        "valor_total": valor_total,
-        "valor_comissao": valor_comissao
-    })
-
-
-@app.route(
-    "/atendimentos/<int:id_atendimento>",
-    methods=["DELETE"]
-)
-@exigir_admin
-def excluir_atendimento(id_atendimento):
-    administrador = usuario_da_sessao()
-    conexao = conectar()
-
-    atendimento = conexao.execute(
-        """
-        SELECT id, cliente, local
-        FROM atendimentos
-        WHERE id = ?
-        """,
-        (id_atendimento,)
-    ).fetchone()
-
-    if not atendimento:
-        conexao.close()
-
-        return jsonify({
-            "erro": "Atendimento não encontrado."
-        }), 404
-
-    conexao.execute(
-        """
-        DELETE FROM atendimentos
-        WHERE id = ?
-        """,
-        (id_atendimento,)
-    )
-
-    conexao.commit()
-    conexao.close()
-
-    registrar_auditoria(
-        administrador["id"],
-        "ATENDIMENTO_EXCLUIDO",
-        "atendimentos",
-        id_atendimento,
-        f"Cliente: {atendimento['cliente'] or atendimento['local']}"
-    )
-
-    return jsonify({
-        "sucesso": True,
-        "mensagem": "Atendimento excluído."
-    })
-
-
-# ============================================================
-# ALTERAÇÃO DE STATUS
-# ============================================================
 
 @app.route(
     "/atendimentos/<int:id_atendimento>/status",
@@ -1396,14 +1714,11 @@ def alterar_status(id_atendimento):
 
     conexao = conectar()
 
-    atendimento = conexao.execute(
-        """
+    atendimento = conexao.execute("""
         SELECT id, status_resposta
         FROM atendimentos
         WHERE id = ?
-        """,
-        (id_atendimento,)
-    ).fetchone()
+    """, (id_atendimento,)).fetchone()
 
     if not atendimento:
         conexao.close()
@@ -1430,27 +1745,24 @@ def alterar_status(id_atendimento):
             )
         }), 400
 
-    concluido_em = (
-        agora()
-        if novo_status == "concluido"
-        else None
-    )
+    momento = agora()
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
         SET status_resposta = ?,
             atualizado_em = ?,
-            concluido_em = COALESCE(?, concluido_em)
+            concluido_em = CASE
+                WHEN ? = 'concluido' THEN ?
+                ELSE concluido_em
+            END
         WHERE id = ?
-        """,
-        (
-            novo_status,
-            agora(),
-            concluido_em,
-            id_atendimento
-        )
-    )
+    """, (
+        novo_status,
+        momento,
+        novo_status,
+        momento,
+        id_atendimento
+    ))
 
     conexao.commit()
     conexao.close()
@@ -1475,17 +1787,28 @@ def alterar_status(id_atendimento):
 )
 @exigir_admin
 def concluir_atendimento(id_atendimento):
+    dados = request.get_json(silent=True) or {}
+
+    return alterar_status_interno(
+        id_atendimento,
+        "concluido",
+        dados
+    )
+
+
+def alterar_status_interno(
+    id_atendimento,
+    novo_status,
+    dados=None
+):
     administrador = usuario_da_sessao()
     conexao = conectar()
 
-    atendimento = conexao.execute(
-        """
+    atendimento = conexao.execute("""
         SELECT id, status_resposta
         FROM atendimentos
         WHERE id = ?
-        """,
-        (id_atendimento,)
-    ).fetchone()
+    """, (id_atendimento,)).fetchone()
 
     if not atendimento:
         conexao.close()
@@ -1499,33 +1822,33 @@ def concluir_atendimento(id_atendimento):
         or "pendente"
     )
 
-    if status_atual not in (
-        "aceito",
-        "em_andamento"
+    if not transicao_permitida(
+        status_atual,
+        novo_status
     ):
         conexao.close()
 
         return jsonify({
             "erro": (
-                "O atendimento precisa estar aceito "
-                "ou em andamento."
+                f"Não é permitido alterar de "
+                f"{status_atual} para {novo_status}."
             )
         }), 400
 
-    conexao.execute(
-        """
+    momento = agora()
+
+    conexao.execute("""
         UPDATE atendimentos
-        SET status_resposta = 'concluido',
-            concluido_em = ?,
-            atualizado_em = ?
+        SET status_resposta = ?,
+            atualizado_em = ?,
+            concluido_em = ?
         WHERE id = ?
-        """,
-        (
-            agora(),
-            agora(),
-            id_atendimento
-        )
-    )
+    """, (
+        novo_status,
+        momento,
+        momento if novo_status == "concluido" else None,
+        id_atendimento
+    ))
 
     conexao.commit()
     conexao.close()
@@ -1535,12 +1858,47 @@ def concluir_atendimento(id_atendimento):
         "ATENDIMENTO_CONCLUIDO",
         "atendimentos",
         id_atendimento,
-        "Comissão liberada após conclusão."
+        "Serviço concluído."
     )
 
     return jsonify({
         "sucesso": True,
         "mensagem": "Atendimento concluído."
+    })
+
+
+@app.route(
+    "/atendimentos/<int:id_atendimento>",
+    methods=["DELETE"]
+)
+@exigir_admin
+def excluir_atendimento(id_atendimento):
+    conexao = conectar()
+
+    atendimento = conexao.execute("""
+        SELECT id
+        FROM atendimentos
+        WHERE id = ?
+    """, (id_atendimento,)).fetchone()
+
+    if not atendimento:
+        conexao.close()
+
+        return jsonify({
+            "erro": "Atendimento não encontrado."
+        }), 404
+
+    conexao.execute("""
+        DELETE FROM atendimentos
+        WHERE id = ?
+    """, (id_atendimento,))
+
+    conexao.commit()
+    conexao.close()
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Atendimento excluído."
     })
 
 
@@ -1564,24 +1922,20 @@ def meus_agendamentos():
         SELECT
             id,
             cliente,
-            nome,
+            telefone_cliente,
             local,
             data,
             horario,
+            duracao_minutos,
             tipo_servico,
             quantidade_aparelhos,
             valor_comissao,
-            status_resposta,
-            criado_em,
-            atualizado_em,
-            concluido_em
+            status_resposta
         FROM atendimentos
         WHERE funcionario_id = ?
     """
 
-    parametros = [
-        usuario["id"]
-    ]
+    parametros = [usuario["id"]]
 
     if data:
         if not data_valida(data):
@@ -1596,26 +1950,17 @@ def meus_agendamentos():
 
     consulta += " ORDER BY data, horario"
 
-    atendimentos = conexao.execute(
+    registros = conexao.execute(
         consulta,
         parametros
     ).fetchall()
 
     conexao.close()
 
-    resposta = []
-
-    for atendimento in atendimentos:
-        item = dict(atendimento)
-
-        # Nunca envia faturamento, custo ou percentual ao funcionário.
-        item.pop("valor_total", None)
-        item.pop("custo", None)
-        item.pop("percentual", None)
-
-        resposta.append(item)
-
-    return jsonify(resposta)
+    return jsonify([
+        dict(registro)
+        for registro in registros
+    ])
 
 
 @app.route(
@@ -1631,28 +1976,25 @@ def responder_agendamento(id_atendimento):
         dados.get("resposta", "")
     ).strip().lower()
 
-    if resposta not in (
+    if resposta not in {
         "aceito",
         "recusado"
-    ):
+    }:
         return jsonify({
             "erro": "Resposta inválida."
         }), 400
 
     conexao = conectar()
 
-    atendimento = conexao.execute(
-        """
+    atendimento = conexao.execute("""
         SELECT id, status_resposta
         FROM atendimentos
         WHERE id = ?
         AND funcionario_id = ?
-        """,
-        (
-            id_atendimento,
-            usuario["id"]
-        )
-    ).fetchone()
+    """, (
+        id_atendimento,
+        usuario["id"]
+    )).fetchone()
 
     if not atendimento:
         conexao.close()
@@ -1661,46 +2003,37 @@ def responder_agendamento(id_atendimento):
             "erro": "Atendimento não encontrado."
         }), 404
 
-    status_atual = (
-        atendimento["status_resposta"]
-        or "pendente"
-    )
-
-    if status_atual != "pendente":
+    if atendimento["status_resposta"] != "pendente":
         conexao.close()
 
         return jsonify({
             "erro": (
-                "Este atendimento já recebeu "
-                "uma resposta."
+                "Este atendimento já recebeu uma resposta."
             )
         }), 400
 
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE atendimentos
         SET status_resposta = ?,
             atualizado_em = ?
         WHERE id = ?
         AND funcionario_id = ?
-        """,
-        (
-            resposta,
-            agora(),
-            id_atendimento,
-            usuario["id"]
-        )
-    )
+    """, (
+        resposta,
+        agora(),
+        id_atendimento,
+        usuario["id"]
+    ))
 
     conexao.commit()
     conexao.close()
 
     registrar_auditoria(
         usuario["id"],
-        "ATENDIMENTO_RESPONDIDO",
+        "RESPOSTA_FUNCIONARIO",
         "atendimentos",
         id_atendimento,
-        f"Resposta do funcionário: {resposta}"
+        resposta
     )
 
     return jsonify({
@@ -1718,8 +2051,7 @@ def responder_agendamento(id_atendimento):
 def listar_auditoria():
     conexao = conectar()
 
-    registros = conexao.execute(
-        """
+    registros = conexao.execute("""
         SELECT
             a.*,
             u.usuario
@@ -1728,8 +2060,7 @@ def listar_auditoria():
             ON u.id = a.usuario_id
         ORDER BY a.id DESC
         LIMIT 500
-        """
-    ).fetchall()
+    """).fetchall()
 
     conexao.close()
 
@@ -1740,10 +2071,15 @@ def listar_auditoria():
 
 
 # ============================================================
-# RELATÓRIOS FINANCEIROS
+# RELATÓRIO FINANCEIRO
 # ============================================================
 
-def obter_periodo():
+@app.route(
+    "/relatorios/financeiro",
+    methods=["GET"]
+)
+@exigir_admin
+def relatorio_financeiro():
     inicio = request.args.get(
         "inicio",
         ""
@@ -1755,30 +2091,22 @@ def obter_periodo():
     ).strip()
 
     if inicio and not data_valida(inicio):
-        return None, None, "Data inicial inválida."
-
-    if fim and not data_valida(fim):
-        return None, None, "Data final inválida."
-
-    if inicio and fim and inicio > fim:
-        return None, None, (
-            "A data inicial não pode ser maior que a final."
-        )
-
-    return inicio, fim, None
-
-
-@app.route("/relatorios/financeiro", methods=["GET"])
-@exigir_admin
-def relatorio_financeiro():
-    inicio, fim, erro = obter_periodo()
-
-    if erro:
         return jsonify({
-            "erro": erro
+            "erro": "Data inicial inválida."
         }), 400
 
-    conexao = conectar()
+    if fim and not data_valida(fim):
+        return jsonify({
+            "erro": "Data final inválida."
+        }), 400
+
+    if inicio and fim and inicio > fim:
+        return jsonify({
+            "erro": (
+                "A data inicial não pode ser maior "
+                "que a final."
+            )
+        }), 400
 
     consulta = """
         SELECT *
@@ -1796,79 +2124,57 @@ def relatorio_financeiro():
         consulta += " AND data <= ?"
         parametros.append(fim)
 
-    consulta += " ORDER BY data, horario"
+    conexao = conectar()
 
-    atendimentos = conexao.execute(
-        consulta,
+    registros = conexao.execute(
+        consulta + " ORDER BY data, horario",
         parametros
     ).fetchall()
 
     conexao.close()
 
-    total_faturamento = 0
-    total_custos = 0
-    total_comissoes = 0
-    total_lucro = 0
+    faturamento = 0
+    custos = 0
+    comissoes = 0
+    lucro = 0
     comissoes_pendentes = 0
     comissoes_concluidas = 0
 
     por_status = {}
-    por_servico = {}
-    por_funcionario = {}
 
-    for atendimento in atendimentos:
-        item = dados_atendimento(atendimento)
+    for registro in registros:
+        item = dados_atendimento(registro)
 
-        faturamento = numero(item.get("valor_total"))
-        custo = numero(item.get("custo"))
-        comissao = numero(item.get("valor_comissao"))
-        lucro = faturamento - custo - comissao
+        valor_total = numero(
+            item.get("valor_total")
+        )
+
+        custo = numero(
+            item.get("custo")
+        )
+
+        comissao = numero(
+            item.get("valor_comissao")
+        )
+
         status = item["status"]
 
-        total_faturamento += faturamento
-        total_custos += custo
-        total_comissoes += comissao
-        total_lucro += lucro
-
-        if status == "concluido":
-            comissoes_concluidas += comissao
-        elif status not in ("recusado", "cancelado"):
-            comissoes_pendentes += comissao
+        faturamento += valor_total
+        custos += custo
+        comissoes += comissao
+        lucro += valor_total - custo - comissao
 
         por_status[status] = (
             por_status.get(status, 0) + 1
         )
 
-        servico = item.get("tipo_servico") or "outros"
-
-        if servico not in por_servico:
-            por_servico[servico] = {
-                "atendimentos": 0,
-                "faturamento": 0,
-                "comissoes": 0,
-                "lucro": 0
-            }
-
-        por_servico[servico]["atendimentos"] += 1
-        por_servico[servico]["faturamento"] += faturamento
-        por_servico[servico]["comissoes"] += comissao
-        por_servico[servico]["lucro"] += lucro
-
-        funcionario = (
-            item.get("nome")
-            or "Não atribuído"
-        )
-
-        if funcionario not in por_funcionario:
-            por_funcionario[funcionario] = {
-                "atendimentos": 0,
-                "faturamento": 0,
-                "comissoes": 0
-            }
-
-        por_funcionario[funcionario]["atendimentos"] += 1
-        por_funcionario[funcionario]["faturamento"] += faturamento
-        por_funcionario[funcionario]["comissoes"] += comissao
+        if status == "concluido":
+            comissoes_concluidas += comissao
+        elif status not in {
+            "recusado",
+            "cancelado"
+        }:
+            comissoes_pendentes += comissao
 
     return jsonify({
         "periodo": {
@@ -1876,11 +2182,11 @@ def relatorio_financeiro():
             "fim": fim
         },
         "resumo": {
-            "atendimentos": len(atendimentos),
-            "faturamento": round(total_faturamento, 2),
-            "custos": round(total_custos, 2),
-            "comissoes": round(total_comissoes, 2),
-            "lucro": round(total_lucro, 2),
+            "atendimentos": len(registros),
+            "faturamento": round(faturamento, 2),
+            "custos": round(custos, 2),
+            "comissoes": round(comissoes, 2),
+            "lucro": round(lucro, 2),
             "comissoes_pendentes": round(
                 comissoes_pendentes,
                 2
@@ -1890,182 +2196,21 @@ def relatorio_financeiro():
                 2
             )
         },
-        "por_status": por_status,
-        "por_servico": por_servico,
-        "por_funcionario": por_funcionario
+        "por_status": por_status
     })
 
 
 # ============================================================
-# EXPORTAÇÃO CSV
+# STATUS DO SERVIDOR
 # ============================================================
 
-@app.route("/exportar/atendimentos.csv", methods=["GET"])
-@exigir_admin
-def exportar_atendimentos():
-    inicio, fim, erro = obter_periodo()
-
-    if erro:
-        return jsonify({
-            "erro": erro
-        }), 400
-
-    conexao = conectar()
-
-    consulta = """
-        SELECT *
-        FROM atendimentos
-        WHERE 1 = 1
-    """
-
-    parametros = []
-
-    if inicio:
-        consulta += " AND data >= ?"
-        parametros.append(inicio)
-
-    if fim:
-        consulta += " AND data <= ?"
-        parametros.append(fim)
-
-    consulta += " ORDER BY data, horario"
-
-    atendimentos = conexao.execute(
-        consulta,
-        parametros
-    ).fetchall()
-
-    conexao.close()
-
-    texto = StringIO()
-    texto.write("\ufeff")
-
-    escritor = csv.writer(
-        texto,
-        delimiter=";"
-    )
-
-    escritor.writerow([
-        "ID",
-        "Cliente",
-        "Local",
-        "Funcionário",
-        "Data",
-        "Horário",
-        "Serviço",
-        "Aparelhos",
-        "Valor total",
-        "Custo",
-        "Comissão",
-        "Lucro",
-        "Status"
-    ])
-
-    for atendimento in atendimentos:
-        item = dados_atendimento(atendimento)
-
-        escritor.writerow([
-            item.get("id", ""),
-            item.get("cliente", ""),
-            item.get("local", ""),
-            item.get("nome", ""),
-            item.get("data", ""),
-            item.get("horario", ""),
-            item.get("tipo_servico", ""),
-            item.get("quantidade_aparelhos", ""),
-            item.get("valor_total", 0),
-            item.get("custo", 0),
-            item.get("valor_comissao", 0),
-            item.get("lucro_estimado", 0),
-            item.get("status", "")
-        ])
-
-    arquivo = BytesIO(
-        texto.getvalue().encode("utf-8")
-    )
-
-    return send_file(
-        arquivo,
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="atendimentos-plar.csv"
-    )
-
-
-@app.route("/exportar/auditoria.csv", methods=["GET"])
-@exigir_admin
-def exportar_auditoria():
-    conexao = conectar()
-
-    registros = conexao.execute(
-        """
-        SELECT
-            a.id,
-            u.usuario,
-            a.acao,
-            a.tabela,
-            a.registro_id,
-            a.detalhes,
-            a.criado_em
-        FROM auditoria a
-        LEFT JOIN usuarios u
-            ON u.id = a.usuario_id
-        ORDER BY a.id DESC
-        """
-    ).fetchall()
-
-    conexao.close()
-
-    texto = StringIO()
-    texto.write("\ufeff")
-
-    escritor = csv.writer(
-        texto,
-        delimiter=";"
-    )
-
-    escritor.writerow([
-        "ID",
-        "Usuário",
-        "Ação",
-        "Tabela",
-        "Registro",
-        "Detalhes",
-        "Data"
-    ])
-
-    for registro in registros:
-        escritor.writerow([
-            registro["id"],
-            registro["usuario"] or "",
-            registro["acao"],
-            registro["tabela"],
-            registro["registro_id"] or "",
-            registro["detalhes"] or "",
-            registro["criado_em"]
-        ])
-
-    arquivo = BytesIO(
-        texto.getvalue().encode("utf-8")
-    )
-
-    return send_file(
-        arquivo,
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="auditoria-plar.csv"
-    )
-
-
-# ============================================================
-# STATUS
-# ============================================================
-
-@app.route("/status", methods=["GET"])
+@app.route("/status")
 def status():
     return jsonify({
         "online": True,
-        "aplicacao": "PLAR ERP"
+        "aplicacao": "PLAR ERP",
+        "empresa": NOME_EMPRESA,
+        "cidade": CIDADE_EMPRESA
     })
 
 
