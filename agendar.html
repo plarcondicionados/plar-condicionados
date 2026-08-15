@@ -24,14 +24,13 @@
       --background: #071014;
       --surface: #0e1d24;
       --surface-light: #142d36;
-      --border: rgba(255,255,255,.12);
+      --border: rgba(255, 255, 255, .12);
       --text: #f1f8fa;
       --muted: #91a7ae;
       --blue: #1499dc;
       --blue-light: #56caff;
       --green: #38d889;
       --red: #ff6674;
-      --orange: #e6a43d;
     }
 
     * {
@@ -67,7 +66,7 @@
     .page {
       width: min(100% - 30px, 940px);
       margin: 0 auto;
-      padding: 35px 0 50px;
+      padding: 30px 0 50px;
     }
 
     .topo {
@@ -120,7 +119,7 @@
         );
       border: 1px solid rgba(86, 202, 255, .22);
       border-radius: 20px;
-      box-shadow: 0 20px 55px rgba(0,0,0,.25);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, .25);
     }
 
     .hero h1 {
@@ -147,7 +146,7 @@
 
     .info {
       padding: 14px;
-      background: rgba(255,255,255,.045);
+      background: rgba(255, 255, 255, .045);
       border: 1px solid var(--border);
       border-radius: 11px;
     }
@@ -172,7 +171,7 @@
       background: rgba(14, 29, 36, .97);
       border: 1px solid var(--border);
       border-radius: 18px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, .22);
     }
 
     .card h2 {
@@ -229,13 +228,7 @@
     select:focus,
     textarea:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(20,153,220,.13);
-    }
-
-    input:disabled,
-    select:disabled {
-      cursor: not-allowed;
-      opacity: .55;
+      box-shadow: 0 0 0 3px rgba(20, 153, 220, .13);
     }
 
     .ajuda {
@@ -244,16 +237,27 @@
       line-height: 1.4;
     }
 
-    .duracao {
+    .duracao,
+    .valor {
       display: flex;
       align-items: center;
       min-height: 44px;
       padding: 10px 12px;
-      color: var(--blue-light);
-      font-size: 12px;
-      background: rgba(20,153,220,.08);
-      border: 1px solid rgba(20,153,220,.22);
       border-radius: 9px;
+    }
+
+    .duracao {
+      color: var(--blue-light);
+      background: rgba(20, 153, 220, .08);
+      border: 1px solid rgba(20, 153, 220, .22);
+    }
+
+    .valor {
+      color: var(--green);
+      font-size: 16px;
+      font-weight: 800;
+      background: rgba(56, 216, 137, .08);
+      border: 1px solid rgba(56, 216, 137, .25);
     }
 
     .horarios {
@@ -266,8 +270,8 @@
     .horario {
       padding: 10px 7px;
       color: var(--blue-light);
-      background: rgba(20,153,220,.08);
-      border: 1px solid rgba(86,202,255,.3);
+      background: rgba(20, 153, 220, .08);
+      border: 1px solid rgba(86, 202, 255, .3);
       border-radius: 8px;
       font-size: 11px;
       font-weight: 700;
@@ -287,7 +291,7 @@
       color: var(--muted);
       font-size: 11px;
       text-align: center;
-      background: rgba(255,255,255,.03);
+      background: rgba(255, 255, 255, .03);
       border-radius: 8px;
     }
 
@@ -341,7 +345,7 @@
     .botao-secundario {
       color: var(--blue-light);
       background: transparent;
-      border: 1px solid rgba(86,202,255,.35);
+      border: 1px solid rgba(86, 202, 255, .35);
     }
 
     .botao:disabled {
@@ -364,14 +368,14 @@
 
     .mensagem.erro {
       color: #ffd6da;
-      background: rgba(255,102,116,.1);
-      border: 1px solid rgba(255,102,116,.3);
+      background: rgba(255, 102, 116, .1);
+      border: 1px solid rgba(255, 102, 116, .3);
     }
 
     .mensagem.sucesso {
       color: #c9ffe0;
-      background: rgba(56,216,137,.1);
-      border: 1px solid rgba(56,216,137,.3);
+      background: rgba(56, 216, 137, .1);
+      border: 1px solid rgba(56, 216, 137, .3);
     }
 
     .rodape {
@@ -406,17 +410,14 @@
         grid-template-columns: 1fr;
       }
 
-      .campo-completo {
+      .campo-completo,
+      .consentimento,
+      .acoes {
         grid-column: auto;
       }
 
       .horarios {
         grid-template-columns: repeat(3, 1fr);
-      }
-
-      .consentimento,
-      .acoes {
-        grid-column: auto;
       }
 
       .acoes {
@@ -457,8 +458,8 @@
 
       <p>
         Escolha o serviço, informe quantos aparelhos serão atendidos
-        e selecione um horário disponível. Sua solicitação passará por
-        confirmação da equipe PLAR.
+        e selecione um horário disponível. Sua solicitação será enviada
+        para confirmação da equipe PLAR.
       </p>
 
       <div class="informacoes">
@@ -483,8 +484,8 @@
       <h2>Solicitar agendamento</h2>
 
       <p class="card-subtitle">
-        Preencha os dados abaixo. O horário só será reservado após
-        o envio e a confirmação da PLAR.
+        Preencha os dados abaixo. O horário somente será confirmado
+        após a análise da equipe PLAR.
       </p>
 
       <form id="formAgendamento" class="form-grid">
@@ -519,7 +520,7 @@
           >
 
           <span class="ajuda">
-            Informe um número com WhatsApp para receber a confirmação.
+            Informe um número com WhatsApp para contato.
           </span>
         </div>
 
@@ -540,13 +541,17 @@
         <div class="campo">
           <label for="tipoServico">Serviço desejado</label>
 
-          <select id="tipoServico" name="tipo_servico" required>
+          <select
+            id="tipoServico"
+            name="tipo_servico"
+            required
+          >
             <option value="">
               Selecione um serviço
             </option>
 
             <option value="manutencao_preventiva">
-              Manutenção preventiva
+              Manutenção preventiva da condensadora
             </option>
 
             <option value="limpeza_higienizacao">
@@ -554,7 +559,7 @@
             </option>
 
             <option value="automacao">
-              Automação de ar-condicionado
+              Automação com Alexa
             </option>
           </select>
         </div>
@@ -576,18 +581,23 @@
           >
 
           <span class="ajuda">
-            O tempo é calculado em 30 minutos por aparelho.
+            Cada aparelho corresponde a 30 minutos de serviço.
           </span>
         </div>
 
-        <div class="campo campo-completo">
+        <div class="campo">
           <label>Duração estimada</label>
 
-          <div
-            id="duracaoEstimativa"
-            class="duracao"
-          >
+          <div id="duracaoEstimativa" class="duracao">
             30 minutos
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Valor estimado</label>
+
+          <div id="valorEstimado" class="valor">
+            Selecione um serviço
           </div>
         </div>
 
@@ -602,8 +612,7 @@
           >
 
           <span class="ajuda">
-            Agendamentos no mesmo dia exigem pelo menos 2 horas
-            de antecedência.
+            É necessário solicitar com pelo menos 2 horas de antecedência.
           </span>
         </div>
 
@@ -630,8 +639,7 @@
 
         <div class="campo campo-completo">
           <label for="observacoes">
-            Observações
-            <span>(opcional)</span>
+            Observações <span>(opcional)</span>
           </label>
 
           <textarea
@@ -653,7 +661,10 @@
           <span>
             Concordo com o uso dos meus dados para contato, agendamento
             e execução do serviço, conforme a
-            <a href="#" onclick="mostrarPrivacidade(event)">
+            <a
+              href="#"
+              onclick="mostrarPrivacidade(event)"
+            >
               política de privacidade
             </a>
             da PLAR Condicionados.
@@ -722,6 +733,10 @@
       "duracaoEstimativa"
     );
 
+    const valorEstimado = document.getElementById(
+      "valorEstimado"
+    );
+
     const mensagem = document.getElementById(
       "mensagem"
     );
@@ -734,6 +749,16 @@
       "botaoLimpar"
     );
 
+    function dinheiro(valor) {
+      return Number(valor || 0).toLocaleString(
+        "pt-BR",
+        {
+          style: "currency",
+          currency: "BRL"
+        }
+      );
+    }
+
     function formatarDuracao(minutos) {
       const valor = Number(minutos || 30);
 
@@ -742,26 +767,83 @@
       }
 
       const horas = Math.floor(valor / 60);
-      const minutosRestantes = valor % 60;
+      const restantes = valor % 60;
 
-      if (!minutosRestantes) {
+      if (!restantes) {
         return horas === 1
           ? "1 hora"
           : `${horas} horas`;
       }
 
-      return `${horas}h ${minutosRestantes}min`;
+      return `${horas}h ${restantes}min`;
+    }
+
+    function calcularValor(
+      tipoServico,
+      quantidade
+    ) {
+      const aparelhos = Math.max(
+        1,
+        Number(quantidade || 1)
+      );
+
+      if (
+        tipoServico === "limpeza_higienizacao"
+      ) {
+        return 199.90 * aparelhos;
+      }
+
+      if (
+        tipoServico === "manutencao_preventiva"
+      ) {
+        return 349.90 * aparelhos;
+      }
+
+      if (tipoServico === "automacao") {
+        return 949.90 + (
+          Math.max(0, aparelhos - 1) * 149.90
+        );
+      }
+
+      return 0;
+    }
+
+    function atualizarResumo() {
+      const quantidade = Math.max(
+        1,
+        Number(campoQuantidade.value || 1)
+      );
+
+      const duracao = quantidade * 30;
+      const valor = calcularValor(
+        campoServico.value,
+        quantidade
+      );
+
+      duracaoEstimativa.textContent =
+        formatarDuracao(duracao);
+
+      valorEstimado.textContent =
+        valor > 0
+          ? dinheiro(valor)
+          : "Selecione um serviço";
+
+      if (campoData.value) {
+        carregarHorarios();
+      }
     }
 
     function obterDataHoje() {
-      const agora = new Date();
-      const ano = agora.getFullYear();
+      const data = new Date();
+
+      const ano = data.getFullYear();
+
       const mes = String(
-        agora.getMonth() + 1
+        data.getMonth() + 1
       ).padStart(2, "0");
 
       const dia = String(
-        agora.getDate()
+        data.getDate()
       ).padStart(2, "0");
 
       return `${ano}-${mes}-${dia}`;
@@ -772,7 +854,8 @@
       tipo = "erro"
     ) {
       mensagem.textContent = texto;
-      mensagem.className = `mensagem visivel ${tipo}`;
+      mensagem.className =
+        `mensagem visivel ${tipo}`;
     }
 
     function limparMensagem() {
@@ -780,36 +863,25 @@
       mensagem.className = "mensagem";
     }
 
-    function atualizarDuracao() {
-      const quantidade = Math.max(
-        1,
-        Number(campoQuantidade.value || 1)
-      );
-
-      duracaoEstimativa.textContent =
-        formatarDuracao(quantidade * 30);
-
-      if (campoData.value) {
-        carregarHorarios();
-      }
-    }
-
     function limparHorarios(texto) {
       listaHorarios.innerHTML = "";
 
-      const vazio = document.createElement("div");
+      const aviso = document.createElement("div");
 
-      vazio.className = "horarios-vazio";
-      vazio.textContent = texto;
+      aviso.className = "horarios-vazio";
+      aviso.textContent = texto;
 
-      listaHorarios.appendChild(vazio);
+      listaHorarios.appendChild(aviso);
       campoHorario.value = "";
     }
 
     function renderizarHorarios(horarios) {
       listaHorarios.innerHTML = "";
 
-      if (!Array.isArray(horarios) || !horarios.length) {
+      if (
+        !Array.isArray(horarios) ||
+        !horarios.length
+      ) {
         limparHorarios(
           "Não há horários disponíveis para esta data."
         );
@@ -825,13 +897,14 @@
         botao.type = "button";
         botao.className = "horario";
         botao.textContent = horario;
-        botao.dataset.horario = horario;
 
         botao.addEventListener("click", () => {
           document
             .querySelectorAll(".horario")
             .forEach(item => {
-              item.classList.remove("selecionado");
+              item.classList.remove(
+                "selecionado"
+              );
             });
 
           botao.classList.add("selecionado");
@@ -845,6 +918,7 @@
 
     async function carregarHorarios() {
       const data = campoData.value;
+
       const quantidade = Math.max(
         1,
         Number(campoQuantidade.value || 1)
@@ -873,7 +947,7 @@
         });
 
         const resposta = await fetch(
-          `/api/horarios-disponiveis?${parametros}`,
+          `/api/horarios-disponiveis?${parametros.toString()}`,
           {
             method: "GET",
             headers: {
@@ -891,7 +965,9 @@
           );
         }
 
-        renderizarHorarios(dados.horarios || []);
+        renderizarHorarios(
+          dados.horarios || []
+        );
       } catch (erro) {
         limparHorarios(erro.message);
       }
@@ -901,8 +977,10 @@
       const numeros = String(telefone || "")
         .replace(/\D/g, "");
 
-      return numeros.length >= 10 &&
-        numeros.length <= 13;
+      return (
+        numeros.length >= 10 &&
+        numeros.length <= 13
+      );
     }
 
     function mostrarPrivacidade(event) {
@@ -911,9 +989,7 @@
       alert(
         "A PLAR Condicionados utiliza os dados informados "
         + "para contato, análise da solicitação, agendamento "
-        + "e execução do serviço. Os dados não devem ser "
-        + "utilizados para finalidade incompatível sem nova "
-        + "base legal ou consentimento."
+        + "e execução do serviço."
       );
     }
 
@@ -921,13 +997,21 @@
       event.preventDefault();
       limparMensagem();
 
-      const telefone = document.getElementById(
-        "telefone"
-      ).value;
+      const telefone = document
+        .getElementById("telefone")
+        .value;
 
       if (!validarTelefone(telefone)) {
         mostrarMensagem(
           "Informe um número de WhatsApp válido."
+        );
+
+        return;
+      }
+
+      if (!campoServico.value) {
+        mostrarMensagem(
+          "Selecione o serviço desejado."
         );
 
         return;
@@ -942,14 +1026,20 @@
       }
 
       const dados = {
-        nome: document.getElementById("nome").value.trim(),
+        nome: document
+          .getElementById("nome")
+          .value
+          .trim(),
+
         telefone,
+
         endereco: document
           .getElementById("endereco")
           .value
           .trim(),
 
         tipo_servico: campoServico.value,
+
         quantidade_aparelhos: Number(
           campoQuantidade.value
         ),
@@ -993,8 +1083,15 @@
         }
 
         form.reset();
+
         campoData.min = obterDataHoje();
-        duracaoEstimativa.textContent = "30 minutos";
+        campoHorario.value = "";
+
+        duracaoEstimativa.textContent =
+          "30 minutos";
+
+        valorEstimado.textContent =
+          "Selecione um serviço";
 
         limparHorarios(
           "Escolha a data para consultar os horários."
@@ -1010,7 +1107,8 @@
         mostrarMensagem(erro.message);
       } finally {
         botaoEnviar.disabled = false;
-        botaoEnviar.textContent = "Enviar solicitação";
+        botaoEnviar.textContent =
+          "Enviar solicitação";
       }
     }
 
@@ -1023,16 +1121,12 @@
 
     campoQuantidade.addEventListener(
       "input",
-      atualizarDuracao
+      atualizarResumo
     );
 
     campoServico.addEventListener(
       "change",
-      () => {
-        if (campoData.value) {
-          carregarHorarios();
-        }
-      }
+      atualizarResumo
     );
 
     botaoLimpar.addEventListener(
@@ -1040,8 +1134,14 @@
       () => {
         setTimeout(() => {
           limparMensagem();
+
           campoData.min = obterDataHoje();
-          duracaoEstimativa.textContent = "30 minutos";
+
+          duracaoEstimativa.textContent =
+            "30 minutos";
+
+          valorEstimado.textContent =
+            "Selecione um serviço";
 
           limparHorarios(
             "Escolha a data para consultar os horários."
@@ -1054,6 +1154,8 @@
       "submit",
       enviarAgendamento
     );
+
+    atualizarResumo();
   </script>
 </body>
 </html>
