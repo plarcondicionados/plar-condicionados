@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>PLAR ERP | Gestão de Serviços</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
   >
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
       --bg: #071014;
       --sidebar: #09171d;
-      --surface: rgba(14, 29, 36, .97);
-      --border: rgba(255, 255, 255, .10);
+      --surface: #0e1d24;
+      --surface-2: #142d36;
+      --border: rgba(255,255,255,.1);
       --text: #f1f8fa;
       --muted: #91a7ae;
       --blue: #1499dc;
@@ -38,10 +36,6 @@
       padding: 0;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
     body {
       min-height: 100vh;
       color: var(--text);
@@ -49,11 +43,6 @@
       background:
         linear-gradient(135deg, rgba(4,14,18,.96), rgba(5,29,38,.94)),
         url("fundo-plar.png") center / cover fixed no-repeat;
-    }
-
-    body.modo-compacto td {
-      padding-top: 8px;
-      padding-bottom: 8px;
     }
 
     button,
@@ -133,7 +122,6 @@
       background: transparent;
       border: 0;
       border-radius: 9px;
-      transition: .2s;
     }
 
     .nav button:hover,
@@ -260,7 +248,7 @@
     .metric {
       min-height: 120px;
       padding: 19px;
-      background: linear-gradient(145deg, #142d36, #0b1c23);
+      background: linear-gradient(145deg, var(--surface-2), #0b1c23);
       border: 1px solid var(--border);
       border-radius: 15px;
     }
@@ -292,7 +280,7 @@
 
     .panel {
       padding: 20px;
-      background: var(--surface);
+      background: rgba(14,29,36,.97);
       border: 1px solid var(--border);
       border-radius: 15px;
       box-shadow: 0 18px 45px rgba(0,0,0,.2);
@@ -352,7 +340,8 @@
     .secondary,
     .danger,
     .success,
-    .warning {
+    .warning,
+    .whatsapp {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -393,6 +382,12 @@
       border: 0;
     }
 
+    .whatsapp {
+      color: #062014;
+      background: #25d366;
+      border: 0;
+    }
+
     .filters {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
@@ -406,7 +401,7 @@
 
     table {
       width: 100%;
-      min-width: 1100px;
+      min-width: 1250px;
       border-collapse: collapse;
       font-size: 11px;
     }
@@ -596,6 +591,17 @@
       text-align: center;
     }
 
+    .valor-estimado {
+      grid-column: 1 / -1;
+      padding: 12px;
+      color: var(--blue-light);
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(20,153,220,.08);
+      border: 1px solid rgba(20,153,220,.2);
+      border-radius: 8px;
+    }
+
     @media (max-width: 1100px) {
       .metrics {
         grid-template-columns: repeat(2, 1fr);
@@ -700,37 +706,37 @@
       <div class="menu-title">Menu principal</div>
 
       <nav class="nav">
-        <button class="active" data-page="dashboard">
+        <button class="active" type="button" data-page="dashboard">
           <span>▦</span>
           <span>Visão geral</span>
         </button>
 
-        <button data-page="atendimento">
+        <button type="button" data-page="atendimento">
           <span>＋</span>
           <span>Novo atendimento</span>
         </button>
 
-        <button data-page="escala">
+        <button type="button" data-page="escala">
           <span>▣</span>
           <span>Escala de serviços</span>
         </button>
 
-        <button data-page="funcionarios">
+        <button type="button" data-page="funcionarios">
           <span>♙</span>
           <span>Funcionários</span>
         </button>
 
-        <button data-page="financeiro">
+        <button type="button" data-page="financeiro">
           <span>R$</span>
           <span>Financeiro</span>
         </button>
 
-        <button data-page="auditoria">
+        <button type="button" data-page="auditoria">
           <span>⌁</span>
           <span>Histórico</span>
         </button>
 
-        <button data-page="exportacao">
+        <button type="button" data-page="exportacao">
           <span>⇩</span>
           <span>Exportar dados</span>
         </button>
@@ -900,13 +906,19 @@
             </div>
 
             <div class="field">
-              <label for="nome">Funcionário responsável</label>
+              <label for="telefoneCliente">WhatsApp do cliente</label>
               <input
-                id="nome"
-                type="text"
-                placeholder="Usuário cadastrado"
-                required
+                id="telefoneCliente"
+                type="tel"
+                placeholder="(16) 99999-9999"
               >
+            </div>
+
+            <div class="field">
+              <label for="nome">Funcionário responsável</label>
+              <select id="nome" required>
+                <option value="">Selecione o funcionário</option>
+              </select>
             </div>
 
             <div class="field">
@@ -940,7 +952,7 @@
               <label for="tipoServico">Tipo de serviço</label>
               <select id="tipoServico" required>
                 <option value="manutencao_preventiva">
-                  Manutenção preventiva
+                  Manutenção preventiva da condensadora
                 </option>
 
                 <option value="limpeza_higienizacao">
@@ -948,7 +960,7 @@
                 </option>
 
                 <option value="automacao">
-                  Automação de ar-condicionado
+                  Automação com Alexa
                 </option>
               </select>
             </div>
@@ -962,8 +974,9 @@
                 id="quantidadeAparelhos"
                 type="number"
                 min="1"
+                max="50"
                 step="1"
-                placeholder="Ex.: 4"
+                value="1"
                 required
               >
             </div>
@@ -981,18 +994,16 @@
               >
             </div>
 
+            <div class="valor-estimado" id="valorEstimado">
+              Valor estimado: R$ 349,90
+            </div>
+
             <div class="form-actions">
-              <button
-                type="reset"
-                class="secondary"
-              >
+              <button type="reset" class="secondary">
                 Limpar campos
               </button>
 
-              <button
-                type="submit"
-                class="primary"
-              >
+              <button type="submit" class="primary">
                 ＋ Adicionar atendimento
               </button>
             </div>
@@ -1004,7 +1015,7 @@
         <div class="page-title">
           <div>
             <h2>Escala de serviços</h2>
-            <p>Gerencie agenda, status, custos e comissões.</p>
+            <p>Gerencie agenda, clientes, WhatsApp, valores e status.</p>
           </div>
 
           <button
@@ -1028,17 +1039,14 @@
 
             <select id="filtroServico">
               <option value="">Todos os serviços</option>
-
               <option value="manutencao_preventiva">
                 Manutenção preventiva
               </option>
-
               <option value="limpeza_higienizacao">
                 Limpeza e higienização
               </option>
-
               <option value="automacao">
-                Automação de ar-condicionado
+                Automação com Alexa
               </option>
             </select>
 
@@ -1058,12 +1066,14 @@
               <thead>
                 <tr>
                   <th>Cliente</th>
+                  <th>WhatsApp</th>
                   <th>Funcionário</th>
                   <th>Local</th>
                   <th>Data</th>
                   <th>Horário</th>
                   <th>Duração</th>
                   <th>Serviço</th>
+                  <th>Aparelhos</th>
                   <th>Valor</th>
                   <th>Comissão</th>
                   <th>Status</th>
@@ -1108,6 +1118,7 @@
                 min="0"
                 max="100"
                 step="0.01"
+                value="0"
                 required
               >
             </div>
@@ -1264,10 +1275,9 @@
           <div class="export-grid">
             <article class="export-card">
               <h3>Atendimentos</h3>
-
               <p>
-                Clientes, agenda, valores, custos,
-                comissões e status.
+                Clientes, WhatsApp, agenda, valores,
+                custos, comissões e status.
               </p>
 
               <button
@@ -1281,7 +1291,6 @@
 
             <article class="export-card">
               <h3>Histórico</h3>
-
               <p>
                 Ações administrativas realizadas no ERP.
               </p>
@@ -1297,7 +1306,6 @@
 
             <article class="export-card">
               <h3>Escala</h3>
-
               <p>
                 Baixe a escala atual em formato TXT.
               </p>
@@ -1332,7 +1340,7 @@
       ],
       escala: [
         "Escala de serviços",
-        "Gerencie agenda, status, custos e comissões."
+        "Gerencie agenda, clientes, WhatsApp e status."
       ],
       funcionarios: [
         "Funcionários",
@@ -1377,14 +1385,71 @@
         .replaceAll("'", "&#039;");
     }
 
+    function escaparAtributo(valor) {
+      return String(valor ?? "")
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'")
+        .replaceAll("\n", " ")
+        .replaceAll("\r", " ");
+    }
+
+    function normalizarWhatsApp(telefone) {
+      const numeros = String(telefone || "")
+        .replace(/\D/g, "");
+
+      if (!numeros) {
+        return "";
+      }
+
+      return numeros.startsWith("55")
+        ? numeros
+        : "55" + numeros;
+    }
+
+    function abrirWhatsApp(
+      telefone,
+      cliente,
+      data,
+      horario
+    ) {
+      const numero = normalizarWhatsApp(telefone);
+
+      if (!numero) {
+        alert("WhatsApp não informado.");
+        return;
+      }
+
+      const mensagem = [
+        `Olá, ${cliente || "tudo bem"}!`,
+        "",
+        "Aqui é da PLAR Condicionados.",
+        "Estamos entrando em contato sobre seu atendimento.",
+        data && horario
+          ? `Data: ${data} às ${horario}.`
+          : "",
+        "",
+        "Podemos confirmar sua visita?"
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const url =
+        "https://wa.me/" +
+        numero +
+        "?text=" +
+        encodeURIComponent(mensagem);
+
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
     function formatarServico(servico) {
       const nomes = {
-        manutencao_preventiva: "Manutenção preventiva",
+        manutencao_preventiva:
+          "Manutenção preventiva da condensadora",
         limpeza_higienizacao:
           "Limpeza e higienização de evaporadora",
-        automacao: "Automação de ar-condicionado",
-
-        // Compatibilidade com registros antigos.
+        automacao:
+          "Automação com Alexa",
         limpeza: "Limpeza",
         manutencao: "Manutenção",
         instalacao: "Instalação"
@@ -1409,11 +1474,60 @@
       }
 
       const horas = Math.floor(valor / 60);
-      const minutosRestantes = valor % 60;
+      const restantes = valor % 60;
 
-      return minutosRestantes
-        ? `${horas}h ${minutosRestantes}min`
+      return restantes
+        ? `${horas}h ${restantes}min`
         : `${horas}h`;
+    }
+
+    function calcularValor(
+      tipoServico,
+      quantidade
+    ) {
+      const totalAparelhos = Math.max(
+        1,
+        Number(quantidade || 1)
+      );
+
+      if (
+        tipoServico === "limpeza_higienizacao"
+      ) {
+        return 199.90 * totalAparelhos;
+      }
+
+      if (
+        tipoServico === "manutencao_preventiva"
+      ) {
+        return 349.90 * totalAparelhos;
+      }
+
+      if (tipoServico === "automacao") {
+        return 949.90 + (
+          Math.max(0, totalAparelhos - 1) * 149.90
+        );
+      }
+
+      return 0;
+    }
+
+    function atualizarValorEstimado() {
+      const tipoServico = document.getElementById(
+        "tipoServico"
+      ).value;
+
+      const quantidade = document.getElementById(
+        "quantidadeAparelhos"
+      ).value;
+
+      const valor = calcularValor(
+        tipoServico,
+        quantidade
+      );
+
+      document.getElementById(
+        "valorEstimado"
+      ).textContent = "Valor estimado: " + dinheiro(valor);
     }
 
     async function api(url, opcoes = {}) {
@@ -1498,16 +1612,27 @@
       }
     }
 
+    function preencherFuncionarios() {
+      const campo = document.getElementById("nome");
+
+      campo.innerHTML = `
+        <option value="">Selecione o funcionário</option>
+      `;
+
+      funcionarios.forEach(funcionario => {
+        const opcao = document.createElement("option");
+
+        opcao.value = funcionario.usuario;
+        opcao.textContent = funcionario.usuario;
+
+        campo.appendChild(opcao);
+      });
+    }
+
     async function carregarFuncionarios() {
       const lista = document.getElementById(
         "listaFuncionarios"
       );
-
-      lista.innerHTML = `
-        <div class="loading">
-          Carregando funcionários...
-        </div>
-      `;
 
       try {
         funcionarios = await api("/usuarios");
@@ -1516,6 +1641,7 @@
           "totalFuncionarios"
         ).textContent = funcionarios.length;
 
+        preencherFuncionarios();
         renderizarFuncionarios();
       } catch (erro) {
         lista.innerHTML = `
@@ -1546,15 +1672,11 @@
           funcionario.usuario
         );
 
-        const iniciais = usuario
-          .substring(0, 2)
-          .toUpperCase();
-
         return `
           <div class="employee">
             <div class="employee-info">
               <div class="employee-avatar">
-                ${iniciais}
+                ${usuario.substring(0, 2).toUpperCase()}
               </div>
 
               <div>
@@ -1604,21 +1726,6 @@
     async function cadastrarFuncionario(event) {
       event.preventDefault();
 
-      const usuario = document
-        .getElementById("novoUsuario")
-        .value
-        .trim();
-
-      const senha = document
-        .getElementById("novaSenha")
-        .value;
-
-      const percentual = Number(
-        document.getElementById(
-          "novoPercentual"
-        ).value
-      );
-
       try {
         await api("/usuarios", {
           method: "POST",
@@ -1626,14 +1733,24 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            usuario,
-            senha,
-            percentual
+            usuario: document
+              .getElementById("novoUsuario")
+              .value
+              .trim(),
+
+            senha: document
+              .getElementById("novaSenha")
+              .value,
+
+            percentual: Number(
+              document.getElementById(
+                "novoPercentual"
+              ).value
+            )
           })
         });
 
         event.target.reset();
-
         await carregarFuncionarios();
 
         alert("Funcionário cadastrado.");
@@ -1643,11 +1760,11 @@
     }
 
     async function salvarPercentual(id) {
-      const campo = document.getElementById(
-        "percentual-" + id
+      const percentual = Number(
+        document.getElementById(
+          "percentual-" + id
+        ).value
       );
-
-      const percentual = Number(campo.value);
 
       try {
         await api("/usuarios/" + id, {
@@ -1655,9 +1772,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            percentual
-          })
+          body: JSON.stringify({ percentual })
         });
 
         alert("Percentual atualizado.");
@@ -1679,7 +1794,6 @@
         });
 
         await carregarFuncionarios();
-
         alert("Funcionário excluído.");
       } catch (erro) {
         alert(erro.message);
@@ -1693,7 +1807,7 @@
 
       corpo.innerHTML = `
         <tr>
-          <td colspan="11" class="loading">
+          <td colspan="13" class="loading">
             Carregando atendimentos...
           </td>
         </tr>
@@ -1707,7 +1821,7 @@
       } catch (erro) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="11" class="empty">
+            <td colspan="13" class="empty">
               ${escaparHTML(erro.message)}
             </td>
           </tr>
@@ -1740,7 +1854,8 @@
           item.nome,
           item.local,
           item.funcionario_usuario,
-          item.tipo_servico
+          item.tipo_servico,
+          item.telefone_cliente
         ]
           .join(" ")
           .toLowerCase();
@@ -1764,7 +1879,7 @@
       if (!lista.length) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="11" class="empty">
+            <td colspan="13" class="empty">
               Nenhum atendimento encontrado.
             </td>
           </tr>
@@ -1775,8 +1890,7 @@
 
       corpo.innerHTML = lista.map(item => {
         const status = item.status || "pendente";
-
-        const podeIniciar = status === "aceito";
+        const telefone = item.telefone_cliente || "";
 
         const podeConcluir = (
           status === "aceito" ||
@@ -1802,6 +1916,37 @@
             </td>
 
             <td>
+              ${
+                telefone
+                  ? `
+                    <button
+                      class="whatsapp"
+                      type="button"
+                      onclick="abrirWhatsApp(
+                        '${escaparAtributo(telefone)}',
+                        '${escaparAtributo(
+                          item.cliente || ""
+                        )}',
+                        '${escaparAtributo(
+                          item.data || ""
+                        )}',
+                        '${escaparAtributo(
+                          item.horario || ""
+                        )}'
+                      )"
+                    >
+                      WhatsApp
+                    </button>
+                  `
+                  : `
+                    <span style="color:var(--muted)">
+                      Não informado
+                    </span>
+                  `
+              }
+            </td>
+
+            <td>
               ${escaparHTML(
                 item.funcionario_usuario ||
                 item.nome ||
@@ -1812,16 +1957,17 @@
             <td>${escaparHTML(item.local || "-")}</td>
             <td>${escaparHTML(item.data || "-")}</td>
             <td>${escaparHTML(item.horario || "-")}</td>
-
-            <td>
-              ${duracaoTexto(item.duracao_minutos)}
-            </td>
+            <td>${duracaoTexto(item.duracao_minutos)}</td>
 
             <td>
               ${escaparHTML(
                 formatarServico(item.tipo_servico)
               )}
             </td>
+
+            <td>${Number(
+              item.quantidade_aparelhos || 1
+            )}</td>
 
             <td>${dinheiro(item.valor_total)}</td>
             <td>${dinheiro(item.valor_comissao)}</td>
@@ -1863,7 +2009,7 @@
                 }
 
                 ${
-                  podeIniciar
+                  status === "aceito"
                     ? `
                       <button
                         class="warning"
@@ -1936,6 +2082,11 @@
           .value
           .trim(),
 
+        telefone_cliente: document
+          .getElementById("telefoneCliente")
+          .value
+          .trim(),
+
         nome: document
           .getElementById("nome")
           .value
@@ -1946,11 +2097,13 @@
           .value
           .trim(),
 
-        data: document.getElementById("data").value,
+        data: document
+          .getElementById("data")
+          .value,
 
-        horario: document.getElementById(
-          "horario"
-        ).value,
+        horario: document
+          .getElementById("horario")
+          .value,
 
         tipo_servico: document
           .getElementById("tipoServico")
@@ -1960,7 +2113,9 @@
           .getElementById("quantidadeAparelhos")
           .value,
 
-        custo: document.getElementById("custo").value
+        custo: document
+          .getElementById("custo")
+          .value
       };
 
       try {
@@ -1978,6 +2133,7 @@
           "custo"
         ).value = "0";
 
+        atualizarValorEstimado();
         await carregarAtendimentos();
 
         alert("Atendimento cadastrado.");
@@ -2030,27 +2186,14 @@
         );
 
         await carregarAtendimentos();
-
-        alert(
-          "Atendimento concluído."
-        );
+        alert("Atendimento concluído.");
       } catch (erro) {
         alert(erro.message);
       }
     }
 
     async function cancelarAtendimento(id) {
-      if (!confirm(
-        "Deseja cancelar este atendimento?"
-      )) {
-        return;
-      }
-
-      try {
-        await alterarStatus(id, "cancelado");
-      } catch (erro) {
-        alert(erro.message);
-      }
+      await alterarStatus(id, "cancelado");
     }
 
     async function excluirAtendimento(id) {
@@ -2069,7 +2212,6 @@
         );
 
         await carregarAtendimentos();
-
         alert("Atendimento excluído.");
       } catch (erro) {
         alert(erro.message);
@@ -2178,6 +2320,7 @@
     }
 
     async function carregarFinanceiro() {
+      const parametros = new URLSearchParams();
       const inicio = document.getElementById(
         "dataInicio"
       ).value;
@@ -2185,8 +2328,6 @@
       const fim = document.getElementById(
         "dataFim"
       ).value;
-
-      const parametros = new URLSearchParams();
 
       if (inicio) {
         parametros.set("inicio", inicio);
@@ -2251,14 +2392,8 @@
     }
 
     function limparPeriodo() {
-      document.getElementById(
-        "dataInicio"
-      ).value = "";
-
-      document.getElementById(
-        "dataFim"
-      ).value = "";
-
+      document.getElementById("dataInicio").value = "";
+      document.getElementById("dataFim").value = "";
       carregarFinanceiro();
     }
 
@@ -2280,7 +2415,6 @@
 
       graficoFinanceiro = new Chart(canvas, {
         type: "bar",
-
         data: {
           labels: labels.length
             ? labels.map(formatarStatus)
@@ -2290,9 +2424,7 @@
             {
               label: "Atendimentos por status",
               data: labels.length
-                ? labels.map(statusAtual => {
-                    return status[statusAtual];
-                  })
+                ? labels.map(item => status[item])
                 : [0],
               backgroundColor: "#1499dc",
               borderRadius: 6
@@ -2398,8 +2530,12 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(valor) {
+      return `"${String(valor ?? "")
+        .replaceAll('"', '""')}"`;
     }
 
     function exportarAtendimentos() {
@@ -2408,26 +2544,27 @@
         return;
       }
 
-      const linhas = [
-        [
-          "ID",
-          "Cliente",
-          "Funcionário",
-          "Local",
-          "Data",
-          "Horário",
-          "Serviço",
-          "Duração",
-          "Valor",
-          "Comissão",
-          "Status"
-        ]
-      ];
+      const linhas = [[
+        "ID",
+        "Cliente",
+        "WhatsApp",
+        "Funcionário",
+        "Local",
+        "Data",
+        "Horário",
+        "Serviço",
+        "Aparelhos",
+        "Duração",
+        "Valor",
+        "Comissão",
+        "Status"
+      ]];
 
       escalas.forEach(item => {
         linhas.push([
           item.id || "",
           item.cliente || "",
+          item.telefone_cliente || "",
           item.funcionario_usuario ||
             item.nome ||
             "",
@@ -2435,6 +2572,7 @@
           item.data || "",
           item.horario || "",
           formatarServico(item.tipo_servico),
+          item.quantidade_aparelhos || 1,
           duracaoTexto(item.duracao_minutos),
           item.valor_total || 0,
           item.valor_comissao || 0,
@@ -2443,14 +2581,7 @@
       });
 
       const csv = linhas
-        .map(linha => {
-          return linha.map(valor => {
-            const texto = String(valor)
-              .replaceAll('"', '""');
-
-            return `"${texto}"`;
-          }).join(";");
-        })
+        .map(linha => linha.map(csvEscape).join(";"))
         .join("\n");
 
       baixarArquivo(
@@ -2464,17 +2595,15 @@
       try {
         const registros = await api("/auditoria");
 
-        const linhas = [
-          [
-            "ID",
-            "Data",
-            "Usuário",
-            "Ação",
-            "Tabela",
-            "Registro",
-            "Detalhes"
-          ]
-        ];
+        const linhas = [[
+          "ID",
+          "Data",
+          "Usuário",
+          "Ação",
+          "Tabela",
+          "Registro",
+          "Detalhes"
+        ]];
 
         registros.forEach(item => {
           linhas.push([
@@ -2489,14 +2618,7 @@
         });
 
         const csv = linhas
-          .map(linha => {
-            return linha.map(valor => {
-              const texto = String(valor)
-                .replaceAll('"', '""');
-
-              return `"${texto}"`;
-            }).join(";");
-          })
+          .map(linha => linha.map(csvEscape).join(";"))
           .join("\n");
 
         baixarArquivo(
@@ -2520,6 +2642,7 @@
       escalas.forEach(item => {
         texto += [
           `Cliente: ${item.cliente || "-"}`,
+          `WhatsApp: ${item.telefone_cliente || "-"}`,
           `Funcionário: ${
             item.funcionario_usuario ||
             item.nome ||
@@ -2528,21 +2651,20 @@
           `Local: ${item.local || "-"}`,
           `Data: ${item.data || "-"}`,
           `Horário: ${item.horario || "-"}`,
-          `Serviço: ${
-            formatarServico(item.tipo_servico)
+          `Serviço: ${formatarServico(
+            item.tipo_servico
+          )}`,
+          `Aparelhos: ${
+            item.quantidade_aparelhos || 1
           }`,
           `Duração: ${
             duracaoTexto(item.duracao_minutos)
           }`,
-          `Status: ${
-            formatarStatus(item.status)
-          }`,
-          `Valor: ${
-            dinheiro(item.valor_total)
-          }`,
+          `Valor: ${dinheiro(item.valor_total)}`,
           `Comissão: ${
             dinheiro(item.valor_comissao)
           }`,
+          `Status: ${formatarStatus(item.status)}`,
           ""
         ].join("\n") + "\n";
       });
@@ -2587,6 +2709,20 @@
       );
 
     document
+      .getElementById("tipoServico")
+      .addEventListener(
+        "change",
+        atualizarValorEstimado
+      );
+
+    document
+      .getElementById("quantidadeAparelhos")
+      .addEventListener(
+        "input",
+        atualizarValorEstimado
+      );
+
+    document
       .getElementById("filtroTabela")
       .addEventListener(
         "input",
@@ -2616,6 +2752,7 @@
 
     carregarFuncionarios();
     carregarAtendimentos();
+    atualizarValorEstimado();
 
     const paginaSalva = localStorage.getItem(
       "paginaAtualPLAR"
