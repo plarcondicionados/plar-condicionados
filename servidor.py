@@ -3,19 +3,20 @@ from flask import (
     request,
     jsonify,
     send_from_directory,
+    send_file,
     session,
     redirect
 )
-
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
-
 from functools import wraps
 from datetime import datetime, timedelta
 from pathlib import Path
+from io import BytesIO, StringIO
 import sqlite3
+import csv
 import os
 
 
@@ -40,23 +41,18 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=60 * 60 * 8
 )
 
-
-# ============================================================
-# CONFIGURAÇÃO DA EMPRESA
-# ============================================================
-
 NOME_EMPRESA = "PLAR Condicionados"
 CIDADE_EMPRESA = "Ribeirão Preto - SP"
 
 SERVICOS = {
     "manutencao_preventiva": (
-        "Manutenção preventiva"
+        "Manutenção preventiva da condensadora"
     ),
     "limpeza_higienizacao": (
         "Limpeza e higienização de evaporadora"
     ),
     "automacao": (
-        "Automação de ar-condicionado"
+        "Automação de ar-condicionado com Alexa"
     )
 }
 
@@ -111,8 +107,8 @@ def coluna_existe(conexao, tabela, coluna):
     ).fetchall()
 
     return any(
-        item["name"] == coluna
-        for item in colunas
+        coluna_atual["name"] == coluna
+        for coluna_atual in colunas
     )
 
 
@@ -136,7 +132,7 @@ def criar_tabelas():
             senha TEXT NOT NULL,
             tipo TEXT NOT NULL DEFAULT 'funcionario',
             percentual REAL NOT NULL DEFAULT 0,
-            criado_em TEXT
+            criado_em TEXT NOT NULL
         )
     """)
 
@@ -199,35 +195,27 @@ def criar_tabelas():
         )
     """)
 
-    colunas_atendimentos = {
+    colunas = {
         "cliente": "TEXT",
         "cliente_id": "INTEGER",
         "telefone_cliente": "TEXT",
         "tipo_servico": "TEXT",
-        "quantidade_aparelhos": (
-            "INTEGER DEFAULT 1"
-        ),
-        "duracao_minutos": (
-            "INTEGER DEFAULT 30"
-        ),
+        "quantidade_aparelhos": "INTEGER DEFAULT 1",
+        "duracao_minutos": "INTEGER DEFAULT 30",
         "valor_total": "REAL DEFAULT 0",
         "custo": "REAL DEFAULT 0",
         "valor_comissao": "REAL DEFAULT 0",
         "funcionario_id": "INTEGER",
-        "status_resposta": (
-            "TEXT DEFAULT 'pendente'"
-        ),
+        "status_resposta": "TEXT DEFAULT 'pendente'",
         "origem": "TEXT DEFAULT 'admin'",
-        "consentimento_lgpd": (
-            "INTEGER DEFAULT 0"
-        ),
+        "consentimento_lgpd": "INTEGER DEFAULT 0",
         "observacoes": "TEXT",
         "criado_em": "TEXT",
         "atualizado_em": "TEXT",
         "concluido_em": "TEXT"
     }
 
-    for coluna, tipo in colunas_atendimentos.items():
+    for coluna, tipo in colunas.items():
         adicionar_coluna(
             conexao,
             "atendimentos",
@@ -253,8 +241,7 @@ def criar_tabelas():
 
     conexao.execute("""
         UPDATE atendimentos
-        SET duracao_minutos =
-            quantidade_aparelhos * 30
+        SET duracao_minutos = quantidade_aparelhos * 30
         WHERE duracao_minutos IS NULL
         OR duracao_minutos <= 0
     """)
@@ -311,20 +298,10 @@ def criar_tabelas():
             momento
         ))
 
-        print("Administrador inicial criado.")
-        print("Usuário: PLAR")
-        print("Altere a senha após o primeiro acesso.")
-
     conexao.execute("""
         CREATE INDEX IF NOT EXISTS
         idx_atendimentos_data_horario
         ON atendimentos(data, horario)
-    """)
-
-    conexao.execute("""
-        CREATE INDEX IF NOT EXISTS
-        idx_atendimentos_funcionario
-        ON atendimentos(funcionario_id)
     """)
 
     conexao.execute("""
@@ -366,11 +343,7 @@ def inteiro(valor, padrao=0):
 
 def data_valida(data):
     try:
-        datetime.strptime(
-            str(data),
-            "%Y-%m-%d"
-        )
-
+        datetime.strptime(str(data), "%Y-%m-%d")
         return True
     except (TypeError, ValueError):
         return False
@@ -394,12 +367,12 @@ def limite_expediente(data):
         "%Y-%m-%d"
     )
 
-    dia_semana = objeto.weekday()
+    dia = objeto.weekday()
 
-    if dia_semana == 6:
+    if dia == 6:
         return None
 
-    if dia_semana == 5:
+    if dia == 5:
         return 8 * 60, 14 * 60
 
     return 8 * 60, 17 * 60 + 30
@@ -437,18 +410,14 @@ def horario_valido(data, horario, duracao=30):
     return True, ""
 
 
-def data_hora_agendamento(data, horario):
-    return datetime.strptime(
-        f"{data} {horario}",
-        "%Y-%m-%d %H:%M"
-    )
-
-
 def antecedencia_valida(data, horario):
-    agendamento = data_hora_agendamento(
-        data,
-        horario
-    )
+    try:
+        agendamento = datetime.strptime(
+            f"{data} {horario}",
+            "%Y-%m-%d %H:%M"
+        )
+    except (TypeError, ValueError):
+        return False
 
     limite = datetime.now() + timedelta(hours=2)
 
@@ -464,7 +433,10 @@ def normalizar_telefone(telefone):
 
 
 def servico_valido(servico):
-    return str(servico or "").strip().lower() in SERVICOS
+    return (
+        str(servico or "").strip().lower()
+        in SERVICOS
+    )
 
 
 def duracao_por_aparelhos(quantidade):
@@ -474,32 +446,66 @@ def duracao_por_aparelhos(quantidade):
 def calcular_valores(
     tipo_servico,
     quantidade_aparelhos,
-    percentual
+    percentual=0
 ):
     quantidade = max(
         1,
-        int(quantidade_aparelhos)
+        int(quantidade_aparelhos or 1)
     )
 
-    valores = {
-        "manutencao_preventiva": 200,
-        "limpeza_higienizacao": 180,
-        "automacao": 950
-    }
+    tipo_servico = str(
+        tipo_servico or ""
+    ).strip().lower()
 
-    valor_unitario = valores.get(
-        tipo_servico,
-        200
-    )
+    if tipo_servico == "limpeza_higienizacao":
+        valor_total = 199.90 * quantidade
 
-    valor_total = valor_unitario * quantidade
+    elif tipo_servico == "manutencao_preventiva":
+        valor_total = 349.90 * quantidade
+
+    elif tipo_servico == "automacao":
+        valor_total = 949.90
+
+        if quantidade > 1:
+            valor_total += (
+                (quantidade - 1) * 149.90
+            )
+
+    else:
+        valor_total = 0
+
+    valor_total = round(valor_total, 2)
 
     valor_comissao = round(
-        valor_total * float(percentual) / 100,
+        valor_total * float(percentual or 0) / 100,
         2
     )
 
-    return round(valor_total, 2), valor_comissao
+    return valor_total, valor_comissao
+
+
+def senha_valida(senha_salva, senha_digitada):
+    if not senha_salva:
+        return False
+
+    senha_salva = str(senha_salva)
+
+    eh_hash = (
+        senha_salva.startswith("pbkdf2:")
+        or senha_salva.startswith("scrypt:")
+        or senha_salva.startswith("argon2:")
+    )
+
+    if eh_hash:
+        try:
+            return check_password_hash(
+                senha_salva,
+                senha_digitada
+            )
+        except (ValueError, TypeError):
+            return False
+
+    return senha_salva == senha_digitada
 
 
 def usuario_da_sessao():
@@ -524,9 +530,7 @@ def usuario_da_sessao():
 def exigir_login(funcao):
     @wraps(funcao)
     def protegida(*args, **kwargs):
-        usuario = usuario_da_sessao()
-
-        if not usuario:
+        if not usuario_da_sessao():
             if request.path.endswith(".html"):
                 return redirect("/")
 
@@ -560,8 +564,7 @@ def exigir_admin(funcao):
 
             return jsonify({
                 "erro": (
-                    "Acesso permitido somente "
-                    "ao administrador."
+                    "Acesso permitido somente ao administrador."
                 )
             }), 403
 
@@ -570,38 +573,8 @@ def exigir_admin(funcao):
     return protegida
 
 
-def senha_valida(senha_salva, senha_digitada):
-    if not senha_salva:
-        return False
-
-    valor = str(senha_salva)
-
-    eh_hash = (
-        valor.startswith("pbkdf2:")
-        or valor.startswith("scrypt:")
-        or valor.startswith("argon2:")
-    )
-
-    if eh_hash:
-        try:
-            return check_password_hash(
-                valor,
-                senha_digitada
-            )
-        except (ValueError, TypeError):
-            return False
-
-    return valor == senha_digitada
-
-
-def transicao_permitida(
-    status_atual,
-    novo_status
-):
-    return novo_status in TRANSICOES.get(
-        status_atual,
-        set()
-    )
+def transicao_permitida(atual, novo):
+    return novo in TRANSICOES.get(atual, set())
 
 
 def registrar_auditoria(
@@ -646,6 +619,10 @@ def conflito_horario(
     ignorar_id=None
 ):
     inicio_novo = hora_em_minutos(horario)
+
+    if inicio_novo is None:
+        return True
+
     fim_novo = inicio_novo + duracao
 
     consulta = """
@@ -658,11 +635,11 @@ def conflito_horario(
 
     parametros = [data]
 
-    if funcionario_id:
+    if funcionario_id is not None:
         consulta += " AND funcionario_id = ?"
         parametros.append(funcionario_id)
 
-    if ignorar_id:
+    if ignorar_id is not None:
         consulta += " AND id != ?"
         parametros.append(ignorar_id)
 
@@ -676,6 +653,9 @@ def conflito_horario(
             registro["horario"]
         )
 
+        if inicio_existente is None:
+            continue
+
         duracao_existente = (
             registro["duracao_minutos"] or 30
         )
@@ -684,12 +664,10 @@ def conflito_horario(
             inicio_existente + duracao_existente
         )
 
-        existe_intersecao = (
+        if (
             inicio_novo < fim_existente
             and fim_novo > inicio_existente
-        )
-
-        if existe_intersecao:
+        ):
             return True
 
     return False
@@ -761,15 +739,9 @@ def login():
             "erro": "Usuário ou senha inválidos."
         }), 401
 
-    senha_salva = str(usuario["senha"])
-
-    eh_hash = (
-        senha_salva.startswith("pbkdf2:")
-        or senha_salva.startswith("scrypt:")
-        or senha_salva.startswith("argon2:")
-    )
-
-    if not eh_hash:
+    if not str(usuario["senha"]).startswith(
+        ("pbkdf2:", "scrypt:", "argon2:")
+    ):
         conexao.execute("""
             UPDATE usuarios
             SET senha = ?
@@ -845,7 +817,7 @@ def pagina_funcionario():
 
 
 @app.route("/agendar")
-def pagina_agendamento():
+def pagina_agendar():
     return send_from_directory(
         str(BASE_DIR),
         "agendar.html"
@@ -853,7 +825,7 @@ def pagina_agendamento():
 
 
 @app.route("/agendar.html")
-def pagina_agendamento_html():
+def pagina_agendar_html():
     return send_from_directory(
         str(BASE_DIR),
         "agendar.html"
@@ -861,7 +833,7 @@ def pagina_agendamento_html():
 
 
 @app.route("/fundo-plar.png")
-def imagem_fundo():
+def fundo_plar():
     return send_from_directory(
         str(BASE_DIR),
         "fundo-plar.png"
@@ -869,7 +841,7 @@ def imagem_fundo():
 
 
 @app.route("/logo-plar.png.png")
-def imagem_logo():
+def logo_plar():
     return send_from_directory(
         str(BASE_DIR),
         "logo-plar.png.png"
@@ -877,7 +849,7 @@ def imagem_logo():
 
 
 @app.route("/logoplarpng.png")
-def imagem_logo_fallback():
+def logo_plar_fallback():
     return send_from_directory(
         str(BASE_DIR),
         "logoplarpng.png"
@@ -885,23 +857,7 @@ def imagem_logo_fallback():
 
 
 # ============================================================
-# PERFIL
-# ============================================================
-
-@app.route("/meu-perfil")
-@exigir_login
-def meu_perfil():
-    usuario = usuario_da_sessao()
-
-    return jsonify({
-        "id": usuario["id"],
-        "usuario": usuario["usuario"],
-        "tipo": usuario["tipo"]
-    })
-
-
-# ============================================================
-# SERVIÇOS E HORÁRIOS PÚBLICOS
+# SERVIÇOS E HORÁRIOS
 # ============================================================
 
 @app.route("/api/servicos", methods=["GET"])
@@ -915,26 +871,20 @@ def listar_servicos():
     ])
 
 
-@app.route(
-    "/api/horarios-disponiveis",
-    methods=["GET"]
-)
+@app.route("/api/horarios-disponiveis", methods=["GET"])
 def horarios_disponiveis():
     data = request.args.get(
         "data",
         ""
     ).strip()
 
-    quantidade = inteiro(
-        request.args.get(
-            "quantidade",
+    quantidade = max(
+        1,
+        inteiro(
+            request.args.get("quantidade", 1),
             1
-        ),
-        1
+        )
     )
-
-    quantidade = max(1, quantidade)
-    duracao = duracao_por_aparelhos(quantidade)
 
     if not data_valida(data):
         return jsonify({
@@ -946,24 +896,26 @@ def horarios_disponiveis():
     if limites is None:
         return jsonify({
             "data": data,
-            "duracao_minutos": duracao,
-            "horarios": []
+            "horarios": [],
+            "duracao_minutos": (
+                duracao_por_aparelhos(quantidade)
+            )
         })
 
+    duracao = duracao_por_aparelhos(quantidade)
     inicio, fim = limites
     conexao = conectar()
-
     horarios = []
 
-    minuto_atual = inicio
+    minuto = inicio
 
-    while minuto_atual + duracao <= fim:
+    while minuto + duracao <= fim:
         horario = (
-            f"{minuto_atual // 60:02d}:"
-            f"{minuto_atual % 60:02d}"
+            f"{minuto // 60:02d}:"
+            f"{minuto % 60:02d}"
         )
 
-        disponivel = (
+        if (
             antecedencia_valida(data, horario)
             and not conflito_horario(
                 conexao,
@@ -971,12 +923,10 @@ def horarios_disponiveis():
                 horario,
                 duracao
             )
-        )
-
-        if disponivel:
+        ):
             horarios.append(horario)
 
-        minuto_atual += 30
+        minuto += 30
 
     conexao.close()
 
@@ -1052,8 +1002,13 @@ def criar_agendamento_publico():
 
     if quantidade <= 0:
         return jsonify({
+            "erro": "Informe a quantidade de aparelhos."
+        }), 400
+
+    if quantidade > 50:
+        return jsonify({
             "erro": (
-                "Informe a quantidade de aparelhos."
+                "A quantidade máxima permitida é 50 aparelhos."
             )
         }), 400
 
@@ -1086,8 +1041,7 @@ def criar_agendamento_publico():
     if not consentimento:
         return jsonify({
             "erro": (
-                "É necessário aceitar a política "
-                "de privacidade."
+                "É necessário aceitar a política de privacidade."
             )
         }), 400
 
@@ -1102,9 +1056,7 @@ def criar_agendamento_publico():
         conexao.close()
 
         return jsonify({
-            "erro": (
-                "Esse horário não está mais disponível."
-            )
+            "erro": "Esse horário não está mais disponível."
         }), 409
 
     momento = agora()
@@ -1123,12 +1075,14 @@ def criar_agendamento_publico():
         conexao.execute("""
             UPDATE clientes
             SET nome = ?,
+                telefone = ?,
                 endereco = ?,
                 consentimento_lgpd = 1,
                 atualizado_em = ?
             WHERE id = ?
         """, (
             nome,
+            telefone,
             endereco,
             momento,
             cliente_id
@@ -1157,6 +1111,12 @@ def criar_agendamento_publico():
         ))
 
         cliente_id = cursor_cliente.lastrowid
+
+    valor_total, valor_comissao = calcular_valores(
+        tipo_servico,
+        quantidade,
+        0
+    )
 
     cursor = conexao.execute("""
         INSERT INTO atendimentos
@@ -1192,9 +1152,9 @@ def criar_agendamento_publico():
         duracao,
         tipo_servico,
         quantidade,
+        valor_total,
         0,
-        0,
-        0,
+        valor_comissao,
         None,
         "pendente",
         "publico",
@@ -1216,12 +1176,14 @@ def criar_agendamento_publico():
             "Aguarde a confirmação da PLAR."
         ),
         "id": atendimento_id,
-        "status": "pendente"
+        "status": "pendente",
+        "valor_total": valor_total,
+        "duracao_minutos": duracao
     }), 201
 
 
 # ============================================================
-# CLIENTES — ADMINISTRADOR
+# CLIENTES
 # ============================================================
 
 @app.route("/clientes", methods=["GET"])
@@ -1243,7 +1205,10 @@ def listar_clientes():
     ])
 
 
-@app.route("/clientes/<int:cliente_id>", methods=["PUT"])
+@app.route(
+    "/clientes/<int:cliente_id>",
+    methods=["PUT"]
+)
 @exigir_admin
 def editar_cliente(cliente_id):
     dados = request.get_json(silent=True) or {}
@@ -1260,7 +1225,7 @@ def editar_cliente(cliente_id):
         dados.get("endereco", "")
     ).strip()
 
-    if not nome or len(telefone) < 10:
+    if len(nome) < 2 or len(telefone) < 10:
         return jsonify({
             "erro": "Nome e telefone são obrigatórios."
         }), 400
@@ -1298,7 +1263,7 @@ def editar_cliente(cliente_id):
 
 
 # ============================================================
-# FUNCIONÁRIOS
+# USUÁRIOS
 # ============================================================
 
 @app.route("/usuarios", methods=["GET"])
@@ -1340,9 +1305,12 @@ def criar_usuario():
         -1
     )
 
-    if not usuario or not senha:
+    if not usuario or len(senha) < 6:
         return jsonify({
-            "erro": "Usuário e senha são obrigatórios."
+            "erro": (
+                "Usuário e senha são obrigatórios. "
+                "A senha deve ter pelo menos 6 caracteres."
+            )
         }), 400
 
     if percentual < 0 or percentual > 100:
@@ -1489,7 +1457,7 @@ def excluir_usuario(id_usuario):
 
 
 # ============================================================
-# ATENDIMENTOS ADMINISTRATIVOS
+# ATENDIMENTOS
 # ============================================================
 
 @app.route("/atendimentos", methods=["GET"])
@@ -1510,8 +1478,8 @@ def listar_atendimentos():
     conexao.close()
 
     return jsonify([
-        dados_atendimento(item)
-        for item in atendimentos
+        dados_atendimento(atendimento)
+        for atendimento in atendimentos
     ])
 
 
@@ -1528,6 +1496,10 @@ def adicionar_atendimento():
     cliente = str(
         dados.get("cliente", "")
     ).strip()
+
+    telefone_cliente = normalizar_telefone(
+        dados.get("telefone_cliente")
+    )
 
     local = str(
         dados.get("local", "")
@@ -1549,7 +1521,7 @@ def adicionar_atendimento():
         1,
         inteiro(
             dados.get("quantidade_aparelhos"),
-            0
+            1
         )
     )
 
@@ -1558,19 +1530,19 @@ def adicionar_atendimento():
         0
     )
 
-    if not cliente:
+    if not cliente or not local:
         return jsonify({
-            "erro": "Informe o cliente."
-        }), 400
-
-    if not local:
-        return jsonify({
-            "erro": "Informe o local."
+            "erro": "Informe cliente e local."
         }), 400
 
     if not servico_valido(tipo_servico):
         return jsonify({
             "erro": "Informe um serviço válido."
+        }), 400
+
+    if custo < 0:
+        return jsonify({
+            "erro": "O custo não pode ser negativo."
         }), 400
 
     duracao = duracao_por_aparelhos(quantidade)
@@ -1586,11 +1558,6 @@ def adicionar_atendimento():
             "erro": mensagem
         }), 400
 
-    if custo < 0:
-        return jsonify({
-            "erro": "O custo não pode ser negativo."
-        }), 400
-
     conexao = conectar()
 
     funcionario = conexao.execute("""
@@ -1598,9 +1565,7 @@ def adicionar_atendimento():
         FROM usuarios
         WHERE usuario = ?
         AND tipo = 'funcionario'
-    """, (
-        nome_funcionario,
-    )).fetchone()
+    """, (nome_funcionario,)).fetchone()
 
     if not funcionario:
         conexao.close()
@@ -1638,6 +1603,7 @@ def adicionar_atendimento():
         (
             nome,
             cliente,
+            telefone_cliente,
             local,
             data,
             horario,
@@ -1653,10 +1619,11 @@ def adicionar_atendimento():
             criado_em,
             atualizado_em
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         funcionario["usuario"],
         cliente,
+        telefone_cliente,
         local,
         data,
         horario,
@@ -1692,6 +1659,207 @@ def adicionar_atendimento():
         "valor_total": valor_total,
         "valor_comissao": valor_comissao
     }), 201
+
+
+@app.route(
+    "/atendimentos/<int:id_atendimento>",
+    methods=["PUT"]
+)
+@exigir_admin
+def editar_atendimento(id_atendimento):
+    administrador = usuario_da_sessao()
+    dados = request.get_json(silent=True) or {}
+
+    conexao = conectar()
+
+    atendimento = conexao.execute("""
+        SELECT *
+        FROM atendimentos
+        WHERE id = ?
+    """, (id_atendimento,)).fetchone()
+
+    if not atendimento:
+        conexao.close()
+
+        return jsonify({
+            "erro": "Atendimento não encontrado."
+        }), 404
+
+    cliente = str(
+        dados.get(
+            "cliente",
+            atendimento["cliente"] or ""
+        )
+    ).strip()
+
+    telefone = normalizar_telefone(
+        dados.get(
+            "telefone_cliente",
+            atendimento["telefone_cliente"] or ""
+        )
+    )
+
+    local = str(
+        dados.get(
+            "local",
+            atendimento["local"] or ""
+        )
+    ).strip()
+
+    data = str(
+        dados.get(
+            "data",
+            atendimento["data"] or ""
+        )
+    ).strip()
+
+    horario = str(
+        dados.get(
+            "horario",
+            atendimento["horario"] or ""
+        )
+    ).strip()
+
+    tipo_servico = str(
+        dados.get(
+            "tipo_servico",
+            atendimento["tipo_servico"] or ""
+        )
+    ).strip().lower()
+
+    quantidade = max(
+        1,
+        inteiro(
+            dados.get(
+                "quantidade_aparelhos",
+                atendimento["quantidade_aparelhos"] or 1
+            ),
+            1
+        )
+    )
+
+    custo = numero(
+        dados.get(
+            "custo",
+            atendimento["custo"] or 0
+        ),
+        0
+    )
+
+    if not cliente or not local:
+        conexao.close()
+
+        return jsonify({
+            "erro": "Cliente e local são obrigatórios."
+        }), 400
+
+    if not servico_valido(tipo_servico):
+        conexao.close()
+
+        return jsonify({
+            "erro": "Serviço inválido."
+        }), 400
+
+    duracao = duracao_por_aparelhos(quantidade)
+
+    valido, mensagem = horario_valido(
+        data,
+        horario,
+        duracao
+    )
+
+    if not valido:
+        conexao.close()
+
+        return jsonify({
+            "erro": mensagem
+        }), 400
+
+    funcionario_id = atendimento["funcionario_id"]
+
+    if conflito_horario(
+        conexao,
+        data,
+        horario,
+        duracao,
+        funcionario_id,
+        id_atendimento
+    ):
+        conexao.close()
+
+        return jsonify({
+            "erro": "Existe conflito de horário."
+        }), 409
+
+    funcionario = None
+
+    if funcionario_id:
+        funcionario = conexao.execute("""
+            SELECT percentual
+            FROM usuarios
+            WHERE id = ?
+        """, (funcionario_id,)).fetchone()
+
+    percentual = (
+        funcionario["percentual"]
+        if funcionario
+        else 0
+    )
+
+    valor_total, valor_comissao = calcular_valores(
+        tipo_servico,
+        quantidade,
+        percentual
+    )
+
+    conexao.execute("""
+        UPDATE atendimentos
+        SET cliente = ?,
+            telefone_cliente = ?,
+            local = ?,
+            data = ?,
+            horario = ?,
+            duracao_minutos = ?,
+            tipo_servico = ?,
+            quantidade_aparelhos = ?,
+            valor_total = ?,
+            custo = ?,
+            valor_comissao = ?,
+            atualizado_em = ?
+        WHERE id = ?
+    """, (
+        cliente,
+        telefone,
+        local,
+        data,
+        horario,
+        duracao,
+        tipo_servico,
+        quantidade,
+        valor_total,
+        custo,
+        valor_comissao,
+        agora(),
+        id_atendimento
+    ))
+
+    conexao.commit()
+    conexao.close()
+
+    registrar_auditoria(
+        administrador["id"],
+        "ATENDIMENTO_EDITADO",
+        "atendimentos",
+        id_atendimento,
+        f"Cliente: {cliente}"
+    )
+
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Atendimento atualizado.",
+        "valor_total": valor_total,
+        "valor_comissao": valor_comissao
+    })
 
 
 @app.route(
@@ -1787,19 +1955,15 @@ def alterar_status(id_atendimento):
 )
 @exigir_admin
 def concluir_atendimento(id_atendimento):
-    dados = request.get_json(silent=True) or {}
-
     return alterar_status_interno(
         id_atendimento,
-        "concluido",
-        dados
+        "concluido"
     )
 
 
 def alterar_status_interno(
     id_atendimento,
-    novo_status,
-    dados=None
+    novo_status
 ):
     administrador = usuario_da_sessao()
     conexao = conectar()
@@ -1817,21 +1981,18 @@ def alterar_status_interno(
             "erro": "Atendimento não encontrado."
         }), 404
 
-    status_atual = (
+    atual = (
         atendimento["status_resposta"]
         or "pendente"
     )
 
-    if not transicao_permitida(
-        status_atual,
-        novo_status
-    ):
+    if not transicao_permitida(atual, novo_status):
         conexao.close()
 
         return jsonify({
             "erro": (
                 f"Não é permitido alterar de "
-                f"{status_atual} para {novo_status}."
+                f"{atual} para {novo_status}."
             )
         }), 400
 
@@ -1846,7 +2007,7 @@ def alterar_status_interno(
     """, (
         novo_status,
         momento,
-        momento if novo_status == "concluido" else None,
+        momento,
         id_atendimento
     ))
 
@@ -1873,10 +2034,11 @@ def alterar_status_interno(
 )
 @exigir_admin
 def excluir_atendimento(id_atendimento):
+    administrador = usuario_da_sessao()
     conexao = conectar()
 
     atendimento = conexao.execute("""
-        SELECT id
+        SELECT cliente
         FROM atendimentos
         WHERE id = ?
     """, (id_atendimento,)).fetchone()
@@ -1895,6 +2057,14 @@ def excluir_atendimento(id_atendimento):
 
     conexao.commit()
     conexao.close()
+
+    registrar_auditoria(
+        administrador["id"],
+        "ATENDIMENTO_EXCLUIDO",
+        "atendimentos",
+        id_atendimento,
+        f"Cliente: {atendimento['cliente']}"
+    )
 
     return jsonify({
         "sucesso": True,
@@ -1915,8 +2085,6 @@ def meus_agendamentos():
         "data",
         ""
     ).strip()
-
-    conexao = conectar()
 
     consulta = """
         SELECT
@@ -1939,8 +2107,6 @@ def meus_agendamentos():
 
     if data:
         if not data_valida(data):
-            conexao.close()
-
             return jsonify({
                 "erro": "Data inválida."
             }), 400
@@ -1949,6 +2115,8 @@ def meus_agendamentos():
         parametros.append(data)
 
     consulta += " ORDER BY data, horario"
+
+    conexao = conectar()
 
     registros = conexao.execute(
         consulta,
@@ -1976,10 +2144,7 @@ def responder_agendamento(id_atendimento):
         dados.get("resposta", "")
     ).strip().lower()
 
-    if resposta not in {
-        "aceito",
-        "recusado"
-    }:
+    if resposta not in {"aceito", "recusado"}:
         return jsonify({
             "erro": "Resposta inválida."
         }), 400
@@ -2103,8 +2268,7 @@ def relatorio_financeiro():
     if inicio and fim and inicio > fim:
         return jsonify({
             "erro": (
-                "A data inicial não pode ser maior "
-                "que a final."
+                "A data inicial não pode ser maior que a final."
             )
         }), 400
 
@@ -2137,44 +2301,34 @@ def relatorio_financeiro():
     custos = 0
     comissoes = 0
     lucro = 0
-    comissoes_pendentes = 0
-    comissoes_concluidas = 0
-
+    pendentes = 0
+    concluidas = 0
     por_status = {}
 
     for registro in registros:
         item = dados_atendimento(registro)
 
-        valor_total = numero(
-            item.get("valor_total")
-        )
+        valor = numero(item.get("valor_total"))
+        custo = numero(item.get("custo"))
+        comissao = numero(item.get("valor_comissao"))
+        status_atual = item["status"]
 
-        custo = numero(
-            item.get("custo")
-        )
-
-        comissao = numero(
-            item.get("valor_comissao")
-        )
-
-        status = item["status"]
-
-        faturamento += valor_total
+        faturamento += valor
         custos += custo
         comissoes += comissao
-        lucro += valor_total - custo - comissao
+        lucro += valor - custo - comissao
 
-        por_status[status] = (
-            por_status.get(status, 0) + 1
+        por_status[status_atual] = (
+            por_status.get(status_atual, 0) + 1
         )
 
-        if status == "concluido":
-            comissoes_concluidas += comissao
-        elif status not in {
+        if status_atual == "concluido":
+            concluidas += comissao
+        elif status_atual not in {
             "recusado",
             "cancelado"
         }:
-            comissoes_pendentes += comissao
+            pendentes += comissao
 
     return jsonify({
         "periodo": {
@@ -2187,24 +2341,188 @@ def relatorio_financeiro():
             "custos": round(custos, 2),
             "comissoes": round(comissoes, 2),
             "lucro": round(lucro, 2),
-            "comissoes_pendentes": round(
-                comissoes_pendentes,
-                2
-            ),
-            "comissoes_concluidas": round(
-                comissoes_concluidas,
-                2
-            )
+            "comissoes_pendentes": round(pendentes, 2),
+            "comissoes_concluidas": round(concluidas, 2)
         },
         "por_status": por_status
     })
 
 
 # ============================================================
-# STATUS DO SERVIDOR
+# EXPORTAÇÕES
 # ============================================================
 
-@app.route("/status")
+@app.route(
+    "/exportar/atendimentos.csv",
+    methods=["GET"]
+)
+@exigir_admin
+def exportar_atendimentos():
+    inicio = request.args.get("inicio", "").strip()
+    fim = request.args.get("fim", "").strip()
+
+    consulta = """
+        SELECT
+            a.*,
+            u.usuario AS funcionario_usuario
+        FROM atendimentos a
+        LEFT JOIN usuarios u
+            ON u.id = a.funcionario_id
+        WHERE 1 = 1
+    """
+
+    parametros = []
+
+    if inicio and data_valida(inicio):
+        consulta += " AND a.data >= ?"
+        parametros.append(inicio)
+
+    if fim and data_valida(fim):
+        consulta += " AND a.data <= ?"
+        parametros.append(fim)
+
+    consulta += " ORDER BY a.data, a.horario"
+
+    conexao = conectar()
+
+    registros = conexao.execute(
+        consulta,
+        parametros
+    ).fetchall()
+
+    conexao.close()
+
+    texto = StringIO()
+    texto.write("\ufeff")
+
+    escritor = csv.writer(
+        texto,
+        delimiter=";"
+    )
+
+    escritor.writerow([
+        "ID",
+        "Cliente",
+        "WhatsApp",
+        "Funcionário",
+        "Local",
+        "Data",
+        "Horário",
+        "Serviço",
+        "Aparelhos",
+        "Duração",
+        "Valor",
+        "Custo",
+        "Comissão",
+        "Status"
+    ])
+
+    for registro in registros:
+        item = dados_atendimento(registro)
+
+        escritor.writerow([
+            item.get("id", ""),
+            item.get("cliente", ""),
+            item.get("telefone_cliente", ""),
+            item.get("funcionario_usuario", ""),
+            item.get("local", ""),
+            item.get("data", ""),
+            item.get("horario", ""),
+            SERVICOS.get(
+                item.get("tipo_servico"),
+                item.get("tipo_servico", "")
+            ),
+            item.get("quantidade_aparelhos", ""),
+            item.get("duracao_minutos", ""),
+            item.get("valor_total", 0),
+            item.get("custo", 0),
+            item.get("valor_comissao", 0),
+            item.get("status", "")
+        ])
+
+    arquivo = BytesIO(
+        texto.getvalue().encode("utf-8")
+    )
+
+    return send_file(
+        arquivo,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="atendimentos-plar.csv"
+    )
+
+
+@app.route(
+    "/exportar/auditoria.csv",
+    methods=["GET"]
+)
+@exigir_admin
+def exportar_auditoria():
+    conexao = conectar()
+
+    registros = conexao.execute("""
+        SELECT
+            a.id,
+            a.criado_em,
+            u.usuario,
+            a.acao,
+            a.tabela,
+            a.registro_id,
+            a.detalhes
+        FROM auditoria a
+        LEFT JOIN usuarios u
+            ON u.id = a.usuario_id
+        ORDER BY a.id DESC
+    """).fetchall()
+
+    conexao.close()
+
+    texto = StringIO()
+    texto.write("\ufeff")
+
+    escritor = csv.writer(
+        texto,
+        delimiter=";"
+    )
+
+    escritor.writerow([
+        "ID",
+        "Data",
+        "Usuário",
+        "Ação",
+        "Tabela",
+        "Registro",
+        "Detalhes"
+    ])
+
+    for registro in registros:
+        escritor.writerow([
+            registro["id"],
+            registro["criado_em"],
+            registro["usuario"] or "",
+            registro["acao"],
+            registro["tabela"],
+            registro["registro_id"] or "",
+            registro["detalhes"] or ""
+        ])
+
+    arquivo = BytesIO(
+        texto.getvalue().encode("utf-8")
+    )
+
+    return send_file(
+        arquivo,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="auditoria-plar.csv"
+    )
+
+
+# ============================================================
+# STATUS
+# ============================================================
+
+@app.route("/status", methods=["GET"])
 def status():
     return jsonify({
         "online": True,
