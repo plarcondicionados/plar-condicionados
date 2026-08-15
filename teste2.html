@@ -20,9 +20,8 @@
     :root {
       --bg: #071014;
       --sidebar: #09171d;
-      --surface: #0e1d24;
-      --surface-2: #142d36;
-      --border: rgba(255,255,255,.1);
+      --surface: rgba(14, 29, 36, .97);
+      --border: rgba(255, 255, 255, .10);
       --text: #f1f8fa;
       --muted: #91a7ae;
       --blue: #1499dc;
@@ -39,6 +38,10 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       min-height: 100vh;
       color: var(--text);
@@ -46,6 +49,11 @@
       background:
         linear-gradient(135deg, rgba(4,14,18,.96), rgba(5,29,38,.94)),
         url("fundo-plar.png") center / cover fixed no-repeat;
+    }
+
+    body.modo-compacto td {
+      padding-top: 8px;
+      padding-bottom: 8px;
     }
 
     button,
@@ -125,6 +133,7 @@
       background: transparent;
       border: 0;
       border-radius: 9px;
+      transition: .2s;
     }
 
     .nav button:hover,
@@ -283,7 +292,7 @@
 
     .panel {
       padding: 20px;
-      background: rgba(14,29,36,.97);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 15px;
       box-shadow: 0 18px 45px rgba(0,0,0,.2);
@@ -750,7 +759,7 @@
             <small>Acesso administrativo</small>
           </div>
 
-          <button class="logout" onclick="sair()">
+          <button class="logout" type="button" onclick="sair()">
             Sair
           </button>
         </div>
@@ -844,6 +853,7 @@
             <div style="display:grid;gap:9px">
               <button
                 class="primary"
+                type="button"
                 onclick="abrirPagina('atendimento')"
               >
                 ＋ Novo atendimento
@@ -851,6 +861,7 @@
 
               <button
                 class="secondary"
+                type="button"
                 onclick="abrirPagina('escala')"
               >
                 ▣ Ver escala
@@ -858,6 +869,7 @@
 
               <button
                 class="secondary"
+                type="button"
                 onclick="abrirPagina('financeiro')"
               >
                 R$ Ver financeiro
@@ -909,11 +921,7 @@
 
             <div class="field">
               <label for="data">Data</label>
-              <input
-                id="data"
-                type="date"
-                required
-              >
+              <input id="data" type="date" required>
             </div>
 
             <div class="field">
@@ -931,10 +939,17 @@
             <div class="field">
               <label for="tipoServico">Tipo de serviço</label>
               <select id="tipoServico" required>
-                <option value="limpeza">Limpeza</option>
-                <option value="automacao">Automação</option>
-                <option value="manutencao">Manutenção</option>
-                <option value="instalacao">Instalação</option>
+                <option value="manutencao_preventiva">
+                  Manutenção preventiva
+                </option>
+
+                <option value="limpeza_higienizacao">
+                  Limpeza e higienização de evaporadora
+                </option>
+
+                <option value="automacao">
+                  Automação de ar-condicionado
+                </option>
               </select>
             </div>
 
@@ -994,6 +1009,7 @@
 
           <button
             class="secondary"
+            type="button"
             onclick="carregarAtendimentos()"
           >
             ↻ Atualizar
@@ -1008,17 +1024,22 @@
               placeholder="Buscar cliente, funcionário ou local"
             >
 
-            <input
-              id="filtroDataEscala"
-              type="date"
-            >
+            <input id="filtroDataEscala" type="date">
 
             <select id="filtroServico">
               <option value="">Todos os serviços</option>
-              <option value="limpeza">Limpeza</option>
-              <option value="automacao">Automação</option>
-              <option value="manutencao">Manutenção</option>
-              <option value="instalacao">Instalação</option>
+
+              <option value="manutencao_preventiva">
+                Manutenção preventiva
+              </option>
+
+              <option value="limpeza_higienizacao">
+                Limpeza e higienização
+              </option>
+
+              <option value="automacao">
+                Automação de ar-condicionado
+              </option>
             </select>
 
             <select id="filtroStatus">
@@ -1041,6 +1062,7 @@
                   <th>Local</th>
                   <th>Data</th>
                   <th>Horário</th>
+                  <th>Duração</th>
                   <th>Serviço</th>
                   <th>Valor</th>
                   <th>Comissão</th>
@@ -1116,6 +1138,7 @@
 
             <button
               class="primary"
+              type="button"
               onclick="carregarFinanceiro()"
             >
               Calcular período
@@ -1123,6 +1146,7 @@
 
             <button
               class="secondary"
+              type="button"
               onclick="limparPeriodo()"
             >
               Período completo
@@ -1199,7 +1223,11 @@
             <p>Registro das ações administrativas.</p>
           </div>
 
-          <button class="secondary" onclick="carregarAuditoria()">
+          <button
+            class="secondary"
+            type="button"
+            onclick="carregarAuditoria()"
+          >
             ↻ Atualizar
           </button>
         </div>
@@ -1228,7 +1256,7 @@
         <div class="page-title">
           <div>
             <h2>Exportar dados</h2>
-            <p>Downloads protegidos pela sessão administrativa.</p>
+            <p>Exporte os dados carregados nesta sessão.</p>
           </div>
         </div>
 
@@ -1236,6 +1264,7 @@
           <div class="export-grid">
             <article class="export-card">
               <h3>Atendimentos</h3>
+
               <p>
                 Clientes, agenda, valores, custos,
                 comissões e status.
@@ -1243,6 +1272,7 @@
 
               <button
                 class="primary"
+                type="button"
                 onclick="exportarAtendimentos()"
               >
                 Exportar CSV
@@ -1251,12 +1281,14 @@
 
             <article class="export-card">
               <h3>Histórico</h3>
+
               <p>
                 Ações administrativas realizadas no ERP.
               </p>
 
               <button
                 class="primary"
+                type="button"
                 onclick="exportarAuditoria()"
               >
                 Exportar CSV
@@ -1265,11 +1297,16 @@
 
             <article class="export-card">
               <h3>Escala</h3>
+
               <p>
                 Baixe a escala atual em formato TXT.
               </p>
 
-              <button class="primary" onclick="exportarTxt()">
+              <button
+                class="primary"
+                type="button"
+                onclick="exportarTxt()"
+              >
                 Exportar TXT
               </button>
             </article>
@@ -1311,7 +1348,7 @@
       ],
       exportacao: [
         "Exportar dados",
-        "Downloads protegidos pela sessão."
+        "Exporte os dados carregados na sessão."
       ]
     };
 
@@ -1342,8 +1379,13 @@
 
     function formatarServico(servico) {
       const nomes = {
+        manutencao_preventiva: "Manutenção preventiva",
+        limpeza_higienizacao:
+          "Limpeza e higienização de evaporadora",
+        automacao: "Automação de ar-condicionado",
+
+        // Compatibilidade com registros antigos.
         limpeza: "Limpeza",
-        automacao: "Automação",
         manutencao: "Manutenção",
         instalacao: "Instalação"
       };
@@ -1359,6 +1401,21 @@
       return "status-" + (status || "pendente");
     }
 
+    function duracaoTexto(minutos) {
+      const valor = Number(minutos || 30);
+
+      if (valor < 60) {
+        return `${valor} min`;
+      }
+
+      const horas = Math.floor(valor / 60);
+      const minutosRestantes = valor % 60;
+
+      return minutosRestantes
+        ? `${horas}h ${minutosRestantes}min`
+        : `${horas}h`;
+    }
+
     async function api(url, opcoes = {}) {
       const resposta = await fetch(url, {
         credentials: "include",
@@ -1371,7 +1428,9 @@
         throw new Error("Sessão expirada.");
       }
 
-      const tipo = resposta.headers.get("content-type") || "";
+      const tipo = resposta.headers.get(
+        "content-type"
+      ) || "";
 
       const dados = tipo.includes("application/json")
         ? await resposta.json()
@@ -1379,7 +1438,8 @@
 
       if (!resposta.ok) {
         throw new Error(
-          dados.erro || "Não foi possível concluir a operação."
+          dados.erro ||
+          "Não foi possível concluir a operação."
         );
       }
 
@@ -1387,9 +1447,11 @@
     }
 
     function abrirPagina(nome) {
-      const pagina = document.getElementById("page-" + nome);
+      const pagina = document.getElementById(
+        "page-" + nome
+      );
 
-      if (!pagina) {
+      if (!pagina || !paginas[nome]) {
         return;
       }
 
@@ -1406,13 +1468,18 @@
         );
       });
 
-      document.getElementById("tituloPagina").textContent =
-        paginas[nome][0];
+      document.getElementById(
+        "tituloPagina"
+      ).textContent = paginas[nome][0];
 
-      document.getElementById("subtituloPagina").textContent =
-        paginas[nome][1];
+      document.getElementById(
+        "subtituloPagina"
+      ).textContent = paginas[nome][1];
 
-      localStorage.setItem("paginaAtualPLAR", nome);
+      localStorage.setItem(
+        "paginaAtualPLAR",
+        nome
+      );
 
       if (nome === "escala") {
         carregarAtendimentos();
@@ -1475,8 +1542,13 @@
       }
 
       lista.innerHTML = funcionarios.map(funcionario => {
-        const usuario = escaparHTML(funcionario.usuario);
-        const iniciais = usuario.substring(0, 2).toUpperCase();
+        const usuario = escaparHTML(
+          funcionario.usuario
+        );
+
+        const iniciais = usuario
+          .substring(0, 2)
+          .toUpperCase();
 
         return `
           <div class="employee">
@@ -1499,19 +1571,27 @@
                 min="0"
                 max="100"
                 step="0.01"
-                value="${Number(funcionario.percentual || 0)}"
+                value="${Number(
+                  funcionario.percentual || 0
+                )}"
               >
 
               <button
                 class="secondary"
-                onclick="salvarPercentual(${Number(funcionario.id)})"
+                type="button"
+                onclick="salvarPercentual(
+                  ${Number(funcionario.id)}
+                )"
               >
                 Salvar %
               </button>
 
               <button
                 class="danger"
-                onclick="excluirFuncionario(${Number(funcionario.id)})"
+                type="button"
+                onclick="excluirFuncionario(
+                  ${Number(funcionario.id)}
+                )"
               >
                 Excluir
               </button>
@@ -1534,7 +1614,9 @@
         .value;
 
       const percentual = Number(
-        document.getElementById("novoPercentual").value
+        document.getElementById(
+          "novoPercentual"
+        ).value
       );
 
       try {
@@ -1551,6 +1633,7 @@
         });
 
         event.target.reset();
+
         await carregarFuncionarios();
 
         alert("Funcionário cadastrado.");
@@ -1560,11 +1643,11 @@
     }
 
     async function salvarPercentual(id) {
-      const percentual = Number(
-        document.getElementById(
-          "percentual-" + id
-        ).value
+      const campo = document.getElementById(
+        "percentual-" + id
       );
+
+      const percentual = Number(campo.value);
 
       try {
         await api("/usuarios/" + id, {
@@ -1584,7 +1667,9 @@
     }
 
     async function excluirFuncionario(id) {
-      if (!confirm("Deseja excluir este funcionário?")) {
+      if (!confirm(
+        "Deseja excluir este funcionário?"
+      )) {
         return;
       }
 
@@ -1602,11 +1687,13 @@
     }
 
     async function carregarAtendimentos() {
-      const corpo = document.getElementById("corpoTabela");
+      const corpo = document.getElementById(
+        "corpoTabela"
+      );
 
       corpo.innerHTML = `
         <tr>
-          <td colspan="10" class="loading">
+          <td colspan="11" class="loading">
             Carregando atendimentos...
           </td>
         </tr>
@@ -1620,7 +1707,7 @@
       } catch (erro) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="10" class="empty">
+            <td colspan="11" class="empty">
               ${escaparHTML(erro.message)}
             </td>
           </tr>
@@ -1668,13 +1755,16 @@
     }
 
     function renderizarTabela() {
-      const corpo = document.getElementById("corpoTabela");
+      const corpo = document.getElementById(
+        "corpoTabela"
+      );
+
       const lista = obterListaFiltrada();
 
       if (!lista.length) {
         corpo.innerHTML = `
           <tr>
-            <td colspan="10" class="empty">
+            <td colspan="11" class="empty">
               Nenhum atendimento encontrado.
             </td>
           </tr>
@@ -1693,6 +1783,12 @@
           status === "em_andamento"
         );
 
+        const podeCancelar = ![
+          "concluido",
+          "cancelado",
+          "recusado"
+        ].includes(status);
+
         return `
           <tr>
             <td>
@@ -1709,13 +1805,17 @@
               ${escaparHTML(
                 item.funcionario_usuario ||
                 item.nome ||
-                "-"
+                "A definir"
               )}
             </td>
 
             <td>${escaparHTML(item.local || "-")}</td>
             <td>${escaparHTML(item.data || "-")}</td>
             <td>${escaparHTML(item.horario || "-")}</td>
+
+            <td>
+              ${duracaoTexto(item.duracao_minutos)}
+            </td>
 
             <td>
               ${escaparHTML(
@@ -1735,10 +1835,39 @@
             <td>
               <div class="actions">
                 ${
+                  status === "pendente"
+                    ? `
+                      <button
+                        class="success"
+                        type="button"
+                        onclick="alterarStatus(
+                          ${Number(item.id)},
+                          'aceito'
+                        )"
+                      >
+                        Aprovar
+                      </button>
+
+                      <button
+                        class="danger"
+                        type="button"
+                        onclick="alterarStatus(
+                          ${Number(item.id)},
+                          'recusado'
+                        )"
+                      >
+                        Recusar
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
                   podeIniciar
                     ? `
                       <button
                         class="warning"
+                        type="button"
                         onclick="alterarStatus(
                           ${Number(item.id)},
                           'em_andamento'
@@ -1755,6 +1884,7 @@
                     ? `
                       <button
                         class="success"
+                        type="button"
                         onclick="concluirAtendimento(
                           ${Number(item.id)}
                         )"
@@ -1766,23 +1896,11 @@
                 }
 
                 ${
-                  ![
-                    "concluido",
-                    "cancelado",
-                    "recusado"
-                  ].includes(status)
+                  podeCancelar
                     ? `
                       <button
-                        class="secondary"
-                        onclick="editarAtendimento(
-                          ${Number(item.id)}
-                        )"
-                      >
-                        Editar
-                      </button>
-
-                      <button
                         class="danger"
+                        type="button"
                         onclick="cancelarAtendimento(
                           ${Number(item.id)}
                         )"
@@ -1795,6 +1913,7 @@
 
                 <button
                   class="danger"
+                  type="button"
                   onclick="excluirAtendimento(
                     ${Number(item.id)}
                   )"
@@ -1829,7 +1948,9 @@
 
         data: document.getElementById("data").value,
 
-        horario: document.getElementById("horario").value,
+        horario: document.getElementById(
+          "horario"
+        ).value,
 
         tipo_servico: document
           .getElementById("tipoServico")
@@ -1852,11 +1973,14 @@
         });
 
         event.target.reset();
-        document.getElementById("custo").value = "0";
+
+        document.getElementById(
+          "custo"
+        ).value = "0";
 
         await carregarAtendimentos();
 
-        alert("Cliente e atendimento cadastrados.");
+        alert("Atendimento cadastrado.");
         abrirPagina("escala");
       } catch (erro) {
         alert(erro.message);
@@ -1908,7 +2032,7 @@
         await carregarAtendimentos();
 
         alert(
-          "Atendimento concluído e comissão liberada."
+          "Atendimento concluído."
         );
       } catch (erro) {
         alert(erro.message);
@@ -1916,117 +2040,14 @@
     }
 
     async function cancelarAtendimento(id) {
-      if (!confirm("Deseja cancelar este atendimento?")) {
+      if (!confirm(
+        "Deseja cancelar este atendimento?"
+      )) {
         return;
       }
 
       try {
-        await api(
-          `/atendimentos/${id}/status`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              status: "cancelado"
-            })
-          }
-        );
-
-        await carregarAtendimentos();
-      } catch (erro) {
-        alert(erro.message);
-      }
-    }
-
-    async function editarAtendimento(id) {
-      const item = escalas.find(atendimento => {
-        return Number(atendimento.id) === Number(id);
-      });
-
-      if (!item) {
-        alert("Atendimento não encontrado.");
-        return;
-      }
-
-      const cliente = prompt(
-        "Cliente:",
-        item.cliente || ""
-      );
-
-      if (cliente === null) {
-        return;
-      }
-
-      const local = prompt(
-        "Local:",
-        item.local || ""
-      );
-
-      if (local === null) {
-        return;
-      }
-
-      const data = prompt(
-        "Data no formato AAAA-MM-DD:",
-        item.data || ""
-      );
-
-      if (data === null) {
-        return;
-      }
-
-      const horario = prompt(
-        "Horário no formato HH:MM:",
-        item.horario || ""
-      );
-
-      if (horario === null) {
-        return;
-      }
-
-      const quantidade = prompt(
-        "Quantidade de aparelhos:",
-        item.quantidade_aparelhos || "1"
-      );
-
-      if (quantidade === null) {
-        return;
-      }
-
-      const custo = prompt(
-        "Custo:",
-        item.custo || "0"
-      );
-
-      if (custo === null) {
-        return;
-      }
-
-      try {
-        await api(
-          `/atendimentos/${id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              cliente,
-              local,
-              data,
-              horario,
-              tipo_servico: item.tipo_servico,
-              quantidade_aparelhos: quantidade,
-              custo
-            })
-          }
-        );
-
-        await carregarAtendimentos();
-
-        alert("Atendimento atualizado.");
+        await alterarStatus(id, "cancelado");
       } catch (erro) {
         alert(erro.message);
       }
@@ -2058,79 +2079,102 @@
     function atualizarIndicadores() {
       const faturamento = escalas.reduce(
         (total, item) => {
-          return total + Number(item.valor_total || 0);
+          return total + Number(
+            item.valor_total || 0
+          );
         },
         0
       );
 
       const custos = escalas.reduce(
         (total, item) => {
-          return total + Number(item.custo || 0);
+          return total + Number(
+            item.custo || 0
+          );
         },
         0
       );
 
       const comissoes = escalas.reduce(
         (total, item) => {
-          return total + Number(item.valor_comissao || 0);
+          return total + Number(
+            item.valor_comissao || 0
+          );
         },
         0
       );
 
       const contar = status => {
         return escalas.filter(item => {
-          return (item.status || "pendente") === status;
+          return (
+            item.status || "pendente"
+          ) === status;
         }).length;
       };
 
-      const comissoesPendentes = escalas
+      const pendentes = escalas
         .filter(item => {
           return ![
             "concluido",
             "recusado",
             "cancelado"
-          ].includes(item.status || "pendente");
+          ].includes(
+            item.status || "pendente"
+          );
         })
         .reduce((total, item) => {
-          return total + Number(item.valor_comissao || 0);
+          return total + Number(
+            item.valor_comissao || 0
+          );
         }, 0);
 
-      const comissoesConcluidas = escalas
+      const concluidas = escalas
         .filter(item => {
           return item.status === "concluido";
         })
         .reduce((total, item) => {
-          return total + Number(item.valor_comissao || 0);
+          return total + Number(
+            item.valor_comissao || 0
+          );
         }, 0);
 
-      document.getElementById("totalAtendimentos").textContent =
-        escalas.length;
+      document.getElementById(
+        "totalAtendimentos"
+      ).textContent = escalas.length;
 
-      document.getElementById("faturamentoTotal").textContent =
-        dinheiro(faturamento);
+      document.getElementById(
+        "faturamentoTotal"
+      ).textContent = dinheiro(faturamento);
 
-      document.getElementById("lucroTotal").textContent =
-        dinheiro(faturamento - custos - comissoes);
+      document.getElementById(
+        "lucroTotal"
+      ).textContent = dinheiro(
+        faturamento - custos - comissoes
+      );
 
-      document.getElementById("resumoPendentes").textContent =
-        contar("pendente");
+      document.getElementById(
+        "resumoPendentes"
+      ).textContent = contar("pendente");
 
-      document.getElementById("resumoAceitos").textContent =
-        contar("aceito");
+      document.getElementById(
+        "resumoAceitos"
+      ).textContent = contar("aceito");
 
-      document.getElementById("resumoAndamento").textContent =
-        contar("em_andamento");
+      document.getElementById(
+        "resumoAndamento"
+      ).textContent = contar("em_andamento");
 
-      document.getElementById("resumoConcluidos").textContent =
-        contar("concluido");
+      document.getElementById(
+        "resumoConcluidos"
+      ).textContent = contar("concluido");
 
       document.getElementById(
         "resumoComissoesPendentes"
-      ).textContent = dinheiro(comissoesPendentes);
+      ).textContent = dinheiro(pendentes);
 
       document.getElementById(
         "resumoComissoesConcluidas"
-      ).textContent = dinheiro(comissoesConcluidas);
+      ).textContent = dinheiro(concluidas);
     }
 
     async function carregarFinanceiro() {
@@ -2162,19 +2206,27 @@
 
         document.getElementById(
           "financeiroFaturamento"
-        ).textContent = dinheiro(resumo.faturamento);
+        ).textContent = dinheiro(
+          resumo.faturamento
+        );
 
         document.getElementById(
           "financeiroCustos"
-        ).textContent = dinheiro(resumo.custos);
+        ).textContent = dinheiro(
+          resumo.custos
+        );
 
         document.getElementById(
           "financeiroComissoes"
-        ).textContent = dinheiro(resumo.comissoes);
+        ).textContent = dinheiro(
+          resumo.comissoes
+        );
 
         document.getElementById(
           "financeiroLucro"
-        ).textContent = dinheiro(resumo.lucro);
+        ).textContent = dinheiro(
+          resumo.lucro
+        );
 
         document.getElementById(
           "financeiroAtendimentos"
@@ -2192,19 +2244,25 @@
           resumo.comissoes_concluidas
         );
 
-        desenharGrafico(relatorio.por_servico);
+        desenharGrafico(relatorio);
       } catch (erro) {
         alert(erro.message);
       }
     }
 
     function limparPeriodo() {
-      document.getElementById("dataInicio").value = "";
-      document.getElementById("dataFim").value = "";
+      document.getElementById(
+        "dataInicio"
+      ).value = "";
+
+      document.getElementById(
+        "dataFim"
+      ).value = "";
+
       carregarFinanceiro();
     }
 
-    function desenharGrafico(porServico) {
+    function desenharGrafico(relatorio) {
       const canvas = document.getElementById(
         "graficoFinanceiro"
       );
@@ -2213,23 +2271,8 @@
         return;
       }
 
-      const nomes = Object.keys(porServico || {});
-
-      const labels = nomes.length
-        ? nomes
-        : ["Sem dados"];
-
-      const faturamento = nomes.length
-        ? nomes.map(nome => porServico[nome].faturamento)
-        : [0];
-
-      const comissoes = nomes.length
-        ? nomes.map(nome => porServico[nome].comissoes)
-        : [0];
-
-      const lucro = nomes.length
-        ? nomes.map(nome => porServico[nome].lucro)
-        : [0];
+      const status = relatorio.por_status || {};
+      const labels = Object.keys(status);
 
       if (graficoFinanceiro) {
         graficoFinanceiro.destroy();
@@ -2239,25 +2282,19 @@
         type: "bar",
 
         data: {
-          labels,
+          labels: labels.length
+            ? labels.map(formatarStatus)
+            : ["Sem dados"],
 
           datasets: [
             {
-              label: "Faturamento",
-              data: faturamento,
+              label: "Atendimentos por status",
+              data: labels.length
+                ? labels.map(statusAtual => {
+                    return status[statusAtual];
+                  })
+                : [0],
               backgroundColor: "#1499dc",
-              borderRadius: 6
-            },
-            {
-              label: "Comissões",
-              data: comissoes,
-              backgroundColor: "#c6a052",
-              borderRadius: 6
-            },
-            {
-              label: "Lucro",
-              data: lucro,
-              backgroundColor: "#38d889",
               borderRadius: 6
             }
           ]
@@ -2272,18 +2309,6 @@
               labels: {
                 color: "#91a7ae"
               }
-            },
-
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  return (
-                    context.dataset.label +
-                    ": " +
-                    dinheiro(context.raw)
-                  );
-                }
-              }
             }
           },
 
@@ -2296,13 +2321,9 @@
 
             y: {
               beginAtZero: true,
-
               ticks: {
                 color: "#91a7ae",
-
-                callback(value) {
-                  return dinheiro(value);
-                }
+                precision: 0
               }
             }
           }
@@ -2343,8 +2364,8 @@
             <tr>
               <td>${escaparHTML(item.criado_em)}</td>
               <td>${escaparHTML(item.usuario || "-")}</td>
-              <td>${escaparHTML(item.acao)}</td>
-              <td>${escaparHTML(item.tabela)}</td>
+              <td>${escaparHTML(item.acao || "-")}</td>
+              <td>${escaparHTML(item.tabela || "-")}</td>
               <td>${escaparHTML(item.registro_id || "-")}</td>
               <td>${escaparHTML(item.detalhes || "-")}</td>
             </tr>
@@ -2361,44 +2382,131 @@
       }
     }
 
-    function baixar(url) {
+    function baixarArquivo(conteudo, nome, tipo) {
+      const arquivo = new Blob(
+        [conteudo],
+        {
+          type: `${tipo};charset=utf-8`
+        }
+      );
+
+      const url = URL.createObjectURL(arquivo);
       const link = document.createElement("a");
 
       link.href = url;
-      link.style.display = "none";
-
+      link.download = nome;
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      URL.revokeObjectURL(url);
     }
 
     function exportarAtendimentos() {
-      const inicio = document.getElementById(
-        "dataInicio"
-      ).value;
-
-      const fim = document.getElementById(
-        "dataFim"
-      ).value;
-
-      const parametros = new URLSearchParams();
-
-      if (inicio) {
-        parametros.set("inicio", inicio);
+      if (!escalas.length) {
+        alert("Não há atendimentos para exportar.");
+        return;
       }
 
-      if (fim) {
-        parametros.set("fim", fim);
-      }
+      const linhas = [
+        [
+          "ID",
+          "Cliente",
+          "Funcionário",
+          "Local",
+          "Data",
+          "Horário",
+          "Serviço",
+          "Duração",
+          "Valor",
+          "Comissão",
+          "Status"
+        ]
+      ];
 
-      baixar(
-        "/exportar/atendimentos.csv?" +
-        parametros.toString()
+      escalas.forEach(item => {
+        linhas.push([
+          item.id || "",
+          item.cliente || "",
+          item.funcionario_usuario ||
+            item.nome ||
+            "",
+          item.local || "",
+          item.data || "",
+          item.horario || "",
+          formatarServico(item.tipo_servico),
+          duracaoTexto(item.duracao_minutos),
+          item.valor_total || 0,
+          item.valor_comissao || 0,
+          formatarStatus(item.status)
+        ]);
+      });
+
+      const csv = linhas
+        .map(linha => {
+          return linha.map(valor => {
+            const texto = String(valor)
+              .replaceAll('"', '""');
+
+            return `"${texto}"`;
+          }).join(";");
+        })
+        .join("\n");
+
+      baixarArquivo(
+        "\ufeff" + csv,
+        "atendimentos-plar.csv",
+        "text/csv"
       );
     }
 
-    function exportarAuditoria() {
-      baixar("/exportar/auditoria.csv");
+    async function exportarAuditoria() {
+      try {
+        const registros = await api("/auditoria");
+
+        const linhas = [
+          [
+            "ID",
+            "Data",
+            "Usuário",
+            "Ação",
+            "Tabela",
+            "Registro",
+            "Detalhes"
+          ]
+        ];
+
+        registros.forEach(item => {
+          linhas.push([
+            item.id || "",
+            item.criado_em || "",
+            item.usuario || "",
+            item.acao || "",
+            item.tabela || "",
+            item.registro_id || "",
+            item.detalhes || ""
+          ]);
+        });
+
+        const csv = linhas
+          .map(linha => {
+            return linha.map(valor => {
+              const texto = String(valor)
+                .replaceAll('"', '""');
+
+              return `"${texto}"`;
+            }).join(";");
+          })
+          .join("\n");
+
+        baixarArquivo(
+          "\ufeff" + csv,
+          "auditoria-plar.csv",
+          "text/csv"
+        );
+      } catch (erro) {
+        alert(erro.message);
+      }
     }
 
     function exportarTxt() {
@@ -2423,10 +2531,15 @@
           `Serviço: ${
             formatarServico(item.tipo_servico)
           }`,
+          `Duração: ${
+            duracaoTexto(item.duracao_minutos)
+          }`,
           `Status: ${
             formatarStatus(item.status)
           }`,
-          `Valor: ${dinheiro(item.valor_total)}`,
+          `Valor: ${
+            dinheiro(item.valor_total)
+          }`,
           `Comissão: ${
             dinheiro(item.valor_comissao)
           }`,
@@ -2434,21 +2547,11 @@
         ].join("\n") + "\n";
       });
 
-      const arquivo = new Blob(
-        [texto],
-        {
-          type: "text/plain;charset=utf-8"
-        }
+      baixarArquivo(
+        texto,
+        "escala-plar.txt",
+        "text/plain"
       );
-
-      const url = URL.createObjectURL(arquivo);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "escala-plar.txt";
-      link.click();
-
-      URL.revokeObjectURL(url);
     }
 
     async function sair() {
@@ -2514,9 +2617,9 @@
     carregarFuncionarios();
     carregarAtendimentos();
 
-    const paginaSalva =
-      localStorage.getItem("paginaAtualPLAR") ||
-      "dashboard";
+    const paginaSalva = localStorage.getItem(
+      "paginaAtualPLAR"
+    ) || "dashboard";
 
     abrirPagina(paginaSalva);
   </script>
