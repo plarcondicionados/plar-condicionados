@@ -23,14 +23,12 @@
     :root {
       --background: #061116;
       --surface: #0c2029;
-      --surface-light: #12343f;
       --blue: #1499dc;
       --blue-light: #58cdfc;
       --text: #f2fbff;
       --muted: #a2b8bf;
       --green: #36d98a;
-      --border: rgba(255,255,255,.13);
-      --shadow: 0 20px 55px rgba(0,0,0,.28);
+      --border: rgba(255, 255, 255, .13);
     }
 
     * {
@@ -44,6 +42,7 @@
     }
 
     body {
+      min-height: 100vh;
       color: var(--text);
       font-family: Inter, Arial, sans-serif;
       background:
@@ -77,15 +76,15 @@
 
     .container {
       width: min(1120px, calc(100% - 36px));
-      margin: auto;
+      margin: 0 auto;
     }
 
     .header {
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
       border-bottom: 1px solid var(--border);
-      background: rgba(6, 17, 22, .88);
+      background: rgba(6, 17, 22, .90);
       backdrop-filter: blur(14px);
     }
 
@@ -126,13 +125,9 @@
     .menu {
       display: flex;
       align-items: center;
-      gap: 25px;
+      gap: 24px;
       color: var(--muted);
       font-size: 13px;
-    }
-
-    .menu a {
-      transition: .2s;
     }
 
     .menu a:hover {
@@ -144,13 +139,12 @@
       align-items: center;
       justify-content: center;
       padding: 13px 19px;
-      border: 0;
-      border-radius: 9px;
       color: white;
       background: linear-gradient(135deg, var(--blue), #116e9b);
+      border: 0;
+      border-radius: 9px;
       font-size: 13px;
       font-weight: 700;
-      cursor: pointer;
       transition: .2s;
     }
 
@@ -162,7 +156,7 @@
     .button-outline {
       color: var(--blue-light);
       background: transparent;
-      border: 1px solid rgba(88,205,252,.4);
+      border: 1px solid rgba(88, 205, 252, .4);
     }
 
     .hero {
@@ -179,8 +173,8 @@
       margin-bottom: 20px;
       padding: 8px 12px;
       color: var(--blue-light);
-      background: rgba(20,153,220,.12);
-      border: 1px solid rgba(88,205,252,.25);
+      background: rgba(20, 153, 220, .12);
+      border: 1px solid rgba(88, 205, 252, .25);
       border-radius: 30px;
       font-size: 11px;
       font-weight: 700;
@@ -216,18 +210,17 @@
     .hero-card {
       position: relative;
       min-height: 390px;
-      padding: 28px;
       overflow: hidden;
-      border: 1px solid rgba(88,205,252,.28);
+      border: 1px solid rgba(88, 205, 252, .28);
       border-radius: 25px;
       background:
         linear-gradient(
           145deg,
-          rgba(20,153,220,.3),
-          rgba(8,26,34,.95)
+          rgba(20, 153, 220, .3),
+          rgba(8, 26, 34, .95)
         ),
         url("ar-condicionado.jpg") center / cover;
-      box-shadow: 0 25px 70px rgba(0,0,0,.35);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, .35);
     }
 
     .hero-card::after {
@@ -236,7 +229,7 @@
       inset: 0;
       background: linear-gradient(
         transparent 35%,
-        rgba(3,12,16,.9)
+        rgba(3, 12, 16, .9)
       );
     }
 
@@ -290,13 +283,13 @@
       padding: 25px;
       border: 1px solid var(--border);
       border-radius: 16px;
-      background: rgba(12,32,41,.86);
+      background: rgba(12, 32, 41, .86);
       transition: .2s;
     }
 
     .service:hover {
       transform: translateY(-4px);
-      border-color: rgba(88,205,252,.4);
+      border-color: rgba(88, 205, 252, .4);
     }
 
     .service-icon {
@@ -305,9 +298,9 @@
       width: 45px;
       height: 45px;
       margin-bottom: 20px;
-      border-radius: 12px;
       color: var(--blue-light);
-      background: rgba(20,153,220,.14);
+      background: rgba(20, 153, 220, .14);
+      border-radius: 12px;
       font-size: 22px;
     }
 
@@ -331,7 +324,7 @@
     .benefit {
       padding: 22px;
       border-left: 2px solid var(--blue);
-      background: rgba(255,255,255,.045);
+      background: rgba(255, 255, 255, .045);
     }
 
     .benefit strong {
@@ -347,12 +340,9 @@
       line-height: 1.5;
     }
 
-    /*
-      GALERIA DE RESULTADOS
-    */
+    /* GALERIA */
 
     .gallery-section {
-      position: relative;
       background: rgba(3, 14, 19, .45);
     }
 
@@ -364,12 +354,12 @@
     }
 
     .gallery-note {
-      max-width: 300px;
+      max-width: 310px;
       padding: 15px;
       color: #c9e9f3;
-      border: 1px solid rgba(88,205,252,.25);
+      background: rgba(20, 153, 220, .09);
+      border: 1px solid rgba(88, 205, 252, .25);
       border-radius: 12px;
-      background: rgba(20,153,220,.09);
       font-size: 11px;
       line-height: 1.5;
     }
@@ -384,14 +374,24 @@
       overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 16px;
-      background: rgba(12,32,41,.95);
-      box-shadow: 0 14px 35px rgba(0,0,0,.18);
+      background: rgba(12, 32, 41, .95);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, .18);
       transition: .25s;
     }
 
     .gallery-card:hover {
       transform: translateY(-5px);
-      border-color: rgba(88,205,252,.45);
+      border-color: rgba(88, 205, 252, .45);
+    }
+
+    .gallery-button {
+      display: block;
+      width: 100%;
+      padding: 0;
+      color: inherit;
+      text-align: left;
+      background: transparent;
+      border: 0;
     }
 
     .gallery-image {
@@ -420,15 +420,14 @@
       bottom: 10px;
       padding: 6px 8px;
       color: white;
+      background: rgba(0, 0, 0, .65);
       border-radius: 6px;
-      background: rgba(0,0,0,.65);
       font-size: 10px;
       opacity: 0;
       transition: .2s;
     }
 
-    .gallery-card:hover .gallery-image::after,
-    .gallery-card:focus-within .gallery-image::after {
+    .gallery-card:hover .gallery-image::after {
       opacity: 1;
     }
 
@@ -449,19 +448,7 @@
       line-height: 1.5;
     }
 
-    .gallery-button {
-      display: block;
-      width: 100%;
-      padding: 0;
-      color: inherit;
-      text-align: left;
-      border: 0;
-      background: transparent;
-    }
-
-    /*
-      MODAL DA GALERIA
-    */
+    /* MODAL */
 
     .lightbox {
       position: fixed;
@@ -471,7 +458,7 @@
       align-items: center;
       justify-content: center;
       padding: 25px;
-      background: rgba(0,0,0,.88);
+      background: rgba(0, 0, 0, .88);
     }
 
     .lightbox.aberto {
@@ -507,12 +494,14 @@
       width: 35px;
       height: 35px;
       color: white;
-      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(0, 0, 0, .4);
+      border: 1px solid rgba(255, 255, 255, .3);
       border-radius: 50%;
-      background: rgba(0,0,0,.4);
       font-size: 22px;
       line-height: 1;
     }
+
+    /* AGENDAMENTO */
 
     .booking-wrapper {
       display: grid;
@@ -526,7 +515,7 @@
       padding: 30px;
       border: 1px solid var(--border);
       border-radius: 18px;
-      background: rgba(12,32,41,.95);
+      background: rgba(12, 32, 41, .95);
     }
 
     .booking-intro h2,
@@ -537,8 +526,8 @@
     .booking-intro p {
       margin-top: 14px;
       color: var(--muted);
-      line-height: 1.6;
       font-size: 14px;
+      line-height: 1.6;
     }
 
     .schedule-info {
@@ -549,8 +538,8 @@
 
     .schedule-info div {
       padding: 15px;
+      background: rgba(20, 153, 220, .1);
       border-radius: 10px;
-      background: rgba(20,153,220,.1);
     }
 
     .schedule-info strong {
@@ -601,17 +590,17 @@
       width: 100%;
       padding: 12px;
       color: white;
-      outline: none;
+      background: #08171d;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: #08171d;
+      outline: none;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(20,153,220,.15);
+      box-shadow: 0 0 0 3px rgba(20, 153, 220, .15);
     }
 
     textarea {
@@ -646,9 +635,9 @@
       grid-column: 1 / -1;
       padding: 14px;
       color: #caffdf;
-      border: 1px solid rgba(54,217,138,.3);
+      background: rgba(54, 217, 138, .1);
+      border: 1px solid rgba(54, 217, 138, .3);
       border-radius: 9px;
-      background: rgba(54,217,138,.1);
       font-size: 12px;
       line-height: 1.5;
     }
@@ -675,10 +664,10 @@
       place-items: center;
       width: 56px;
       height: 56px;
-      border-radius: 50%;
       color: white;
       background: #20c978;
-      box-shadow: 0 8px 25px rgba(0,0,0,.3);
+      border-radius: 50%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
       font-size: 25px;
     }
 
@@ -808,6 +797,7 @@
 
     <section class="container hero">
       <div>
+
         <span class="tag">
           ATENDIMENTO EM RIBEIRÃO PRETO E REGIÃO
         </span>
@@ -836,6 +826,7 @@
             Falar pelo WhatsApp
           </a>
         </div>
+
       </div>
 
       <div class="hero-card">
@@ -905,6 +896,7 @@
       <div class="container">
 
         <div class="gallery-intro">
+
           <div class="section-heading">
             <span class="tag">RESULTADO REAL</span>
 
@@ -922,6 +914,7 @@
             As imagens foram utilizadas com autorização do cliente para
             demonstrar o processo e o resultado do serviço realizado.
           </div>
+
         </div>
 
         <div class="gallery">
@@ -930,12 +923,12 @@
             <button
               type="button"
               class="gallery-button"
-              data-imagem="plar%201.jpeg"
+              data-imagem="plar-1.jpeg"
               data-titulo="Antes da limpeza"
             >
               <div class="gallery-image">
                 <img
-                  src="plar%201.jpeg"
+                  src="plar-1.jpeg"
                   alt="Pia antes da limpeza realizada pela PLAR"
                   loading="lazy"
                 >
@@ -955,12 +948,12 @@
             <button
               type="button"
               class="gallery-button"
-              data-imagem="plar%202.jpeg"
+              data-imagem="plar-2.jpeg"
               data-titulo="Depois da limpeza"
             >
               <div class="gallery-image">
                 <img
-                  src="plar%202.jpeg"
+                  src="plar-2.jpeg"
                   alt="Resultado depois da limpeza realizada pela PLAR"
                   loading="lazy"
                 >
@@ -980,12 +973,12 @@
             <button
               type="button"
               class="gallery-button"
-              data-imagem="plar%203.jpeg"
+              data-imagem="plar-3.jpeg"
               data-titulo="Durante a lavagem"
             >
               <div class="gallery-image">
                 <img
-                  src="plar%203.jpeg"
+                  src="plar-3.jpeg"
                   alt="Pia durante o processo de lavagem"
                   loading="lazy"
                 >
@@ -1005,12 +998,12 @@
             <button
               type="button"
               class="gallery-button"
-              data-imagem="image%20editing.png"
+              data-imagem="image-editing.png"
               data-titulo="Ambiente limpo e finalizado"
             >
               <div class="gallery-image">
                 <img
-                  src="image%20editing.png"
+                  src="image-editing.png"
                   alt="Ambiente limpo e finalizado após o serviço da PLAR"
                   loading="lazy"
                 >
@@ -1058,6 +1051,7 @@
           id="legendaLightbox"
           class="lightbox-caption"
         ></p>
+
       </div>
     </div>
 
