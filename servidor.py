@@ -7,14 +7,17 @@ from flask import (
     session,
     redirect
 )
+
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+
 from functools import wraps
 from datetime import datetime, timedelta
 from pathlib import Path
 from io import BytesIO, StringIO
+
 import sqlite3
 import csv
 import os
@@ -31,13 +34,16 @@ app = Flask(__name__)
 
 app.secret_key = os.environ.get(
     "PLAR_SECRET_KEY",
-    "ALTERE-ESTA-CHAVE-SECRETA"
+    "ALTERE-ESTA-CHAVE-NO-RENDER"
 )
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_SECURE=(
+        os.environ.get("RENDER", "").lower() == "true"
+        or os.environ.get("FLASK_ENV") == "production"
+    ),
     PERMANENT_SESSION_LIFETIME=60 * 60 * 8
 )
 
@@ -85,6 +91,25 @@ TRANSICOES = {
     "cancelado": set()
 }
 
+# Arquivos que podem ser acessados pelo navegador.
+# O banco e o código Python não estão nesta lista.
+ARQUIVOS_PUBLICOS = {
+    "plar-1.jpeg",
+    "plar-2.jpeg",
+    "plar-3.jpeg",
+    "image-editing.png",
+    "Image-Editing.png",
+    "fundo-plar.png",
+    "logo-plar.png.png",
+    "logoplarpng.png",
+    "ar-condicionado.jpg",
+    "index.html",
+    "agendar.html",
+    "login.html",
+    "teste2.html",
+    "area-funcionario.html"
+}
+
 
 # ============================================================
 # BANCO DE DADOS
@@ -107,8 +132,8 @@ def coluna_existe(conexao, tabela, coluna):
     ).fetchall()
 
     return any(
-        coluna_atual["name"] == coluna
-        for coluna_atual in colunas
+        item["name"] == coluna
+        for item in colunas
     )
 
 
@@ -357,6 +382,7 @@ def hora_em_minutos(horario):
         )
 
         return objeto.hour * 60 + objeto.minute
+
     except (TypeError, ValueError):
         return None
 
@@ -873,10 +899,7 @@ def listar_servicos():
 
 @app.route("/api/horarios-disponiveis", methods=["GET"])
 def horarios_disponiveis():
-    data = request.args.get(
-        "data",
-        ""
-    ).strip()
+    data = request.args.get("data", "").strip()
 
     quantidade = max(
         1,
@@ -1396,9 +1419,10 @@ def editar_usuario(id_usuario):
     ))
 
     conexao.commit()
+    alterado = resultado.rowcount
     conexao.close()
 
-    if not resultado.rowcount:
+    if not alterado:
         return jsonify({
             "erro": "Funcionário não encontrado."
         }), 404
@@ -2324,6 +2348,7 @@ def relatorio_financeiro():
 
         if status_atual == "concluido":
             concluidas += comissao
+
         elif status_atual not in {
             "recusado",
             "cancelado"
@@ -2358,8 +2383,15 @@ def relatorio_financeiro():
 )
 @exigir_admin
 def exportar_atendimentos():
-    inicio = request.args.get("inicio", "").strip()
-    fim = request.args.get("fim", "").strip()
+    inicio = request.args.get(
+        "inicio",
+        ""
+    ).strip()
+
+    fim = request.args.get(
+        "fim",
+        ""
+    ).strip()
 
     consulta = """
         SELECT
@@ -2533,12 +2565,55 @@ def status():
 
 
 # ============================================================
+# ARQUIVOS PÚBLICOS
+# ============================================================
+
+@app.route(
+    "/<path:nome_arquivo>",
+    methods=["GET"]
+)
+def servir_arquivo_publico(nome_arquivo):
+    """
+    Permite que o navegador carregue as imagens da raiz
+    do projeto sem liberar o banco de dados ou o código Python.
+    """
+
+    nome_arquivo = str(
+        nome_arquivo
+    ).replace("\\", "/").strip()
+
+    # Bloqueia acesso a subpastas e caminhos ../
+    if "/" in nome_arquivo:
+        return "Arquivo não encontrado.", 404
+
+    if nome_arquivo not in ARQUIVOS_PUBLICOS:
+        return "Arquivo não encontrado.", 404
+
+    caminho = BASE_DIR / nome_arquivo
+
+    if not caminho.is_file():
+        return "Arquivo não encontrado.", 404
+
+    return send_from_directory(
+        str(BASE_DIR),
+        nome_arquivo
+    )
+
+
+# ============================================================
 # EXECUÇÃO
 # ============================================================
 
 if __name__ == "__main__":
+    porta = int(
+        os.environ.get(
+            "PORT",
+            "5000"
+        )
+    )
+
     app.run(
-        host="127.0.0.1",
-        port=5000,
+        host="0.0.0.0",
+        port=porta,
         debug=False
     )
