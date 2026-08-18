@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Agende sua visita | PLAR Condicionados</title>
+  <title>PLAR Condicionados | Conforto e qualidade</title>
 
   <meta
     name="description"
-    content="Agende sua visita técnica com a PLAR Condicionados em Ribeirão Preto."
+    content="Instalação, manutenção, limpeza e automação de ar-condicionado em Ribeirão Preto."
   >
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,16 +21,16 @@
 
   <style>
     :root {
-      --background: #071014;
-      --surface: #0e1d24;
-      --surface-light: #142d36;
-      --border: rgba(255, 255, 255, .12);
-      --text: #f1f8fa;
-      --muted: #91a7ae;
+      --background: #061116;
+      --surface: #0c2029;
+      --surface-light: #12343f;
       --blue: #1499dc;
-      --blue-light: #56caff;
-      --green: #38d889;
-      --red: #ff6674;
+      --blue-light: #58cdfc;
+      --text: #f2fbff;
+      --muted: #a2b8bf;
+      --green: #36d98a;
+      --border: rgba(255,255,255,.13);
+      --shadow: 0 20px 55px rgba(0,0,0,.28);
     }
 
     * {
@@ -39,17 +39,29 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      min-height: 100vh;
       color: var(--text);
       font-family: Inter, Arial, sans-serif;
       background:
         linear-gradient(
           135deg,
-          rgba(4, 14, 18, .96),
-          rgba(5, 29, 38, .93)
+          rgba(3, 15, 20, .96),
+          rgba(4, 34, 46, .90)
         ),
         url("fundo-plar.png") center / cover fixed no-repeat;
+    }
+
+    body.modal-aberto {
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
     button,
@@ -63,123 +75,499 @@
       cursor: pointer;
     }
 
-    .page {
-      width: min(100% - 30px, 940px);
-      margin: 0 auto;
-      padding: 30px 0 50px;
+    .container {
+      width: min(1120px, calc(100% - 36px));
+      margin: auto;
     }
 
-    .topo {
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6, 17, 22, .88);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 25px;
+      min-height: 76px;
+      gap: 24px;
     }
 
-    .marca {
+    .brand {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .marca img {
-      width: 54px;
-      height: 54px;
+    .brand img {
+      width: 48px;
+      height: 48px;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 10px;
     }
 
-    .marca strong {
+    .brand strong {
       display: block;
       font-size: 18px;
     }
 
-    .marca small {
+    .brand small {
       display: block;
-      margin-top: 4px;
+      margin-top: 3px;
       color: var(--blue-light);
-      font-size: 10px;
-      letter-spacing: 1.4px;
+      font-size: 9px;
+      letter-spacing: 1.3px;
     }
 
-    .telefone {
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 25px;
       color: var(--muted);
-      font-size: 12px;
-      text-align: right;
+      font-size: 13px;
+    }
+
+    .menu a {
+      transition: .2s;
+    }
+
+    .menu a:hover {
+      color: white;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 19px;
+      border: 0;
+      border-radius: 9px;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), #116e9b);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .button-outline {
+      color: var(--blue-light);
+      background: transparent;
+      border: 1px solid rgba(88,205,252,.4);
     }
 
     .hero {
-      padding: 30px;
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      align-items: center;
+      gap: 55px;
+      min-height: 650px;
+      padding: 80px 0;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 8px 12px;
+      color: var(--blue-light);
+      background: rgba(20,153,220,.12);
+      border: 1px solid rgba(88,205,252,.25);
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+
+    h1 {
+      max-width: 650px;
+      font-size: clamp(36px, 6vw, 66px);
+      line-height: 1.02;
+      letter-spacing: -2px;
+    }
+
+    h1 span {
+      color: var(--blue-light);
+    }
+
+    .hero-text {
+      max-width: 570px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .hero-card {
+      position: relative;
+      min-height: 390px;
+      padding: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(88,205,252,.28);
+      border-radius: 25px;
       background:
         linear-gradient(
-          135deg,
-          rgba(20, 153, 220, .18),
-          rgba(14, 29, 36, .96)
-        );
-      border: 1px solid rgba(86, 202, 255, .22);
-      border-radius: 20px;
-      box-shadow: 0 20px 55px rgba(0, 0, 0, .25);
+          145deg,
+          rgba(20,153,220,.3),
+          rgba(8,26,34,.95)
+        ),
+        url("ar-condicionado.jpg") center / cover;
+      box-shadow: 0 25px 70px rgba(0,0,0,.35);
     }
 
-    .hero h1 {
-      max-width: 650px;
-      font-size: clamp(27px, 5vw, 42px);
-      line-height: 1.08;
-      letter-spacing: -.8px;
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        transparent 35%,
+        rgba(3,12,16,.9)
+      );
     }
 
-    .hero p {
-      max-width: 680px;
-      margin-top: 13px;
+    .hero-card-content {
+      position: absolute;
+      z-index: 1;
+      right: 25px;
+      bottom: 25px;
+      left: 25px;
+    }
+
+    .hero-card-content strong {
+      display: block;
+      font-size: 23px;
+    }
+
+    .hero-card-content p {
+      margin-top: 8px;
+      color: #c9e9f3;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .section {
+      padding: 85px 0;
+    }
+
+    .section-heading {
+      max-width: 700px;
+      margin-bottom: 35px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -1px;
+    }
+
+    .section-heading p {
+      margin-top: 12px;
       color: var(--muted);
-      font-size: 14px;
       line-height: 1.6;
     }
 
-    .informacoes {
+    .services {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 23px;
+      gap: 16px;
     }
 
-    .info {
-      padding: 14px;
-      background: rgba(255, 255, 255, .045);
+    .service {
+      padding: 25px;
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 16px;
+      background: rgba(12,32,41,.86);
+      transition: .2s;
     }
 
-    .info strong {
+    .service:hover {
+      transform: translateY(-4px);
+      border-color: rgba(88,205,252,.4);
+    }
+
+    .service-icon {
+      display: grid;
+      place-items: center;
+      width: 45px;
+      height: 45px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      color: var(--blue-light);
+      background: rgba(20,153,220,.14);
+      font-size: 22px;
+    }
+
+    .service h3 {
+      font-size: 18px;
+    }
+
+    .service p {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .benefit {
+      padding: 22px;
+      border-left: 2px solid var(--blue);
+      background: rgba(255,255,255,.045);
+    }
+
+    .benefit strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .benefit span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /*
+      GALERIA DE RESULTADOS
+    */
+
+    .gallery-section {
+      position: relative;
+      background: rgba(3, 14, 19, .45);
+    }
+
+    .gallery-intro {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .gallery-note {
+      max-width: 300px;
+      padding: 15px;
+      color: #c9e9f3;
+      border: 1px solid rgba(88,205,252,.25);
+      border-radius: 12px;
+      background: rgba(20,153,220,.09);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .gallery-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(12,32,41,.95);
+      box-shadow: 0 14px 35px rgba(0,0,0,.18);
+      transition: .25s;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(88,205,252,.45);
+    }
+
+    .gallery-image {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+      background: #09171d;
+    }
+
+    .gallery-image img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .35s;
+    }
+
+    .gallery-card:hover .gallery-image img {
+      transform: scale(1.06);
+    }
+
+    .gallery-image::after {
+      content: "Clique para ampliar";
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      padding: 6px 8px;
+      color: white;
+      border-radius: 6px;
+      background: rgba(0,0,0,.65);
+      font-size: 10px;
+      opacity: 0;
+      transition: .2s;
+    }
+
+    .gallery-card:hover .gallery-image::after,
+    .gallery-card:focus-within .gallery-image::after {
+      opacity: 1;
+    }
+
+    .gallery-content {
+      padding: 18px;
+    }
+
+    .gallery-content strong {
+      display: block;
+      color: var(--blue-light);
+      font-size: 15px;
+    }
+
+    .gallery-content p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .gallery-button {
+      display: block;
+      width: 100%;
+      padding: 0;
+      color: inherit;
+      text-align: left;
+      border: 0;
+      background: transparent;
+    }
+
+    /*
+      MODAL DA GALERIA
+    */
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      background: rgba(0,0,0,.88);
+    }
+
+    .lightbox.aberto {
+      display: flex;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: min(1000px, 100%);
+      max-height: 92vh;
+      text-align: center;
+    }
+
+    .lightbox-content img {
+      display: block;
+      max-width: 100%;
+      max-height: 78vh;
+      margin: auto;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    .lightbox-caption {
+      margin-top: 13px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -42px;
+      right: 0;
+      width: 35px;
+      height: 35px;
+      color: white;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      background: rgba(0,0,0,.4);
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .booking-wrapper {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .booking-intro,
+    .booking-form {
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(12,32,41,.95);
+    }
+
+    .booking-intro h2,
+    .booking-form h2 {
+      font-size: 27px;
+    }
+
+    .booking-intro p {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .schedule-info {
+      display: grid;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .schedule-info div {
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(20,153,220,.1);
+    }
+
+    .schedule-info strong {
       display: block;
       color: var(--blue-light);
       font-size: 13px;
     }
 
-    .info span {
+    .schedule-info span {
       display: block;
       margin-top: 5px;
       color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
+      font-size: 12px;
     }
 
-    .card {
-      margin-top: 18px;
-      padding: 25px;
-      background: rgba(14, 29, 36, .97);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, .22);
-    }
-
-    .card h2 {
-      font-size: 20px;
-    }
-
-    .card-subtitle {
-      margin-top: 6px;
+    .form-subtitle {
+      margin-top: 8px;
       color: var(--muted);
       font-size: 12px;
       line-height: 1.5;
@@ -187,17 +575,17 @@
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 22px;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 25px;
     }
 
-    .campo {
+    .field {
       display: grid;
       gap: 7px;
     }
 
-    .campo-completo {
+    .field-full {
       grid-column: 1 / -1;
     }
 
@@ -211,12 +599,19 @@
     select,
     textarea {
       width: 100%;
-      padding: 12px 13px;
-      color: var(--text);
-      background: #09171d;
-      border: 1px solid var(--border);
-      border-radius: 9px;
+      padding: 12px;
+      color: white;
       outline: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #08171d;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(20,153,220,.15);
     }
 
     textarea {
@@ -224,938 +619,816 @@
       resize: vertical;
     }
 
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(20, 153, 220, .13);
-    }
-
-    .ajuda {
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.4;
-    }
-
-    .duracao,
-    .valor {
+    .check {
       display: flex;
-      align-items: center;
-      min-height: 44px;
-      padding: 10px 12px;
-      border-radius: 9px;
-    }
-
-    .duracao {
-      color: var(--blue-light);
-      background: rgba(20, 153, 220, .08);
-      border: 1px solid rgba(20, 153, 220, .22);
-    }
-
-    .valor {
-      color: var(--green);
-      font-size: 16px;
-      font-weight: 800;
-      background: rgba(56, 216, 137, .08);
-      border: 1px solid rgba(56, 216, 137, .25);
-    }
-
-    .horarios {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 9px;
-    }
-
-    .horario {
-      padding: 10px 7px;
-      color: var(--blue-light);
-      background: rgba(20, 153, 220, .08);
-      border: 1px solid rgba(86, 202, 255, .3);
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .horario:hover,
-    .horario.selecionado {
-      color: white;
-      background: var(--blue);
-      border-color: var(--blue);
-    }
-
-    .horarios-vazio,
-    .horarios-carregando {
       grid-column: 1 / -1;
-      padding: 13px;
-      color: var(--muted);
-      font-size: 11px;
-      text-align: center;
-      background: rgba(255, 255, 255, .03);
-      border-radius: 8px;
-    }
-
-    .consentimento {
-      display: flex;
       align-items: flex-start;
-      gap: 9px;
-      grid-column: 1 / -1;
+      gap: 8px;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
     }
 
-    .consentimento input {
-      width: 17px;
-      height: 17px;
-      margin-top: 1px;
+    .check input {
+      width: 16px;
+      margin-top: 2px;
       accent-color: var(--blue);
     }
 
-    .consentimento a {
-      color: var(--blue-light);
-    }
-
-    .acoes {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
+    .form-button {
+      width: 100%;
       grid-column: 1 / -1;
-      margin-top: 3px;
+      margin-top: 5px;
     }
 
-    .botao {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      padding: 12px 17px;
-      border-radius: 9px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .botao-principal {
-      color: white;
-      background: linear-gradient(135deg, var(--blue), #126e9c);
-      border: 0;
-    }
-
-    .botao-secundario {
-      color: var(--blue-light);
-      background: transparent;
-      border: 1px solid rgba(86, 202, 255, .35);
-    }
-
-    .botao:disabled {
-      cursor: not-allowed;
-      opacity: .55;
-    }
-
-    .mensagem {
+    #feedback {
       display: none;
-      margin-top: 18px;
+      grid-column: 1 / -1;
       padding: 14px;
+      color: #caffdf;
+      border: 1px solid rgba(54,217,138,.3);
       border-radius: 9px;
+      background: rgba(54,217,138,.1);
       font-size: 12px;
       line-height: 1.5;
     }
 
-    .mensagem.visivel {
+    #feedback.show {
       display: block;
     }
 
-    .mensagem.erro {
-      color: #ffd6da;
-      background: rgba(255, 102, 116, .1);
-      border: 1px solid rgba(255, 102, 116, .3);
-    }
-
-    .mensagem.sucesso {
-      color: #c9ffe0;
-      background: rgba(56, 216, 137, .1);
-      border: 1px solid rgba(56, 216, 137, .3);
-    }
-
-    .rodape {
-      margin-top: 18px;
+    .footer {
+      padding: 30px 0;
       color: var(--muted);
-      font-size: 10px;
-      line-height: 1.6;
+      border-top: 1px solid var(--border);
       text-align: center;
+      font-size: 12px;
+      line-height: 1.6;
     }
 
-    @media (max-width: 700px) {
-      .page {
-        width: min(100% - 20px, 940px);
-        padding-top: 20px;
+    .whatsapp {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      color: white;
+      background: #20c978;
+      box-shadow: 0 8px 25px rgba(0,0,0,.3);
+      font-size: 25px;
+    }
+
+    @media (max-width: 950px) {
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      .menu {
+        display: none;
       }
 
-      .topo {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .telefone {
-        text-align: left;
-      }
-
-      .hero {
-        padding: 23px 18px;
-      }
-
-      .informacoes,
-      .form-grid {
+      .hero,
+      .booking-wrapper {
         grid-template-columns: 1fr;
       }
 
-      .campo-completo,
-      .consentimento,
-      .acoes {
+      .hero {
+        min-height: auto;
+        padding: 65px 0;
+      }
+
+      .hero-card {
+        min-height: 300px;
+      }
+
+      .services {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .gallery-intro {
+        display: block;
+      }
+
+      .gallery-note {
+        max-width: none;
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(100% - 24px, 1120px);
+      }
+
+      .nav .button {
+        padding: 11px 12px;
+        font-size: 11px;
+      }
+
+      .brand strong {
+        font-size: 15px;
+      }
+
+      .brand small {
+        font-size: 8px;
+      }
+
+      .form-grid,
+      .benefits,
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .field-full,
+      .check,
+      .form-button,
+      #feedback {
         grid-column: auto;
       }
 
-      .horarios {
-        grid-template-columns: repeat(3, 1fr);
+      .booking-intro,
+      .booking-form {
+        padding: 22px 18px;
       }
 
-      .acoes {
-        display: grid;
+      .gallery-image {
+        height: 270px;
       }
 
-      .botao {
-        width: 100%;
+      .lightbox {
+        padding: 15px;
       }
     }
   </style>
 </head>
 
 <body>
-  <main class="page">
-    <header class="topo">
-      <div class="marca">
+
+  <header class="header">
+    <div class="container nav">
+
+      <a href="#" class="brand">
         <img
           src="logo-plar.png.png"
           alt="Logo PLAR Condicionados"
-          onerror="this.onerror=null;this.src='logoplarpng.png'"
+          onerror="this.style.display='none'"
         >
 
         <div>
           <strong>PLAR ERP</strong>
           <small>PLAR CONDICIONADOS</small>
         </div>
+      </a>
+
+      <nav class="menu" aria-label="Navegação principal">
+        <a href="#servicos">Serviços</a>
+        <a href="#resultados">Antes e depois</a>
+        <a href="#diferenciais">Diferenciais</a>
+        <a href="#agendamento">Contato</a>
+      </nav>
+
+      <a href="#agendamento" class="button">
+        Agendar visita
+      </a>
+
+    </div>
+  </header>
+
+  <main>
+
+    <section class="container hero">
+      <div>
+        <span class="tag">
+          ATENDIMENTO EM RIBEIRÃO PRETO E REGIÃO
+        </span>
+
+        <h1>
+          Conforto, eficiência e cuidado para o seu
+          <span>ar-condicionado.</span>
+        </h1>
+
+        <p class="hero-text">
+          A PLAR Condicionados oferece serviços técnicos para manter
+          seus aparelhos funcionando com qualidade, economia e segurança.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#agendamento" class="button">
+            Agendar uma visita técnica
+          </a>
+
+          <a
+            href="https://wa.me/5516999999999"
+            target="_blank"
+            rel="noopener"
+            class="button button-outline"
+          >
+            Falar pelo WhatsApp
+          </a>
+        </div>
       </div>
 
-      <div class="telefone">
-        Ribeirão Preto - SP<br>
-        Atendimento de segunda a sábado
-      </div>
-    </header>
+      <div class="hero-card">
+        <div class="hero-card-content">
+          <strong>Atendimento especializado</strong>
 
-    <section class="hero">
-      <h1>Agende sua visita técnica</h1>
-
-      <p>
-        Escolha o serviço, informe quantos aparelhos serão atendidos
-        e selecione um horário disponível. Sua solicitação será enviada
-        para confirmação da equipe PLAR.
-      </p>
-
-      <div class="informacoes">
-        <div class="info">
-          <strong>Segunda a sexta</strong>
-          <span>08:00 às 17:30</span>
-        </div>
-
-        <div class="info">
-          <strong>Sábado</strong>
-          <span>08:00 às 14:00</span>
-        </div>
-
-        <div class="info">
-          <strong>Duração</strong>
-          <span>30 minutos por aparelho</span>
+          <p>
+            Soluções para residências, empresas, comércios e ambientes
+            que precisam de climatização eficiente.
+          </p>
         </div>
       </div>
     </section>
 
-    <section class="card">
-      <h2>Solicitar agendamento</h2>
+    <section id="servicos" class="section">
+      <div class="container">
 
-      <p class="card-subtitle">
-        Preencha os dados abaixo. O horário somente será confirmado
-        após a análise da equipe PLAR.
-      </p>
+        <div class="section-heading">
+          <h2>Nossos serviços</h2>
 
-      <form id="formAgendamento" class="form-grid">
-        <div class="campo">
-          <label for="nome">Nome completo</label>
-
-          <input
-            id="nome"
-            name="nome"
-            type="text"
-            autocomplete="name"
-            minlength="2"
-            maxlength="120"
-            placeholder="Digite seu nome"
-            required
-          >
+          <p>
+            Conte com a PLAR para cuidar do desempenho, da limpeza e da
+            automação dos seus equipamentos.
+          </p>
         </div>
 
-        <div class="campo">
-          <label for="telefone">WhatsApp</label>
+        <div class="services">
 
-          <input
-            id="telefone"
-            name="telefone"
-            type="tel"
-            autocomplete="tel"
-            inputmode="tel"
-            minlength="10"
-            maxlength="20"
-            placeholder="(16) 99999-9999"
-            required
-          >
+          <article class="service">
+            <div class="service-icon">❄</div>
 
-          <span class="ajuda">
-            Informe um número com WhatsApp para contato.
-          </span>
+            <h3>Manutenção preventiva</h3>
+
+            <p>
+              Avaliação da condensadora, verificação do funcionamento e
+              prevenção de problemas futuros.
+            </p>
+          </article>
+
+          <article class="service">
+            <div class="service-icon">✦</div>
+
+            <h3>Limpeza e higienização</h3>
+
+            <p>
+              Limpeza técnica para melhorar a qualidade do ar e o desempenho
+              do aparelho.
+            </p>
+          </article>
+
+          <article class="service">
+            <div class="service-icon">⌁</div>
+
+            <h3>Automação com Alexa</h3>
+
+            <p>
+              Controle seu ar-condicionado com mais praticidade por meio de
+              soluções inteligentes.
+            </p>
+          </article>
+
         </div>
+      </div>
+    </section>
 
-        <div class="campo campo-completo">
-          <label for="endereco">Endereço do atendimento</label>
+    <section id="resultados" class="section gallery-section">
+      <div class="container">
 
-          <input
-            id="endereco"
-            name="endereco"
-            type="text"
-            autocomplete="street-address"
-            maxlength="220"
-            placeholder="Rua, número, bairro e complemento"
-            required
-          >
-        </div>
+        <div class="gallery-intro">
+          <div class="section-heading">
+            <span class="tag">RESULTADO REAL</span>
 
-        <div class="campo">
-          <label for="tipoServico">Serviço desejado</label>
+            <h2>
+              Antes, durante e depois da limpeza
+            </h2>
 
-          <select
-            id="tipoServico"
-            name="tipo_servico"
-            required
-          >
-            <option value="">
-              Selecione um serviço
-            </option>
+            <p>
+              Veja a transformação realizada pela equipe PLAR em um
+              atendimento autorizado pelo cliente.
+            </p>
+          </div>
 
-            <option value="manutencao_preventiva">
-              Manutenção preventiva da condensadora
-            </option>
-
-            <option value="limpeza_higienizacao">
-              Limpeza e higienização de evaporadora
-            </option>
-
-            <option value="automacao">
-              Automação com Alexa
-            </option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="quantidadeAparelhos">
-            Quantidade de aparelhos
-          </label>
-
-          <input
-            id="quantidadeAparelhos"
-            name="quantidade_aparelhos"
-            type="number"
-            min="1"
-            max="50"
-            step="1"
-            value="1"
-            required
-          >
-
-          <span class="ajuda">
-            Cada aparelho corresponde a 30 minutos de serviço.
-          </span>
-        </div>
-
-        <div class="campo">
-          <label>Duração estimada</label>
-
-          <div id="duracaoEstimativa" class="duracao">
-            30 minutos
+          <div class="gallery-note">
+            As imagens foram utilizadas com autorização do cliente para
+            demonstrar o processo e o resultado do serviço realizado.
           </div>
         </div>
 
-        <div class="campo">
-          <label>Valor estimado</label>
+        <div class="gallery">
 
-          <div id="valorEstimado" class="valor">
-            Selecione um serviço
-          </div>
-        </div>
-
-        <div class="campo">
-          <label for="data">Data da visita</label>
-
-          <input
-            id="data"
-            name="data"
-            type="date"
-            required
-          >
-
-          <span class="ajuda">
-            É necessário solicitar com pelo menos 2 horas de antecedência.
-          </span>
-        </div>
-
-        <div class="campo">
-          <label>Horário disponível</label>
-
-          <input
-            id="horario"
-            name="horario"
-            type="hidden"
-            required
-          >
-
-          <div
-            id="listaHorarios"
-            class="horarios"
-            aria-live="polite"
-          >
-            <div class="horarios-vazio">
-              Escolha a data para consultar os horários.
-            </div>
-          </div>
-        </div>
-
-        <div class="campo campo-completo">
-          <label for="observacoes">
-            Observações <span>(opcional)</span>
-          </label>
-
-          <textarea
-            id="observacoes"
-            name="observacoes"
-            maxlength="1000"
-            placeholder="Informe alguma orientação sobre o local ou aparelho."
-          ></textarea>
-        </div>
-
-        <label class="consentimento">
-          <input
-            id="consentimentoLgpd"
-            name="consentimento_lgpd"
-            type="checkbox"
-            required
-          >
-
-          <span>
-            Concordo com o uso dos meus dados para contato, agendamento
-            e execução do serviço, conforme a
-            <a
-              href="#"
-              onclick="mostrarPrivacidade(event)"
+          <article class="gallery-card">
+            <button
+              type="button"
+              class="gallery-button"
+              data-imagem="plar%201.jpeg"
+              data-titulo="Antes da limpeza"
             >
-              política de privacidade
-            </a>
-            da PLAR Condicionados.
-          </span>
-        </label>
+              <div class="gallery-image">
+                <img
+                  src="plar%201.jpeg"
+                  alt="Pia antes da limpeza realizada pela PLAR"
+                  loading="lazy"
+                >
+              </div>
 
-        <div class="acoes">
-          <button
-            type="reset"
-            class="botao botao-secundario"
-            id="botaoLimpar"
-          >
-            Limpar
-          </button>
+              <div class="gallery-content">
+                <strong>01. Antes da limpeza</strong>
 
-          <button
-            type="submit"
-            class="botao botao-principal"
-            id="botaoEnviar"
-          >
-            Enviar solicitação
-          </button>
+                <p>
+                  Situação do ambiente antes do início do atendimento.
+                </p>
+              </div>
+            </button>
+          </article>
+
+          <article class="gallery-card">
+            <button
+              type="button"
+              class="gallery-button"
+              data-imagem="plar%202.jpeg"
+              data-titulo="Depois da limpeza"
+            >
+              <div class="gallery-image">
+                <img
+                  src="plar%202.jpeg"
+                  alt="Resultado depois da limpeza realizada pela PLAR"
+                  loading="lazy"
+                >
+              </div>
+
+              <div class="gallery-content">
+                <strong>02. Depois da limpeza</strong>
+
+                <p>
+                  Resultado visual após a conclusão da higienização.
+                </p>
+              </div>
+            </button>
+          </article>
+
+          <article class="gallery-card">
+            <button
+              type="button"
+              class="gallery-button"
+              data-imagem="plar%203.jpeg"
+              data-titulo="Durante a lavagem"
+            >
+              <div class="gallery-image">
+                <img
+                  src="plar%203.jpeg"
+                  alt="Pia durante o processo de lavagem"
+                  loading="lazy"
+                >
+              </div>
+
+              <div class="gallery-content">
+                <strong>03. Durante a lavagem</strong>
+
+                <p>
+                  Etapa do processo de limpeza e remoção da sujeira.
+                </p>
+              </div>
+            </button>
+          </article>
+
+          <article class="gallery-card">
+            <button
+              type="button"
+              class="gallery-button"
+              data-imagem="image%20editing.png"
+              data-titulo="Ambiente limpo e finalizado"
+            >
+              <div class="gallery-image">
+                <img
+                  src="image%20editing.png"
+                  alt="Ambiente limpo e finalizado após o serviço da PLAR"
+                  loading="lazy"
+                >
+              </div>
+
+              <div class="gallery-content">
+                <strong>04. Ambiente finalizado</strong>
+
+                <p>
+                  Ambiente entregue limpo e organizado após o atendimento.
+                </p>
+              </div>
+            </button>
+          </article>
+
         </div>
-      </form>
-
-      <div
-        id="mensagem"
-        class="mensagem"
-        role="alert"
-        aria-live="polite"
-      ></div>
+      </div>
     </section>
 
-    <footer class="rodape">
-      PLAR Condicionados · Ribeirão Preto - SP<br>
-      A solicitação depende de confirmação da equipe.
-    </footer>
+    <div
+      id="lightbox"
+      class="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Visualização ampliada da imagem"
+    >
+      <div class="lightbox-content">
+
+        <button
+          id="fecharLightbox"
+          class="lightbox-close"
+          type="button"
+          aria-label="Fechar imagem ampliada"
+        >
+          ×
+        </button>
+
+        <img
+          id="imagemAmpliada"
+          src=""
+          alt=""
+        >
+
+        <p
+          id="legendaLightbox"
+          class="lightbox-caption"
+        ></p>
+      </div>
+    </div>
+
+    <section id="diferenciais" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <h2>Por que escolher a PLAR?</h2>
+
+          <p>
+            Atendimento próximo, processo organizado e foco na satisfação
+            de cada cliente.
+          </p>
+        </div>
+
+        <div class="benefits">
+
+          <div class="benefit">
+            <strong>Atendimento regional</strong>
+
+            <span>
+              Equipe preparada para atender Ribeirão Preto e região.
+            </span>
+          </div>
+
+          <div class="benefit">
+            <strong>Agendamento organizado</strong>
+
+            <span>
+              Escolha a melhor data e horário para receber nossa equipe.
+            </span>
+          </div>
+
+          <div class="benefit">
+            <strong>Produtos de qualidade</strong>
+
+            <span>
+              Utilização de produtos adequados para realizar uma limpeza
+              cuidadosa e eficiente.
+            </span>
+          </div>
+
+          <div class="benefit">
+            <strong>Mais eficiência</strong>
+
+            <span>
+              Equipamentos cuidados para funcionar melhor e consumir menos.
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="agendamento" class="section">
+      <div class="container booking-wrapper">
+
+        <div class="booking-intro">
+          <h2>Agende sua visita técnica</h2>
+
+          <p>
+            Preencha os dados abaixo para solicitar um atendimento.
+            Após o envio, a equipe PLAR entrará em contato para confirmar
+            a disponibilidade.
+          </p>
+
+          <div class="schedule-info">
+
+            <div>
+              <strong>Segunda a sexta</strong>
+              <span>08:00 às 17:30</span>
+            </div>
+
+            <div>
+              <strong>Sábado</strong>
+              <span>08:00 às 14:00</span>
+            </div>
+
+            <div>
+              <strong>Tempo estimado</strong>
+              <span>30 minutos por aparelho</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="booking-form">
+          <h2>Solicitar agendamento</h2>
+
+          <p class="form-subtitle">
+            Informe seus dados e o serviço desejado.
+          </p>
+
+          <form id="formAgendamento" class="form-grid">
+
+            <div class="field">
+              <label for="nome">Nome completo</label>
+
+              <input
+                id="nome"
+                name="nome"
+                type="text"
+                autocomplete="name"
+                placeholder="Digite seu nome"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="telefone">WhatsApp</label>
+
+              <input
+                id="telefone"
+                name="telefone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="(16) 99999-9999"
+                required
+              >
+            </div>
+
+            <div class="field field-full">
+              <label for="endereco">
+                Endereço do atendimento
+              </label>
+
+              <input
+                id="endereco"
+                name="endereco"
+                type="text"
+                autocomplete="street-address"
+                placeholder="Rua, número, bairro e complemento"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="servico">Serviço desejado</label>
+
+              <select
+                id="servico"
+                name="servico"
+                required
+              >
+                <option value="">
+                  Selecione um serviço
+                </option>
+
+                <option value="manutencao">
+                  Manutenção preventiva
+                </option>
+
+                <option value="limpeza">
+                  Limpeza e higienização
+                </option>
+
+                <option value="automacao">
+                  Automação com Alexa
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="quantidade">
+                Quantidade de aparelhos
+              </label>
+
+              <input
+                id="quantidade"
+                name="quantidade"
+                type="number"
+                min="1"
+                max="50"
+                value="1"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="data">Data da visita</label>
+
+              <input
+                id="data"
+                name="data"
+                type="date"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="horario">
+                Horário preferencial
+              </label>
+
+              <select
+                id="horario"
+                name="horario"
+                required
+              >
+                <option value="">
+                  Selecione um horário
+                </option>
+
+                <option>08:00</option>
+                <option>09:00</option>
+                <option>10:00</option>
+                <option>13:00</option>
+                <option>14:00</option>
+                <option>15:00</option>
+                <option>16:00</option>
+              </select>
+            </div>
+
+            <div class="field field-full">
+              <label for="observacoes">
+                Observações
+              </label>
+
+              <textarea
+                id="observacoes"
+                name="observacoes"
+                placeholder="Informe alguma orientação sobre o local ou aparelho."
+              ></textarea>
+            </div>
+
+            <label class="check">
+              <input
+                id="consentimento"
+                name="consentimento"
+                type="checkbox"
+                required
+              >
+
+              <span>
+                Concordo com o uso dos meus dados para contato,
+                agendamento e execução do serviço, conforme a política
+                de privacidade da PLAR Condicionados.
+              </span>
+            </label>
+
+            <div
+              id="feedback"
+              role="status"
+              aria-live="polite"
+            >
+              Solicitação enviada com sucesso! A equipe PLAR entrará em
+              contato para confirmar o agendamento.
+            </div>
+
+            <button
+              type="submit"
+              class="button form-button"
+            >
+              Enviar solicitação
+            </button>
+
+          </form>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
+  <footer class="footer">
+    <div class="container">
+      PLAR Condicionados · Ribeirão Preto - SP<br>
+      Atendimento de segunda a sábado
+    </div>
+  </footer>
+
+  <a
+    class="whatsapp"
+    href="https://wa.me/5516999999999"
+    target="_blank"
+    rel="noopener"
+    aria-label="Falar com a PLAR pelo WhatsApp"
+  >
+    ☎
+  </a>
+
   <script>
-    const form = document.getElementById(
-      "formAgendamento"
-    );
+    const form = document.getElementById("formAgendamento");
+    const feedback = document.getElementById("feedback");
+    const campoData = document.getElementById("data");
 
-    const campoData = document.getElementById(
-      "data"
-    );
-
-    const campoHorario = document.getElementById(
-      "horario"
-    );
-
-    const campoQuantidade = document.getElementById(
-      "quantidadeAparelhos"
-    );
-
-    const campoServico = document.getElementById(
-      "tipoServico"
-    );
-
-    const listaHorarios = document.getElementById(
-      "listaHorarios"
-    );
-
-    const duracaoEstimativa = document.getElementById(
-      "duracaoEstimativa"
-    );
-
-    const valorEstimado = document.getElementById(
-      "valorEstimado"
-    );
-
-    const mensagem = document.getElementById(
-      "mensagem"
-    );
-
-    const botaoEnviar = document.getElementById(
-      "botaoEnviar"
-    );
-
-    const botaoLimpar = document.getElementById(
-      "botaoLimpar"
-    );
-
-    function dinheiro(valor) {
-      return Number(valor || 0).toLocaleString(
-        "pt-BR",
-        {
-          style: "currency",
-          currency: "BRL"
-        }
-      );
-    }
-
-    function formatarDuracao(minutos) {
-      const valor = Number(minutos || 30);
-
-      if (valor < 60) {
-        return `${valor} minutos`;
-      }
-
-      const horas = Math.floor(valor / 60);
-      const restantes = valor % 60;
-
-      if (!restantes) {
-        return horas === 1
-          ? "1 hora"
-          : `${horas} horas`;
-      }
-
-      return `${horas}h ${restantes}min`;
-    }
-
-    function calcularValor(
-      tipoServico,
-      quantidade
-    ) {
-      const aparelhos = Math.max(
-        1,
-        Number(quantidade || 1)
-      );
-
-      if (
-        tipoServico === "limpeza_higienizacao"
-      ) {
-        return 199.90 * aparelhos;
-      }
-
-      if (
-        tipoServico === "manutencao_preventiva"
-      ) {
-        return 349.90 * aparelhos;
-      }
-
-      if (tipoServico === "automacao") {
-        return 949.90 + (
-          Math.max(0, aparelhos - 1) * 149.90
-        );
-      }
-
-      return 0;
-    }
-
-    function atualizarResumo() {
-      const quantidade = Math.max(
-        1,
-        Number(campoQuantidade.value || 1)
-      );
-
-      const duracao = quantidade * 30;
-      const valor = calcularValor(
-        campoServico.value,
-        quantidade
-      );
-
-      duracaoEstimativa.textContent =
-        formatarDuracao(duracao);
-
-      valorEstimado.textContent =
-        valor > 0
-          ? dinheiro(valor)
-          : "Selecione um serviço";
-
-      if (campoData.value) {
-        carregarHorarios();
-      }
-    }
+    const lightbox = document.getElementById("lightbox");
+    const imagemAmpliada = document.getElementById("imagemAmpliada");
+    const legendaLightbox = document.getElementById("legendaLightbox");
+    const fecharLightbox = document.getElementById("fecharLightbox");
 
     function obterDataHoje() {
-      const data = new Date();
+      const hoje = new Date();
 
-      const ano = data.getFullYear();
+      const ano = hoje.getFullYear();
 
       const mes = String(
-        data.getMonth() + 1
+        hoje.getMonth() + 1
       ).padStart(2, "0");
 
       const dia = String(
-        data.getDate()
+        hoje.getDate()
       ).padStart(2, "0");
 
       return `${ano}-${mes}-${dia}`;
     }
 
-    function mostrarMensagem(
-      texto,
-      tipo = "erro"
-    ) {
-      mensagem.textContent = texto;
-      mensagem.className =
-        `mensagem visivel ${tipo}`;
-    }
-
-    function limparMensagem() {
-      mensagem.textContent = "";
-      mensagem.className = "mensagem";
-    }
-
-    function limparHorarios(texto) {
-      listaHorarios.innerHTML = "";
-
-      const aviso = document.createElement("div");
-
-      aviso.className = "horarios-vazio";
-      aviso.textContent = texto;
-
-      listaHorarios.appendChild(aviso);
-      campoHorario.value = "";
-    }
-
-    function renderizarHorarios(horarios) {
-      listaHorarios.innerHTML = "";
-
-      if (
-        !Array.isArray(horarios) ||
-        !horarios.length
-      ) {
-        limparHorarios(
-          "Não há horários disponíveis para esta data."
-        );
-
-        return;
-      }
-
-      horarios.forEach(horario => {
-        const botao = document.createElement(
-          "button"
-        );
-
-        botao.type = "button";
-        botao.className = "horario";
-        botao.textContent = horario;
-
-        botao.addEventListener("click", () => {
-          document
-            .querySelectorAll(".horario")
-            .forEach(item => {
-              item.classList.remove(
-                "selecionado"
-              );
-            });
-
-          botao.classList.add("selecionado");
-          campoHorario.value = horario;
-          limparMensagem();
-        });
-
-        listaHorarios.appendChild(botao);
-      });
-    }
-
-    async function carregarHorarios() {
-      const data = campoData.value;
-
-      const quantidade = Math.max(
-        1,
-        Number(campoQuantidade.value || 1)
-      );
-
-      campoHorario.value = "";
-
-      if (!data) {
-        limparHorarios(
-          "Escolha a data para consultar os horários."
-        );
-
-        return;
-      }
-
-      listaHorarios.innerHTML = `
-        <div class="horarios-carregando">
-          Consultando horários disponíveis...
-        </div>
-      `;
-
-      try {
-        const parametros = new URLSearchParams({
-          data,
-          quantidade: String(quantidade)
-        });
-
-        const resposta = await fetch(
-          `/api/horarios-disponiveis?${parametros.toString()}`,
-          {
-            method: "GET",
-            headers: {
-              "Accept": "application/json"
-            }
-          }
-        );
-
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-          throw new Error(
-            dados.erro ||
-            "Não foi possível consultar os horários."
-          );
-        }
-
-        renderizarHorarios(
-          dados.horarios || []
-        );
-      } catch (erro) {
-        limparHorarios(erro.message);
-      }
-    }
-
-    function validarTelefone(telefone) {
-      const numeros = String(telefone || "")
-        .replace(/\D/g, "");
-
-      return (
-        numeros.length >= 10 &&
-        numeros.length <= 13
-      );
-    }
-
-    function mostrarPrivacidade(event) {
-      event.preventDefault();
-
-      alert(
-        "A PLAR Condicionados utiliza os dados informados "
-        + "para contato, análise da solicitação, agendamento "
-        + "e execução do serviço."
-      );
-    }
-
-    async function enviarAgendamento(event) {
-      event.preventDefault();
-      limparMensagem();
-
-      const telefone = document
-        .getElementById("telefone")
-        .value;
-
-      if (!validarTelefone(telefone)) {
-        mostrarMensagem(
-          "Informe um número de WhatsApp válido."
-        );
-
-        return;
-      }
-
-      if (!campoServico.value) {
-        mostrarMensagem(
-          "Selecione o serviço desejado."
-        );
-
-        return;
-      }
-
-      if (!campoHorario.value) {
-        mostrarMensagem(
-          "Selecione um horário disponível."
-        );
-
-        return;
-      }
-
-      const dados = {
-        nome: document
-          .getElementById("nome")
-          .value
-          .trim(),
-
-        telefone,
-
-        endereco: document
-          .getElementById("endereco")
-          .value
-          .trim(),
-
-        tipo_servico: campoServico.value,
-
-        quantidade_aparelhos: Number(
-          campoQuantidade.value
-        ),
-
-        data: campoData.value,
-        horario: campoHorario.value,
-
-        observacoes: document
-          .getElementById("observacoes")
-          .value
-          .trim(),
-
-        consentimento_lgpd: document
-          .getElementById("consentimentoLgpd")
-          .checked
-      };
-
-      botaoEnviar.disabled = true;
-      botaoEnviar.textContent = "Enviando...";
-
-      try {
-        const resposta = await fetch(
-          "/api/agendamentos-publicos",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json"
-            },
-            body: JSON.stringify(dados)
-          }
-        );
-
-        const retorno = await resposta.json();
-
-        if (!resposta.ok) {
-          throw new Error(
-            retorno.erro ||
-            "Não foi possível enviar a solicitação."
-          );
-        }
-
-        form.reset();
-
-        campoData.min = obterDataHoje();
-        campoHorario.value = "";
-
-        duracaoEstimativa.textContent =
-          "30 minutos";
-
-        valorEstimado.textContent =
-          "Selecione um serviço";
-
-        limparHorarios(
-          "Escolha a data para consultar os horários."
-        );
-
-        mostrarMensagem(
-          retorno.mensagem ||
-          "Solicitação enviada com sucesso. "
-          + "Aguarde a confirmação da PLAR.",
-          "sucesso"
-        );
-      } catch (erro) {
-        mostrarMensagem(erro.message);
-      } finally {
-        botaoEnviar.disabled = false;
-        botaoEnviar.textContent =
-          "Enviar solicitação";
-      }
-    }
-
     campoData.min = obterDataHoje();
 
-    campoData.addEventListener(
-      "change",
-      carregarHorarios
-    );
+    document
+      .querySelectorAll(".gallery-button")
+      .forEach(botao => {
+        botao.addEventListener("click", () => {
+          const imagem = botao.dataset.imagem;
+          const titulo = botao.dataset.titulo;
 
-    campoQuantidade.addEventListener(
-      "input",
-      atualizarResumo
-    );
+          imagemAmpliada.src = imagem;
+          imagemAmpliada.alt = titulo;
+          legendaLightbox.textContent = titulo;
 
-    campoServico.addEventListener(
-      "change",
-      atualizarResumo
-    );
+          lightbox.classList.add("aberto");
+          document.body.classList.add("modal-aberto");
 
-    botaoLimpar.addEventListener(
+          fecharLightbox.focus();
+        });
+      });
+
+    function fecharImagem() {
+      lightbox.classList.remove("aberto");
+      document.body.classList.remove("modal-aberto");
+
+      imagemAmpliada.src = "";
+      imagemAmpliada.alt = "";
+      legendaLightbox.textContent = "";
+    }
+
+    fecharLightbox.addEventListener(
       "click",
-      () => {
-        setTimeout(() => {
-          limparMensagem();
+      fecharImagem
+    );
 
-          campoData.min = obterDataHoje();
-
-          duracaoEstimativa.textContent =
-            "30 minutos";
-
-          valorEstimado.textContent =
-            "Selecione um serviço";
-
-          limparHorarios(
-            "Escolha a data para consultar os horários."
-          );
-        }, 0);
+    lightbox.addEventListener("click", event => {
+      if (event.target === lightbox) {
+        fecharImagem();
       }
-    );
+    });
 
-    form.addEventListener(
-      "submit",
-      enviarAgendamento
-    );
+    document.addEventListener("keydown", event => {
+      if (
+        event.key === "Escape" &&
+        lightbox.classList.contains("aberto")
+      ) {
+        fecharImagem();
+      }
+    });
 
-    atualizarResumo();
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      feedback.classList.add("show");
+
+      form.reset();
+
+      campoData.min = obterDataHoje();
+
+      feedback.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
   </script>
+
 </body>
 </html>
